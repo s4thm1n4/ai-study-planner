@@ -168,8 +168,8 @@ async def generate_advanced_plan(
             subject=request.subject,
             available_hours_per_day=request.available_hours_per_day,
             total_days=request.total_days,
-            learning_style=request.learning_style or current_user["learning_style"],
-            knowledge_level=request.knowledge_level or current_user["knowledge_level"]
+            learning_style=request.learning_style or "mixed",  # Use default if not provided
+            knowledge_level=request.knowledge_level or "beginner"  # Use default if not provided
         )
         
         if result["status"] == "error":
@@ -191,9 +191,9 @@ async def get_resources(
 ):
     """Get educational resources for a subject (PROTECTED)"""
     try:
-        # Use user's knowledge level if not specified
+        # Use default difficulty if beginner is specified
         if difficulty == "beginner":
-            difficulty = current_user.get("knowledge_level", "beginner")
+            difficulty = "beginner"  # Keep as beginner since that's the default
             
         resources = coordinator.resource_agent.find_best_resources(
             subject=subject,
@@ -230,8 +230,8 @@ async def get_available_subjects(current_user: dict = Depends(get_current_user))
         subjects = list(coordinator.schedule_agent.subjects_db.keys())
         return {
             "subjects": subjects, 
-            "user_knowledge_level": current_user["knowledge_level"],
-            "user_learning_style": current_user["learning_style"]
+            "user_id": current_user["id"],
+            "username": current_user["username"]
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

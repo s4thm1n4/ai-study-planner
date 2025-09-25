@@ -411,33 +411,46 @@ async function getMotivation() {
 // Load available subjects after authentication
 async function loadSubjects() {
     try {
-        if (!authToken) {
-            console.log('Waiting for authentication...');
+        if (!authToken || !currentUser) {
+            console.log('No authentication token available, skipping subjects load');
             return;
         }
         
+        console.log('Loading subjects with authentication...');
         const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/subjects`);
+        
         if (response.ok) {
             const data = await response.json();
             const subjectSelect = document.getElementById('subject');
             
-            // Clear existing options except the first one
-            subjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+            if (subjectSelect) {
+                // Clear existing options except the first one
+                subjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+                
+                // Add subjects from the database
+                data.subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectSelect.appendChild(option);
+                });
+                
+                console.log('Subjects loaded successfully:', data.subjects.length);
+            }
+        } else {
+            const errorText = await response.text();
+            console.error('Failed to load subjects:', response.status, response.statusText, errorText);
             
-            // Add subjects from the database
-            data.subjects.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject;
-                option.textContent = subject;
-                subjectSelect.appendChild(option);
-            });
-            
-            console.log('Subjects loaded successfully');
+            // If it's an authentication error (401), redirect to login
+            if (response.status === 401) {
+                console.log('Authentication failed, redirecting to login');
+                logout();
+            }
         }
     } catch (error) {
-        console.error('Failed to load subjects:', error);
-        // If auth fails, redirect to login
-        if (error.message.includes('Authentication')) {
+        console.error('Error loading subjects:', error);
+        // If it's an authentication error, redirect to login
+        if (error.message.includes('Authentication failed')) {
             logout();
         }
     }
