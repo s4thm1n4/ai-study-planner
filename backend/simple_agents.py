@@ -40,11 +40,11 @@ class StudyPlan:
 @dataclass
 class User:
     id: str
+    first_name: str
+    last_name: str
     username: str
     email: str
     hashed_password: str
-    learning_style: str
-    knowledge_level: str
     created_at: str
 
 class DatabaseManager:
@@ -63,11 +63,11 @@ class DatabaseManager:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
+                first_name TEXT NOT NULL,
+                last_name TEXT NOT NULL,
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 hashed_password TEXT NOT NULL,
-                learning_style TEXT,
-                knowledge_level TEXT,
                 created_at TEXT
             )
         ''')
@@ -121,8 +121,7 @@ class SecurityAgent:
         """Verify a password"""
         return self.hash_password(plain_password) == hashed_password
     
-    def register_user(self, username: str, email: str, password: str, 
-                     learning_style: str = "mixed", knowledge_level: str = "beginner") -> Dict:
+    def register_user(self, first_name: str, last_name: str, username: str, email: str, password: str) -> Dict:
         """Register a new user"""
         try:
             user_id = hashlib.md5(email.encode()).hexdigest()
@@ -132,11 +131,9 @@ class SecurityAgent:
             cursor = conn.cursor()
             
             cursor.execute('''
-                INSERT INTO users (id, username, email, hashed_password, 
-                                 learning_style, knowledge_level, created_at)
+                INSERT INTO users (id, first_name, last_name, username, email, hashed_password, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (user_id, username, email, hashed_password, 
-                  learning_style, knowledge_level, datetime.now().isoformat()))
+            ''', (user_id, first_name, last_name, username, email, hashed_password, datetime.now().isoformat()))
             
             conn.commit()
             conn.close()
@@ -152,7 +149,7 @@ class SecurityAgent:
             cursor = conn.cursor()
             
             cursor.execute('''
-                SELECT id, username, email, hashed_password, learning_style, knowledge_level
+                SELECT id, first_name, last_name, username, email, hashed_password
                 FROM users WHERE email = ?
             ''', (email,))
             
@@ -162,17 +159,17 @@ class SecurityAgent:
             if not user_data:
                 return {"status": "error", "message": "User not found"}
             
-            user_id, username, email, hashed_password, learning_style, knowledge_level = user_data
+            user_id, first_name, last_name, username, email, hashed_password = user_data
             
             if self.verify_password(password, hashed_password):
                 return {
                     "status": "success",
                     "user": {
                         "id": user_id,
+                        "first_name": first_name,
+                        "last_name": last_name,
                         "username": username,
-                        "email": email,
-                        "learning_style": learning_style,
-                        "knowledge_level": knowledge_level
+                        "email": email
                     },
                     "message": "Login successful"
                 }
@@ -189,7 +186,7 @@ class SecurityAgent:
             cursor = conn.cursor()
             
             cursor.execute('''
-                SELECT id, username, email, learning_style, knowledge_level, created_at
+                SELECT id, first_name, last_name, username, email, created_at
                 FROM users WHERE id = ?
             ''', (user_id,))
             
@@ -197,13 +194,13 @@ class SecurityAgent:
             conn.close()
             
             if user_data:
-                user_id, username, email, learning_style, knowledge_level, created_at = user_data
+                user_id, first_name, last_name, username, email, created_at = user_data
                 return {
                     "id": user_id,
+                    "first_name": first_name,
+                    "last_name": last_name,
                     "username": username,
                     "email": email,
-                    "learning_style": learning_style,
-                    "knowledge_level": knowledge_level,
                     "created_at": created_at
                 }
             return None
