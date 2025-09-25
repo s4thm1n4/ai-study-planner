@@ -15,7 +15,7 @@ function showUserInfo() {
     const userSection = document.getElementById('user-section');
     userSection.innerHTML = `
         <div class="user-info">
-            🔒 ${currentUser.username} (${currentUser.knowledge_level})
+            🔒 ${currentUser.first_name} ${currentUser.last_name} (@${currentUser.username})
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     `;

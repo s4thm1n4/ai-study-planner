@@ -59,7 +59,31 @@ class DatabaseManager:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Users table
+        # Check if users table exists and migrate if needed
+        cursor.execute("PRAGMA table_info(users)")
+        columns_info = cursor.fetchall()
+        existing_columns = [row[1] for row in columns_info]
+        
+        # Migrate existing table if it doesn't have the new columns
+        if existing_columns and 'first_name' not in existing_columns:
+            print("Migrating database: Adding first_name and last_name columns...")
+            try:
+                cursor.execute('ALTER TABLE users ADD COLUMN first_name TEXT')
+                cursor.execute('ALTER TABLE users ADD COLUMN last_name TEXT')
+                
+                # Update existing records with placeholder values
+                cursor.execute('''
+                    UPDATE users 
+                    SET first_name = 'User',
+                        last_name = username
+                    WHERE first_name IS NULL OR last_name IS NULL
+                ''')
+                conn.commit()
+                print("Migration completed successfully!")
+            except sqlite3.OperationalError as e:
+                print(f"Migration error (might be already migrated): {e}")
+        
+        # Users table - create if not exists
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,

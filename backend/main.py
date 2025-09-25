@@ -182,26 +182,6 @@ async def generate_advanced_plan(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/register")
-async def register_user(user_data: UserRegistration):
-    """Register a new user"""
-    try:
-        result = coordinator.security_agent.register_user(
-            username=user_data.username,
-            email=user_data.email,
-            password=user_data.password,
-            learning_style=user_data.learning_style,
-            knowledge_level=user_data.knowledge_level
-        )
-        
-        if result["status"] == "error":
-            raise HTTPException(status_code=400, detail=result["message"])
-        
-        return result
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @app.get("/api/resources/{subject}")
 async def get_resources(
     subject: str, 
