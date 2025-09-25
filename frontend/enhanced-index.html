@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Planner - Multi-Agent System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            color: #495057;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: white;
+            color: #4CAF50;
+            border-bottom: 3px solid #4CAF50;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .schedule-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .resource-card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            transition: transform 0.3s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .resource-rating {
+            color: #ffc107;
+        }
+
+        .motivation-section {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f44336;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Study Planner</h1>
+            <p>Multi-Agent System for Personalized Learning</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('simple')">Simple Plan</button>
+            <button class="tab" onclick="showTab('advanced')">Advanced Plan</button>
+            <button class="tab" onclick="showTab('resources')">Find Resources</button>
+            <button class="tab" onclick="showTab('motivation')">Motivation</button>
+        </div>
+
+        <!-- Simple Plan Tab -->
+        <div id="simple" class="tab-content active">
+            <h2>🎯 Quick Study Plan</h2>
+            <p>Enter a subject and get a basic 3-day study plan with resources.</p>
+            
+            <div class="form-group">
+                <label for="simple-goal">What would you like to learn?</label>
+                <input type="text" id="simple-goal" placeholder="e.g., Machine Learning, Python Programming, Data Science" />
+            </div>
+            
+            <button class="btn" onclick="generateSimplePlan()">Generate Simple Plan</button>
+            
+            <div class="loading" id="simple-loading">
+                <div class="spinner"></div>
+                <p>Creating your study plan...</p>
+            </div>
+            
+            <div id="simple-results"></div>
+        </div>
+
+        <!-- Advanced Plan Tab -->
+        <div id="advanced" class="tab-content">
+            <h2>🚀 Advanced Study Plan</h2>
+            <p>Get a personalized study plan based on your preferences and schedule.</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject">
+                        <option value="">Select a subject...</option>
+                        <option value="Data Mining">Data Mining</option>
+                        <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        <option value="Machine Learning">Machine Learning</option>
+                        <option value="Information Retrieval">Information Retrieval</option>
+                        <option value="Natural Language Processing">Natural Language Processing</option>
+                        <option value="Database Systems">Database Systems</option>
+                        <option value="Software Engineering">Software Engineering</option>
+                        <option value="Computer Networks">Computer Networks</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="knowledge-level">Knowledge Level</label>
+                    <select id="knowledge-level">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="daily-hours">Hours per day</label>
+                    <input type="number" id="daily-hours" min="1" max="12" value="2" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="total-days">Total days</label>
+                    <input type="number" id="total-days" min="1" max="30" value="7" />
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="learning-style">Learning Style</label>
+                <select id="learning-style">
+                    <option value="mixed">Mixed (Text + Video)</option>
+                    <option value="visual">Visual (Videos, Diagrams)</option>
+                    <option value="reading">Reading (Text, Books)</option>
+                    <option value="practical">Practical (Hands-on)</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="generateAdvancedPlan()">Generate Advanced Plan</button>
+            
+            <div class="loading" id="advanced-loading">
+                <div class="spinner"></div>
+                <p>Creating your personalized study plan...</p>
+            </div>
+            
+            <div id="advanced-results"></div>
+        </div>
+
+        <!-- Resources Tab -->
+        <div id="resources" class="tab-content">
+            <h2>📚 Find Resources</h2>
+            <p>Discover curated educational resources for any subject.</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="resource-subject">Subject</label>
+                    <input type="text" id="resource-subject" placeholder="e.g., Machine Learning" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="resource-difficulty">Difficulty</label>
+                    <select id="resource-difficulty">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="findResources()">Find Resources</button>
+            
+            <div class="loading" id="resources-loading">
+                <div class="spinner"></div>
+                <p>Searching for resources...</p>
+            </div>
+            
+            <div id="resources-results"></div>
+        </div>
+
+        <!-- Motivation Tab -->
+        <div id="motivation" class="tab-content">
+            <h2>💪 Motivation Coach</h2>
+            <p>Get personalized motivation and study tips.</p>
+            
+            <div class="form-group">
+                <label for="mood-text">How are you feeling about your studies? (Optional)</label>
+                <textarea id="mood-text" rows="3" placeholder="e.g., I'm feeling overwhelmed with all the topics I need to learn..."></textarea>
+            </div>
+            
+            <button class="btn" onclick="getMotivation()">Get Motivation</button>
+            
+            <div class="loading" id="motivation-loading">
+                <div class="spinner"></div>
+                <p>Analyzing your mood and finding motivation...</p>
+            </div>
+            
+            <div id="motivation-results"></div>
+        </div>
+    </div>
+
+    <script src="enhanced-app.js"></script>
+</body>
+</html>
