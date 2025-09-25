@@ -1,7 +1,8 @@
-// Enhanced JavaScript for Multi-Agent Study Planner
+// Enhanced JavaScript for Multi-Agent Study Planner with JWT Authentication
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
 let currentUser = null;
+let authToken = null;
 
 // Initialize authentication on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -9,42 +10,66 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Authentication functions
-function initializeAuth() {
-    const savedUser = localStorage.getItem('ai_study_planner_user');
-    if (savedUser) {
-        try {
-            currentUser = JSON.parse(savedUser);
-            showUserInfo();
-        } catch (e) {
-            localStorage.removeItem('ai_study_planner_user');
-            showAuthLink();
-        }
-    } else {
-        showAuthLink();
-    }
-}
 
 function showUserInfo() {
     const userSection = document.getElementById('user-section');
     userSection.innerHTML = `
         <div class="user-info">
-            Welcome, ${currentUser.username}!
+            🔒 ${currentUser.first_name} ${currentUser.last_name} (@${currentUser.username})
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     `;
 }
 
-function showAuthLink() {
+function redirectToLogin() {
     const userSection = document.getElementById('user-section');
     userSection.innerHTML = `
-        <a href="auth.html" class="auth-link">🔐 Login / Register</a>
+        <div style="color: white; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 20px;">
+            🔒 Authentication Required
+            <br><a href="secure-auth.html" style="color: white; text-decoration: underline;">Login to Continue</a>
+        </div>
     `;
+    
+    // Redirect after 3 seconds if not authenticated
+    setTimeout(() => {
+        if (!authToken) {
+            window.location.href = 'secure-auth.html';
+        }
+    }, 3000);
 }
 
 function logout() {
+    authToken = null;
     currentUser = null;
+    localStorage.removeItem('ai_study_planner_token');
     localStorage.removeItem('ai_study_planner_user');
-    showAuthLink();
+    window.location.href = 'secure-auth.html';
+}
+
+// Helper function to make authenticated API calls
+async function makeAuthenticatedRequest(url, options = {}) {
+    if (!authToken) {
+        throw new Error('No authentication token available');
+    }
+    
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+        ...options.headers
+    };
+    
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+    
+    if (response.status === 401) {
+        // Token expired or invalid
+        logout();
+        throw new Error('Authentication failed. Please login again.');
+    }
+    
+    return response;
 }
 
 // Tab functionality
@@ -152,11 +177,8 @@ async function generateAdvancedPlan() {
     resultsDiv.innerHTML = '';
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v2/generate-advanced-plan`, {
+        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/v2/generate-advanced-plan`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 subject,
                 available_hours_per_day: dailyHours,
@@ -271,7 +293,7 @@ async function findResources() {
     resultsDiv.innerHTML = '';
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/resources/${encodeURIComponent(subject)}?difficulty=${difficulty}&limit=8`);
+        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/resources/${encodeURIComponent(subject)}?difficulty=${difficulty}&limit=8`);
         
         if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
@@ -329,11 +351,8 @@ async function getMotivation() {
     resultsDiv.innerHTML = '';
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/motivation`, {
+        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/motivation`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({ text: moodText }),
         });
         
@@ -389,29 +408,76 @@ async function getMotivation() {
     }
 }
 
-// Load available subjects on page load
-document.addEventListener('DOMContentLoaded', async function() {
+// Load available subjects after authentication
+async function loadSubjects() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/subjects`);
+        if (!authToken || !currentUser) {
+            console.log('No authentication token available, skipping subjects load');
+            return;
+        }
+        
+        console.log('Loading subjects with authentication...');
+        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/subjects`);
+        
         if (response.ok) {
             const data = await response.json();
             const subjectSelect = document.getElementById('subject');
             
-            // Clear existing options except the first one
-            subjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+            if (subjectSelect) {
+                // Clear existing options except the first one
+                subjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+                
+                // Add subjects from the database
+                data.subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectSelect.appendChild(option);
+                });
+                
+                console.log('Subjects loaded successfully:', data.subjects.length);
+            }
+        } else {
+            const errorText = await response.text();
+            console.error('Failed to load subjects:', response.status, response.statusText, errorText);
             
-            // Add subjects from the database
-            data.subjects.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject;
-                option.textContent = subject;
-                subjectSelect.appendChild(option);
-            });
+            // If it's an authentication error (401), redirect to login
+            if (response.status === 401) {
+                console.log('Authentication failed, redirecting to login');
+                logout();
+            }
         }
     } catch (error) {
-        console.error('Failed to load subjects:', error);
+        console.error('Error loading subjects:', error);
+        // If it's an authentication error, redirect to login
+        if (error.message.includes('Authentication failed')) {
+            logout();
+        }
     }
-});
+}
+
+// Update authentication initialization to load subjects after auth
+function initializeAuth() {
+    const savedToken = localStorage.getItem('ai_study_planner_token');
+    const savedUser = localStorage.getItem('ai_study_planner_user');
+    
+    if (savedToken && savedUser) {
+        try {
+            authToken = savedToken;
+            currentUser = JSON.parse(savedUser);
+            showUserInfo();
+            // Load subjects after successful authentication
+            loadSubjects();
+        } catch (e) {
+            // Clear invalid data
+            localStorage.removeItem('ai_study_planner_token');
+            localStorage.removeItem('ai_study_planner_user');
+            redirectToLogin();
+        }
+    } else {
+        redirectToLogin();
+    }
+}
 
 // Add some visual feedback for form interactions
 document.addEventListener('DOMContentLoaded', function() {

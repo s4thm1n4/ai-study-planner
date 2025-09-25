@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 AI Study Planner - Login & Register</title>
+    <title>🔐 AI Study Planner - Secure Login</title>
     <style>
         * {
             margin: 0;
@@ -26,7 +26,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
             position: relative;
         }
@@ -46,6 +46,15 @@
         .auth-header p {
             opacity: 0.9;
             font-size: 16px;
+        }
+        
+        .security-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-top: 10px;
+            display: inline-block;
         }
         
         .auth-tabs {
@@ -167,26 +176,17 @@
             100% { transform: rotate(360deg); }
         }
         
-        .user-dashboard {
-            display: none;
-            text-align: center;
-        }
-        
-        .user-info {
+        .token-info {
             background: #f8f9fa;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #4CAF50;
         }
         
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
+        .token-info h4 {
+            color: #4CAF50;
+            margin-bottom: 10px;
         }
         
         .study-planner-link {
@@ -204,13 +204,25 @@
         .study-planner-link:hover {
             transform: translateY(-2px);
         }
+        
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-header">
-            <h1>🤖 AI Study Planner</h1>
-            <p>Your Personal Learning Assistant</p>
+            <h1>🔒 Secure Study Planner</h1>
+            <p>JWT-Protected Multi-Agent System</p>
+            <div class="security-badge">🛡️ Secure Authentication</div>
         </div>
         
         <div class="auth-tabs">
@@ -234,7 +246,7 @@
                 </div>
                 
                 <button type="submit" class="submit-btn" id="login-btn">
-                    Sign In
+                    🔑 Secure Sign In
                 </button>
             </form>
             
@@ -262,7 +274,7 @@
                 
                 <div class="form-group">
                     <label for="register-password">Password</label>
-                    <input type="password" id="register-password" required placeholder="Create a password" minlength="6">
+                    <input type="password" id="register-password" required placeholder="Create a secure password" minlength="6">
                 </div>
                 
                 <div class="form-group">
@@ -271,18 +283,17 @@
                 </div>
                 
                 <button type="submit" class="submit-btn" id="register-btn">
-                    Create Account
+                    📝 Create Secure Account
                 </button>
             </form>
             
             <!-- User Dashboard -->
-            <div class="user-dashboard" id="user-dashboard">
-                <div class="user-info" id="user-info">
-                    <!-- User information will be populated here -->
-                </div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+            <div class="user-dashboard" id="user-dashboard" style="display: none;">
+                <div id="user-info"></div>
+                <div id="token-info" class="token-info" style="display: none;"></div>
+                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
                 <a href="enhanced-index.html" class="study-planner-link">
-                    📚 Go to Study Planner
+                    📚 Access Study Planner
                 </a>
             </div>
         </div>
@@ -291,19 +302,29 @@
     <script>
         const API_BASE_URL = 'http://127.0.0.1:8000';
         let currentUser = null;
+        let authToken = null;
 
         // Check if user is already logged in
         document.addEventListener('DOMContentLoaded', function() {
-            const savedUser = localStorage.getItem('ai_study_planner_user');
-            if (savedUser) {
+            checkAuthStatus();
+        });
+
+        function checkAuthStatus() {
+            const token = localStorage.getItem('ai_study_planner_token');
+            const user = localStorage.getItem('ai_study_planner_user');
+            
+            if (token && user) {
                 try {
-                    currentUser = JSON.parse(savedUser);
+                    authToken = token;
+                    currentUser = JSON.parse(user);
                     showUserDashboard();
                 } catch (e) {
+                    // Clear invalid data
+                    localStorage.removeItem('ai_study_planner_token');
                     localStorage.removeItem('ai_study_planner_user');
                 }
             }
-        });
+        }
 
         function switchTab(tab) {
             // Update tab buttons
@@ -347,17 +368,22 @@
                 
                 const data = await response.json();
                 
-                if (response.ok && data.status === 'success') {
+                if (response.ok) {
+                    // Store JWT token and user data
+                    authToken = data.access_token;
                     currentUser = data.user;
+                    
+                    localStorage.setItem('ai_study_planner_token', authToken);
                     localStorage.setItem('ai_study_planner_user', JSON.stringify(currentUser));
-                    showMessage('Login successful! Welcome back!', 'success');
+                    
+                    showMessage('🎉 Login successful! JWT token received.', 'success');
                     setTimeout(() => showUserDashboard(), 1500);
                 } else {
-                    showMessage(data.message || 'Login failed', 'error');
+                    showMessage(`❌ ${data.detail || 'Login failed'}`, 'error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage('Network error. Please try again.', 'error');
+                showMessage('🌐 Network error. Please check server connection.', 'error');
             } finally {
                 setLoading('login-btn', false);
             }
@@ -410,16 +436,16 @@
                 const data = await response.json();
                 
                 if (response.ok && data.status === 'success') {
-                    showMessage('Account created successfully! Please log in.', 'success');
-                    // Switch to login tab
+                    showMessage('✅ Account created successfully! Please log in.', 'success');
+                    // Switch to login tab and pre-fill email
                     switchTab('login');
                     document.getElementById('login-email').value = email;
                 } else {
-                    showMessage(data.message || 'Registration failed', 'error');
+                    showMessage(`❌ ${data.message || data.detail || 'Registration failed'}`, 'error');
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage('Network error. Please try again.', 'error');
+                showMessage('🌐 Network error. Please check server connection.', 'error');
             } finally {
                 setLoading('register-btn', false);
             }
@@ -431,18 +457,25 @@
             
             const dashboard = document.getElementById('user-dashboard');
             const userInfo = document.getElementById('user-info');
+            const tokenInfo = document.getElementById('token-info');
             
             userInfo.innerHTML = `
-                <h3>Welcome, ${currentUser.first_name} ${currentUser.last_name}! 👋</h3>
-                <p><strong>Username:</strong> ${currentUser.username}</p>
-                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <h3>🎉 Welcome, ${currentUser.first_name} ${currentUser.last_name}! 👋</h3>
+                <p><strong>📧 Email:</strong> ${currentUser.email}</p>
+                <p><strong>👤 Username:</strong> ${currentUser.username}</p>
+                <p><strong>🔐 Status:</strong> <span style="color: green;">Authenticated</span></p>
             `;
+            
+            // Hide token info as requested
+            tokenInfo.style.display = 'none';
             
             dashboard.style.display = 'block';
         }
 
         function logout() {
+            authToken = null;
             currentUser = null;
+            localStorage.removeItem('ai_study_planner_token');
             localStorage.removeItem('ai_study_planner_user');
             location.reload();
         }
@@ -463,9 +496,9 @@
                 button.disabled = true;
             } else {
                 if (buttonId === 'login-btn') {
-                    button.innerHTML = 'Sign In';
+                    button.innerHTML = '🔑 Secure Sign In';
                 } else {
-                    button.innerHTML = 'Create Account';
+                    button.innerHTML = '📝 Create Secure Account';
                 }
                 button.disabled = false;
             }
