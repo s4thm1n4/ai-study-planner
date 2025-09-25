@@ -1,6 +1,51 @@
 // Enhanced JavaScript for Multi-Agent Study Planner
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
+let currentUser = null;
+
+// Initialize authentication on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAuth();
+});
+
+// Authentication functions
+function initializeAuth() {
+    const savedUser = localStorage.getItem('ai_study_planner_user');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            showUserInfo();
+        } catch (e) {
+            localStorage.removeItem('ai_study_planner_user');
+            showAuthLink();
+        }
+    } else {
+        showAuthLink();
+    }
+}
+
+function showUserInfo() {
+    const userSection = document.getElementById('user-section');
+    userSection.innerHTML = `
+        <div class="user-info">
+            Welcome, ${currentUser.username}!
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    `;
+}
+
+function showAuthLink() {
+    const userSection = document.getElementById('user-section');
+    userSection.innerHTML = `
+        <a href="auth.html" class="auth-link">🔐 Login / Register</a>
+    `;
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('ai_study_planner_user');
+    showAuthLink();
+}
 
 // Tab functionality
 function showTab(tabName) {
@@ -42,10 +87,6 @@ async function generateSimplePlan() {
             },
             body: JSON.stringify({ goal: goal }),
         });
-        
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
         
         const data = await response.json();
         

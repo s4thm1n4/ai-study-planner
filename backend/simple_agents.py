@@ -144,6 +144,72 @@ class SecurityAgent:
             return {"status": "success", "user_id": user_id, "message": "User registered successfully"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+    
+    def authenticate_user(self, email: str, password: str) -> Dict:
+        """Authenticate user login"""
+        try:
+            conn = sqlite3.connect(self.db.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT id, username, email, hashed_password, learning_style, knowledge_level
+                FROM users WHERE email = ?
+            ''', (email,))
+            
+            user_data = cursor.fetchone()
+            conn.close()
+            
+            if not user_data:
+                return {"status": "error", "message": "User not found"}
+            
+            user_id, username, email, hashed_password, learning_style, knowledge_level = user_data
+            
+            if self.verify_password(password, hashed_password):
+                return {
+                    "status": "success",
+                    "user": {
+                        "id": user_id,
+                        "username": username,
+                        "email": email,
+                        "learning_style": learning_style,
+                        "knowledge_level": knowledge_level
+                    },
+                    "message": "Login successful"
+                }
+            else:
+                return {"status": "error", "message": "Invalid password"}
+                
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+    
+    def get_user_by_id(self, user_id: str) -> Optional[Dict]:
+        """Get user information by ID"""
+        try:
+            conn = sqlite3.connect(self.db.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT id, username, email, learning_style, knowledge_level, created_at
+                FROM users WHERE id = ?
+            ''', (user_id,))
+            
+            user_data = cursor.fetchone()
+            conn.close()
+            
+            if user_data:
+                user_id, username, email, learning_style, knowledge_level, created_at = user_data
+                return {
+                    "id": user_id,
+                    "username": username,
+                    "email": email,
+                    "learning_style": learning_style,
+                    "knowledge_level": knowledge_level,
+                    "created_at": created_at
+                }
+            return None
+            
+        except Exception as e:
+            return None
 
 class ScheduleCreatorAgent:
     """Enhanced schedule creator with personalization and datasets"""

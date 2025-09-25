@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 AI Study Planner - Login & Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .auth-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .auth-header h1 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            background: #f5f5f5;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-tab.active {
+            background: white;
+            color: #4CAF50;
+            border-bottom: 3px solid #4CAF50;
+        }
+        
+        .auth-content {
+            padding: 30px;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .message.success {
+            background: #e8f5e8;
+            color: #2e7d2e;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #e57373;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .user-dashboard {
+            display: none;
+            text-align: center;
+        }
+        
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .study-planner-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .study-planner-link:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>🤖 AI Study Planner</h1>
+            <p>Your Personal Learning Assistant</p>
+        </div>
+        
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+            <button class="auth-tab" onclick="switchTab('register')">Register</button>
+        </div>
+        
+        <div class="auth-content">
+            <div id="message-container"></div>
+            
+            <!-- Login Form -->
+            <form class="auth-form active" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="submit-btn" id="login-btn">
+                    Sign In
+                </button>
+            </form>
+            
+            <!-- Register Form -->
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" required placeholder="Choose a username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-email">Email Address</label>
+                    <input type="email" id="register-email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required placeholder="Create a password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="learning-style">Learning Style</label>
+                    <select id="learning-style">
+                        <option value="visual">Visual Learner</option>
+                        <option value="auditory">Auditory Learner</option>
+                        <option value="kinesthetic">Kinesthetic Learner</option>
+                        <option value="mixed" selected>Mixed Learning</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="knowledge-level">Knowledge Level</label>
+                    <select id="knowledge-level">
+                        <option value="beginner" selected>Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="register-btn">
+                    Create Account
+                </button>
+            </form>
+            
+            <!-- User Dashboard -->
+            <div class="user-dashboard" id="user-dashboard">
+                <div class="user-info" id="user-info">
+                    <!-- User information will be populated here -->
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+                <a href="enhanced-index.html" class="study-planner-link">
+                    📚 Go to Study Planner
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+        let currentUser = null;
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('ai_study_planner_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    showUserDashboard();
+                } catch (e) {
+                    localStorage.removeItem('ai_study_planner_user');
+                }
+            }
+        });
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update forms
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+            document.getElementById(`${tab}-form`).classList.add('active');
+            
+            // Clear messages
+            document.getElementById('message-container').innerHTML = '';
+        }
+
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            setLoading('login-btn', true);
+            clearMessages();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    currentUser = data.user;
+                    localStorage.setItem('ai_study_planner_user', JSON.stringify(currentUser));
+                    showMessage('Login successful! Welcome back!', 'success');
+                    setTimeout(() => showUserDashboard(), 1500);
+                } else {
+                    showMessage(data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                setLoading('login-btn', false);
+            }
+        });
+
+        // Register form handler
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const learningStyle = document.getElementById('learning-style').value;
+            const knowledgeLevel = document.getElementById('knowledge-level').value;
+            
+            if (!username || !email || !password) {
+                showMessage('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long', 'error');
+                return;
+            }
+            
+            setLoading('register-btn', true);
+            clearMessages();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password,
+                        learning_style: learningStyle,
+                        knowledge_level: knowledgeLevel
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    showMessage('Account created successfully! Please log in.', 'success');
+                    // Switch to login tab
+                    switchTab('login');
+                    document.getElementById('login-email').value = email;
+                } else {
+                    showMessage(data.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                setLoading('register-btn', false);
+            }
+        });
+
+        function showUserDashboard() {
+            document.querySelectorAll('.auth-form').forEach(form => form.style.display = 'none');
+            document.querySelectorAll('.auth-tab').forEach(tab => tab.style.display = 'none');
+            
+            const dashboard = document.getElementById('user-dashboard');
+            const userInfo = document.getElementById('user-info');
+            
+            userInfo.innerHTML = `
+                <h3>Welcome, ${currentUser.username}! 👋</h3>
+                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <p><strong>Learning Style:</strong> ${currentUser.learning_style}</p>
+                <p><strong>Knowledge Level:</strong> ${currentUser.knowledge_level}</p>
+            `;
+            
+            dashboard.style.display = 'block';
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('ai_study_planner_user');
+            location.reload();
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('message-container');
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+
+        function clearMessages() {
+            document.getElementById('message-container').innerHTML = '';
+        }
+
+        function setLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            if (loading) {
+                button.innerHTML = '<span class="loading"></span>Processing...';
+                button.disabled = true;
+            } else {
+                if (buttonId === 'login-btn') {
+                    button.innerHTML = 'Sign In';
+                } else {
+                    button.innerHTML = 'Create Account';
+                }
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -37,6 +37,17 @@ class UserRegistration(BaseModel):
     learning_style: Optional[str] = "mixed"
     knowledge_level: Optional[str] = "beginner"
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserProfile(BaseModel):
+    id: str
+    username: str
+    email: str
+    learning_style: str
+    knowledge_level: str
+
 # Legacy endpoint for backward compatibility
 @app.post("/api/generate-plan")
 async def generate_plan_legacy(data: dict):
@@ -149,6 +160,55 @@ async def get_available_subjects():
     try:
         subjects = list(coordinator.schedule_agent.subjects_db.keys())
         return {"subjects": subjects}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== Authentication Endpoints =====
+@app.post("/api/register")
+async def register_user(user_data: UserRegistration):
+    """Register a new user"""
+    try:
+        result = coordinator.security_agent.register_user(
+            username=user_data.username,
+            email=user_data.email,
+            password=user_data.password,
+            learning_style=user_data.learning_style,
+            knowledge_level=user_data.knowledge_level
+        )
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/login")
+async def login_user(login_data: UserLogin):
+    """Authenticate user login"""
+    try:
+        result = coordinator.security_agent.authenticate_user(
+            email=login_data.email,
+            password=login_data.password
+        )
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=401, detail=result["message"])
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/user/{user_id}")
+async def get_user_profile(user_id: str):
+    """Get user profile information"""
+    try:
+        user = coordinator.security_agent.get_user_by_id(user_id)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"status": "success", "user": user}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

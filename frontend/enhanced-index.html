@@ -32,6 +32,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -42,6 +43,41 @@
         .header p {
             font-size: 1.1rem;
             opacity: 0.9;
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .auth-link {
+            color: white;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+        
+        .auth-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
         }
 
         .tabs {
@@ -237,6 +273,9 @@
 <body>
     <div class="container">
         <div class="header">
+            <div id="user-section">
+                <!-- User info will be populated by JavaScript -->
+            </div>
             <h1>🤖 AI Study Planner</h1>
             <p>Multi-Agent System for Personalized Learning</p>
         </div>
