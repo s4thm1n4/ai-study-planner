@@ -28,6 +28,18 @@ generateBtn.addEventListener('click', async () => {
 
         // Get the JSON data from the response
         const data = await response.json();
+        
+        // Check if there's an error in the response
+        if (data.error) {
+            resultsDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+            return;
+        }
+
+        // Check if we have the expected data structure
+        if (!data.schedule || !data.first_resource) {
+            resultsDiv.innerHTML = `<p style="color: red;">Invalid response format. Please try again.</p>`;
+            return;
+        }
 
         // Format the output into nice HTML
         let outputHTML = `

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import your agent functions from agents.py
-from .agents import generate_schedule, find_resource
+from agents import generate_schedule, find_resource
 
 # This line creates the "app" object Uvicorn is looking for
 app = FastAPI()
