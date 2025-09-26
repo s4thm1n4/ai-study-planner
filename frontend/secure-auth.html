@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -32,7 +32,7 @@
         }
         
         .auth-header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-align: center;
             padding: 30px 20px;
@@ -76,8 +76,8 @@
         
         .auth-tab.active {
             background: white;
-            color: #4CAF50;
-            border-bottom: 3px solid #4CAF50;
+            color: #6366f1;
+            border-bottom: 3px solid #6366f1;
         }
         
         .auth-content {
@@ -114,14 +114,14 @@
         
         .form-group input:focus, .form-group select:focus {
             outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
         
         .submit-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -165,7 +165,7 @@
             width: 20px;
             height: 20px;
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #4CAF50;
+            border-top: 3px solid #6366f1;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 10px;
@@ -181,11 +181,11 @@
             padding: 15px;
             border-radius: 10px;
             margin-top: 20px;
-            border-left: 4px solid #4CAF50;
+            border-left: 4px solid #6366f1;
         }
         
         .token-info h4 {
-            color: #4CAF50;
+            color: #6366f1;
             margin-bottom: 10px;
         }
         
@@ -193,7 +193,7 @@
             display: inline-block;
             margin-top: 15px;
             padding: 12px 24px;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -213,7 +213,19 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .user-dashboard {
+            display: none;
+            text-align: center;
+        }
+        
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -289,7 +301,7 @@
             
             <!-- User Dashboard -->
             <div class="user-dashboard" id="user-dashboard" style="display: none;">
-                <div id="user-info"></div>
+                <div class="user-info" id="user-info"></div>
                 <div id="token-info" class="token-info" style="display: none;"></div>
                 <button class="logout-btn" onclick="logout()">🚪 Logout</button>
                 <a href="enhanced-index.html" class="study-planner-link">
@@ -310,18 +322,18 @@
         });
 
         function checkAuthStatus() {
-            const token = localStorage.getItem('ai_study_planner_token');
-            const user = localStorage.getItem('ai_study_planner_user');
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('currentUser');
             
-            if (token && user) {
+            if (token && userData) {
                 try {
                     authToken = token;
-                    currentUser = JSON.parse(user);
+                    currentUser = JSON.parse(userData);
                     showUserDashboard();
                 } catch (e) {
                     // Clear invalid data
-                    localStorage.removeItem('ai_study_planner_token');
-                    localStorage.removeItem('ai_study_planner_user');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('currentUser');
                 }
             }
         }
@@ -368,18 +380,19 @@
                 
                 const data = await response.json();
                 
-                if (response.ok) {
+                if (response.ok && data.access_token) {
                     // Store JWT token and user data
                     authToken = data.access_token;
                     currentUser = data.user;
                     
-                    localStorage.setItem('ai_study_planner_token', authToken);
-                    localStorage.setItem('ai_study_planner_user', JSON.stringify(currentUser));
+                    // Store in the format expected by enhanced-index.html
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     
                     showMessage('🎉 Login successful! JWT token received.', 'success');
                     setTimeout(() => showUserDashboard(), 1500);
                 } else {
-                    showMessage(`❌ ${data.detail || 'Login failed'}`, 'error');
+                    showMessage(`❌ ${data.detail || data.message || 'Login failed'}`, 'error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
@@ -475,8 +488,8 @@
         function logout() {
             authToken = null;
             currentUser = null;
-            localStorage.removeItem('ai_study_planner_token');
-            localStorage.removeItem('ai_study_planner_user');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
             location.reload();
         }
 

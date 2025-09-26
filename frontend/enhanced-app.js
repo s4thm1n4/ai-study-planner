@@ -4,492 +4,549 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 let currentUser = null;
 let authToken = null;
 
-// Initialize authentication on page load
+// Initialize authentication on page load - SINGLE EVENT LISTENER
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing enhanced study planner...');
     initializeAuth();
 });
 
 // Authentication functions
-
-function showUserInfo() {
-    const userSection = document.getElementById('user-section');
-    userSection.innerHTML = `
-        <div class="user-info">
-            🔒 ${currentUser.first_name} ${currentUser.last_name} (@${currentUser.username})
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-    `;
+function initializeAuth() {
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('currentUser');
+    
+    console.log('Checking authentication...', { hasToken: !!token, hasUserData: !!userData });
+    
+    if (token && userData) {
+        try {
+            authToken = token;
+            currentUser = JSON.parse(userData);
+            console.log('User authenticated:', currentUser);
+            showAuthenticatedContent();
+        } catch (error) {
+            console.error('Error parsing stored user data:', error);
+            redirectToLogin();
+        }
+    } else {
+        console.log('No authentication found, redirecting to login');
+        redirectToLogin();
+    }
 }
 
 function redirectToLogin() {
-    const userSection = document.getElementById('user-section');
-    userSection.innerHTML = `
-        <div style="color: white; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 20px;">
-            🔒 Authentication Required
-            <br><a href="secure-auth.html" style="color: white; text-decoration: underline;">Login to Continue</a>
-        </div>
-    `;
+    const loginRequired = document.getElementById('loginRequired');
+    const mainContent = document.getElementById('mainContent');
     
-    // Redirect after 3 seconds if not authenticated
+    console.log('Redirecting to login...', { loginRequired: !!loginRequired, mainContent: !!mainContent });
+    
+    if (loginRequired) {
+        loginRequired.style.display = 'block';
+    }
+    if (mainContent) {
+        mainContent.style.display = 'none';
+    }
+}
+
+function showAuthenticatedContent() {
+    console.log('showAuthenticatedContent called');
+    debugAuthState();
+    
+    const loginRequired = document.getElementById('loginRequired');
+    const mainContent = document.getElementById('mainContent');
+    const userDisplay = document.getElementById('userDisplay');
+    
+    console.log('Elements found:', { 
+        loginRequired: !!loginRequired, 
+        mainContent: !!mainContent, 
+        userDisplay: !!userDisplay 
+    });
+    
+    // Hide login screen and show main content
+    if (loginRequired) {
+        loginRequired.style.display = 'none';
+        console.log('Hidden login required');
+    }
+    if (mainContent) {
+        mainContent.style.display = 'block';
+        console.log('Shown main content');
+    }
+    
+    // Update user display
+    if (userDisplay && currentUser) {
+        const userName = currentUser.first_name && currentUser.last_name 
+            ? `${currentUser.first_name} ${currentUser.last_name}`
+            : currentUser.username || 'User';
+        
+        userDisplay.innerHTML = `
+            <i class="fas fa-user-circle"></i>
+            <span>${userName}</span>
+        `;
+        console.log('Updated user display:', userName);
+    }
+    
+    // Load subjects for dropdowns
+    console.log('Loading subjects...');
+    loadSubjects();
+    
+    // Ensure default tab is active
     setTimeout(() => {
-        if (!authToken) {
-            window.location.href = 'secure-auth.html';
+        const activeTab = document.querySelector('.tab.active');
+        const activeContent = document.querySelector('.tab-content.active');
+        
+        console.log('Tab state:', { activeTab: !!activeTab, activeContent: !!activeContent });
+        
+        if (!activeTab || !activeContent) {
+            console.log('Setting default tab to advanced...');
+            switchTab('advanced');
         }
-    }, 3000);
+    }, 100);
 }
 
 function logout() {
+    console.log('Logging out...');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
     authToken = null;
     currentUser = null;
-    localStorage.removeItem('ai_study_planner_token');
-    localStorage.removeItem('ai_study_planner_user');
-    window.location.href = 'secure-auth.html';
+    
+    // Redirect to home page
+    window.location.href = 'index.html';
 }
 
 // Helper function to make authenticated API calls
 async function makeAuthenticatedRequest(url, options = {}) {
-    if (!authToken) {
-        throw new Error('No authentication token available');
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+        console.error('No authentication token found');
+        throw new Error('No authentication token found');
     }
     
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
-        ...options.headers
+    const defaultHeaders = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
     };
     
-    const response = await fetch(url, {
+    const requestOptions = {
         ...options,
-        headers
-    });
+        headers: {
+            ...defaultHeaders,
+            ...options.headers
+        }
+    };
+    
+    const response = await fetch(API_BASE_URL + url, requestOptions);
     
     if (response.status === 401) {
-        // Token expired or invalid
+        console.error('Authentication failed, logging out');
         logout();
-        throw new Error('Authentication failed. Please login again.');
+        throw new Error('Authentication failed. Please log in again.');
     }
     
     return response;
 }
 
 // Tab functionality
-function showTab(tabName) {
-    // Hide all tab contents
-    const contents = document.querySelectorAll('.tab-content');
-    contents.forEach(content => content.classList.remove('active'));
+function switchTab(tabName) {
+    console.log('Switching to tab:', tabName);
     
-    // Remove active class from all tabs
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
+    // Remove active class from all tabs and content
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
-    // Show selected tab content
-    document.getElementById(tabName).classList.add('active');
+    // Add active class to selected tab and content
+    const selectedTab = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
+    const selectedContent = document.getElementById(`${tabName}-tab`);
     
-    // Add active class to clicked tab
-    event.target.classList.add('active');
+    console.log('Tab elements:', { selectedTab: !!selectedTab, selectedContent: !!selectedContent });
+    
+    if (selectedTab && selectedContent) {
+        selectedTab.classList.add('active');
+        selectedContent.classList.add('active');
+        console.log('Tab switched successfully to:', tabName);
+    } else {
+        console.error('Tab switching failed for:', tabName);
+    }
 }
 
-// Simple Plan Generation (Legacy compatibility)
-async function generateSimplePlan() {
-    const goal = document.getElementById('simple-goal').value.trim();
-    const resultsDiv = document.getElementById('simple-results');
-    const loadingDiv = document.getElementById('simple-loading');
-    
-    if (!goal) {
-        resultsDiv.innerHTML = '<div class="error">Please enter a learning goal!</div>';
-        return;
-    }
-    
-    // Show loading
-    loadingDiv.style.display = 'block';
-    resultsDiv.innerHTML = '';
-    
+// Load subjects for dropdowns
+async function loadSubjects() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/generate-plan`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ goal: goal }),
-        });
+        console.log('Loading subjects from API...');
+        const response = await makeAuthenticatedRequest('/api/subjects');
         
-        const data = await response.json();
-        
-        if (data.error) {
-            throw new Error(data.error);
+        if (response.ok) {
+            const subjects = await response.json();
+            console.log('Subjects loaded successfully:', subjects.length, subjects);
+            
+            // Update Advanced Planner dropdown
+            const advancedSubjectSelect = document.getElementById('advancedSubject');
+            if (advancedSubjectSelect) {
+                advancedSubjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+                subjects.forEach(subject => {
+                    advancedSubjectSelect.innerHTML += `<option value="${subject}">${subject}</option>`;
+                });
+                console.log('Advanced subject dropdown updated');
+            } else {
+                console.error('Advanced subject dropdown not found');
+            }
+            
+            // Update Resources dropdown
+            const resourceSubjectSelect = document.getElementById('resourceSubject');
+            if (resourceSubjectSelect) {
+                resourceSubjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+                subjects.forEach(subject => {
+                    resourceSubjectSelect.innerHTML += `<option value="${subject}">${subject}</option>`;
+                });
+                console.log('Resource subject dropdown updated');
+            } else {
+                console.error('Resource subject dropdown not found');
+            }
+            
+        } else {
+            console.error('Failed to load subjects, status:', response.status);
         }
-        
-        // Check if we have the expected data structure
-        if (!data.schedule || !data.first_resource) {
-            throw new Error('Invalid response format from server');
-        }
-        
-        // Format the output
-        let outputHTML = `
-            <div class="success">✅ Study plan generated successfully!</div>
-            <h3>📅 Your 3-Day Study Plan:</h3>
-            <div class="schedule">
-                ${data.schedule.map((topic, index) => `
-                    <div class="schedule-item">
-                        <strong>Day ${index + 1}:</strong> ${topic}
-                    </div>
-                `).join('')}
-            </div>
-            <h3>📚 First Resource:</h3>
-            <div class="resource-card">
-                <strong>Topic:</strong> ${data.first_resource.topic}<br>
-                <strong>Link:</strong> <a href="${data.first_resource.link}" target="_blank">${data.first_resource.link}</a>
-            </div>
-        `;
-        
-        resultsDiv.innerHTML = outputHTML;
-        
     } catch (error) {
-        console.error('Error:', error);
-        resultsDiv.innerHTML = `
-            <div class="error">
-                <strong>Error:</strong> ${error.message}
-            </div>
-        `;
-    } finally {
-        loadingDiv.style.display = 'none';
+        console.error('Error loading subjects:', error);
+        // Don't show error to user for subjects loading - it's not critical
     }
 }
 
 // Advanced Plan Generation
 async function generateAdvancedPlan() {
-    const subject = document.getElementById('subject').value;
-    const knowledgeLevel = document.getElementById('knowledge-level').value;
-    const dailyHours = parseInt(document.getElementById('daily-hours').value);
-    const totalDays = parseInt(document.getElementById('total-days').value);
-    const learningStyle = document.getElementById('learning-style').value;
-    
-    const resultsDiv = document.getElementById('advanced-results');
-    const loadingDiv = document.getElementById('advanced-loading');
+    const subject = document.getElementById('advancedSubject')?.value;
+    const dailyHours = parseInt(document.getElementById('dailyHours')?.value || '2');
+    const totalDays = parseInt(document.getElementById('totalDays')?.value || '7');
+    const knowledgeLevel = document.getElementById('knowledgeLevel')?.value || 'beginner';
     
     if (!subject) {
-        resultsDiv.innerHTML = '<div class="error">Please select a subject!</div>';
+        showError('advanced-results', 'Please select a subject!');
         return;
     }
     
-    // Show loading
-    loadingDiv.style.display = 'block';
-    resultsDiv.innerHTML = '';
+    const loadingDiv = document.getElementById('advanced-loading');
+    const resultsDiv = document.getElementById('advanced-results');
+    const generateBtn = document.querySelector('#advanced-tab .generate-btn');
     
     try {
-        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/v2/generate-advanced-plan`, {
+        // Show loading
+        if (loadingDiv) loadingDiv.classList.add('show');
+        if (resultsDiv) resultsDiv.innerHTML = '';
+        if (generateBtn) generateBtn.disabled = true;
+        
+        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel });
+        
+        const response = await makeAuthenticatedRequest('/api/generate-advanced-plan', {
             method: 'POST',
             body: JSON.stringify({
-                subject,
+                subject: subject,
                 available_hours_per_day: dailyHours,
                 total_days: totalDays,
-                learning_style: learningStyle,
                 knowledge_level: knowledgeLevel
-            }),
+            })
         });
         
         if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
         
         const data = await response.json();
+        console.log('Advanced plan generated:', data);
         
-        // Format the advanced output
-        let scheduleHTML = '';
-        if (data.schedule && Array.isArray(data.schedule)) {
-            scheduleHTML = data.schedule.map(day => `
-                <div class="schedule-item">
-                    <h4>📅 Day ${day.day} - ${day.date}</h4>
-                    <p><strong>Study Time:</strong> ${day.hours} hours</p>
-                    <div class="topics">
-                        ${day.topics.map(topic => `
-                            <div style="margin-left: 20px; padding: 5px 0;">
-                                📖 <strong>${topic.topic}</strong> (${topic.hours}h)
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        let resourcesHTML = '';
-        if (data.resources && Array.isArray(data.resources)) {
-            resourcesHTML = data.resources.map(resource => `
-                <div class="resource-card">
-                    <h4>${resource.title}</h4>
-                    <p><strong>Type:</strong> ${resource.resource_type}</p>
-                    <p><strong>Difficulty:</strong> ${resource.difficulty}</p>
-                    <p><strong>Rating:</strong> <span class="resource-rating">${'⭐'.repeat(Math.floor(resource.rating || 4))}</span> (${resource.rating || 'N/A'})</p>
-                    <p>${resource.description}</p>
-                    <p><strong>Tags:</strong> ${(resource.tags || []).join(', ')}</p>
-                    <a href="${resource.url}" target="_blank" style="color: #4CAF50; text-decoration: none; font-weight: bold;">📖 Access Resource</a>
-                </div>
-            `).join('');
-        }
-        
-        let motivationHTML = '';
-        if (data.motivation) {
-            motivationHTML = `
-                <div class="motivation-section">
-                    <h3>💪 Daily Motivation</h3>
-                    <blockquote style="font-style: italic; margin: 10px 0;">
-                        "${data.motivation.quote.quote}" - ${data.motivation.quote.author}
-                    </blockquote>
-                    <p><strong>💡 Study Tip:</strong> ${data.motivation.tip.tip}</p>
-                    <p>${data.motivation.encouragement}</p>
-                </div>
-            `;
-        }
-        
-        const outputHTML = `
-            <div class="success">🚀 Advanced study plan generated successfully!</div>
-            
-            <div style="background: white; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                <h3>📊 Plan Overview</h3>
-                <p><strong>Subject:</strong> ${data.subject}</p>
-                <p><strong>Total Hours:</strong> ${data.total_hours}h</p>
-                <p><strong>Daily Hours:</strong> ${data.daily_hours}h</p>
-                <p><strong>Difficulty:</strong> ${data.difficulty}</p>
-            </div>
-            
-            ${motivationHTML}
-            
-            <h3>📅 Your Study Schedule</h3>
-            ${scheduleHTML}
-            
-            <h3>📚 Recommended Resources</h3>
-            ${resourcesHTML}
-        `;
-        
-        resultsDiv.innerHTML = outputHTML;
+        displayAdvancedResults(data);
         
     } catch (error) {
-        console.error('Error:', error);
-        resultsDiv.innerHTML = `
-            <div class="error">
-                <strong>Error:</strong> Failed to generate advanced plan. ${error.message}
-            </div>
-        `;
+        console.error('Error generating advanced plan:', error);
+        showError('advanced-results', `Failed to generate advanced plan: ${error.message}`);
     } finally {
-        loadingDiv.style.display = 'none';
+        if (loadingDiv) loadingDiv.classList.remove('show');
+        if (generateBtn) generateBtn.disabled = false;
     }
+}
+
+function displayAdvancedResults(data) {
+    const resultsDiv = document.getElementById('advanced-results');
+    if (!resultsDiv) {
+        console.error('Advanced results div not found');
+        return;
+    }
+    
+    if (!data.study_plan) {
+        console.error('No study plan in response data');
+        showError('advanced-results', 'No study plan received from server');
+        return;
+    }
+    
+    const plan = data.study_plan;
+    
+    let scheduleHtml = '';
+    if (plan.schedule && Array.isArray(plan.schedule)) {
+        scheduleHtml = plan.schedule.map(day => {
+            const topicsText = day.topics && day.topics.length > 0 
+                ? day.topics.map(topic => `${topic.topic} (${topic.hours}h)`).join(', ')
+                : 'Study session';
+            
+            return `
+                <div class="schedule-item">
+                    <h4>📅 Day ${day.day} - ${day.date}</h4>
+                    <p><strong>Topics:</strong> ${topicsText}</p>
+                    <p><strong>Total Hours:</strong> ${day.hours}h</p>
+                    ${day.goals && day.goals.length > 0 ? `<p><strong>Goals:</strong> ${day.goals.join(', ')}</p>` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+    
+    let resourcesHtml = '';
+    if (plan.resources && Array.isArray(plan.resources)) {
+        resourcesHtml = plan.resources.map(resource => `
+            <div class="resource-item">
+                <h4>📚 ${resource.title || resource.topic || 'Resource'}</h4>
+                <p><strong>Type:</strong> ${resource.resource_type || 'General'}</p>
+                <p><strong>Difficulty:</strong> ${resource.difficulty || 'N/A'}</p>
+                ${resource.description ? `<p>${resource.description}</p>` : ''}
+                ${resource.url ? `<p><a href="${resource.url}" target="_blank" rel="noopener noreferrer">View Resource →</a></p>` : ''}
+            </div>
+        `).join('');
+    }
+    
+    resultsDiv.innerHTML = `
+        <div class="results">
+            <h3>🎯 Your Personalized Study Plan</h3>
+            <div style="margin-bottom: 2rem;">
+                <p><strong>Subject:</strong> ${plan.subject}</p>
+                <p><strong>Total Hours:</strong> ${plan.total_hours}h</p>
+                <p><strong>Daily Hours:</strong> ${plan.daily_hours}h</p>
+                <p><strong>Difficulty:</strong> ${plan.difficulty}</p>
+            </div>
+            
+            ${scheduleHtml ? `
+                <div style="margin-bottom: 2rem;">
+                    <h4>📅 Study Schedule</h4>
+                    ${scheduleHtml}
+                </div>
+            ` : ''}
+            
+            ${resourcesHtml ? `
+                <div>
+                    <h4>📚 Recommended Resources</h4>
+                    ${resourcesHtml}
+                </div>
+            ` : ''}
+            
+            ${plan.motivation ? `
+                <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 0.75rem;">
+                    <h4>💪 Motivational Message</h4>
+                    <p><em>"${plan.motivation.quote.quote}"</em> - ${plan.motivation.quote.author}</p>
+                    <p><strong>Tip:</strong> ${plan.motivation.tip.tip}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
 }
 
 // Find Resources
 async function findResources() {
-    const subject = document.getElementById('resource-subject').value.trim();
-    const difficulty = document.getElementById('resource-difficulty').value;
-    
-    const resultsDiv = document.getElementById('resources-results');
-    const loadingDiv = document.getElementById('resources-loading');
+    const subject = document.getElementById('resourceSubject')?.value;
+    const resourceType = document.getElementById('resourceType')?.value;
     
     if (!subject) {
-        resultsDiv.innerHTML = '<div class="error">Please enter a subject!</div>';
+        showError('resources-results', 'Please select a subject!');
         return;
     }
     
-    // Show loading
-    loadingDiv.style.display = 'block';
-    resultsDiv.innerHTML = '';
+    const loadingDiv = document.getElementById('resources-loading');
+    const resultsDiv = document.getElementById('resources-results');
+    const generateBtn = document.querySelector('#resources-tab .generate-btn');
     
     try {
-        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/resources/${encodeURIComponent(subject)}?difficulty=${difficulty}&limit=8`);
+        // Show loading
+        if (loadingDiv) loadingDiv.classList.add('show');
+        if (resultsDiv) resultsDiv.innerHTML = '';
+        if (generateBtn) generateBtn.disabled = true;
+        
+        console.log('Finding resources for:', { subject, resourceType });
+        
+        const response = await makeAuthenticatedRequest('/api/find-resources', {
+            method: 'POST',
+            body: JSON.stringify({
+                subject: subject,
+                resource_type: resourceType || null,
+                limit: 5
+            })
+        });
         
         if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
         
         const data = await response.json();
+        console.log('Resources found:', data);
         
-        if (!data.resources || data.resources.length === 0) {
-            resultsDiv.innerHTML = '<div class="error">No resources found for this subject. Try a different search term.</div>';
-            return;
-        }
-        
-        const resourcesHTML = data.resources.map(resource => `
-            <div class="resource-card">
-                <h4>${resource.title}</h4>
-                <p><strong>Type:</strong> ${resource.resource_type}</p>
-                <p><strong>Subject:</strong> ${resource.subject}</p>
-                <p><strong>Difficulty:</strong> ${resource.difficulty}</p>
-                <p><strong>Rating:</strong> <span class="resource-rating">${'⭐'.repeat(Math.floor(resource.rating || 4))}</span> (${resource.rating || 'N/A'})</p>
-                ${resource.duration_minutes ? `<p><strong>Duration:</strong> ${Math.floor(resource.duration_minutes / 60)}h ${resource.duration_minutes % 60}m</p>` : ''}
-                <p>${resource.description}</p>
-                <p><strong>Tags:</strong> ${(resource.tags || []).join(', ')}</p>
-                <p><strong>Source:</strong> ${resource.source}</p>
-                <a href="${resource.url}" target="_blank" style="color: #4CAF50; text-decoration: none; font-weight: bold;">📖 Access Resource</a>
-                ${resource.similarity_score ? `<p style="font-size: 0.9em; color: #666;">Match Score: ${(resource.similarity_score * 100).toFixed(1)}%</p>` : ''}
-            </div>
-        `).join('');
-        
-        resultsDiv.innerHTML = `
-            <div class="success">Found ${data.resources.length} resources for "${subject}"</div>
-            ${resourcesHTML}
-        `;
+        displayResourceResults(data.resources || []);
         
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error finding resources:', error);
+        showError('resources-results', `Failed to find resources: ${error.message}`);
+    } finally {
+        if (loadingDiv) loadingDiv.classList.remove('show');
+        if (generateBtn) generateBtn.disabled = false;
+    }
+}
+
+function displayResourceResults(resources) {
+    const resultsDiv = document.getElementById('resources-results');
+    if (!resultsDiv) return;
+    
+    if (!resources || resources.length === 0) {
         resultsDiv.innerHTML = `
-            <div class="error">
-                <strong>Error:</strong> Failed to find resources. ${error.message}
+            <div class="results">
+                <h3>📚 No Resources Found</h3>
+                <p>We couldn't find any resources for your search. Try a different subject or resource type.</p>
             </div>
         `;
-    } finally {
-        loadingDiv.style.display = 'none';
+        return;
     }
+    
+    const resourcesHtml = resources.map(resource => `
+        <div class="resource-item">
+            <h4>📚 ${resource.title || 'Resource'}</h4>
+            <p><strong>Type:</strong> ${resource.resource_type || 'General'}</p>
+            <p><strong>Difficulty:</strong> ${resource.difficulty || 'N/A'}</p>
+            ${resource.description ? `<p>${resource.description}</p>` : ''}
+            ${resource.url ? `<p><a href="${resource.url}" target="_blank" rel="noopener noreferrer">View Resource →</a></p>` : ''}
+            ${resource.similarity_score ? `<p><small>Relevance: ${Math.round(resource.similarity_score * 100)}%</small></p>` : ''}
+        </div>
+    `).join('');
+    
+    resultsDiv.innerHTML = `
+        <div class="results">
+            <h3>📚 Found ${resources.length} Resources</h3>
+            ${resourcesHtml}
+        </div>
+    `;
 }
 
 // Get Motivation
 async function getMotivation() {
-    const moodText = document.getElementById('mood-text').value.trim();
+    const mood = document.getElementById('currentMood')?.value?.trim();
     
-    const resultsDiv = document.getElementById('motivation-results');
+    if (!mood) {
+        showError('motivation-results', 'Please share how you\'re feeling about your studies!');
+        return;
+    }
+    
     const loadingDiv = document.getElementById('motivation-loading');
-    
-    // Show loading
-    loadingDiv.style.display = 'block';
-    resultsDiv.innerHTML = '';
+    const resultsDiv = document.getElementById('motivation-results');
+    const generateBtn = document.querySelector('#motivation-tab .generate-btn');
     
     try {
-        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/motivation`, {
+        // Show loading
+        if (loadingDiv) loadingDiv.classList.add('show');
+        if (resultsDiv) resultsDiv.innerHTML = '';
+        if (generateBtn) generateBtn.disabled = true;
+        
+        console.log('Getting motivation for mood:', mood);
+        
+        const response = await makeAuthenticatedRequest('/api/get-motivation', {
             method: 'POST',
-            body: JSON.stringify({ text: moodText }),
+            body: JSON.stringify({
+                mood_text: mood
+            })
         });
         
         if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
         
         const data = await response.json();
+        console.log('Motivation received:', data);
         
-        const motivationHTML = `
-            <div class="motivation-section">
-                <h3>🌟 Your Daily Motivation</h3>
-                
-                ${moodText ? `
-                    <div style="background: rgba(255,255,255,0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                        <h4>📊 Mood Analysis</h4>
-                        <p>Based on your input, I detected a <strong>${data.mood || 'neutral'}</strong> mood.</p>
-                    </div>
-                ` : ''}
-                
-                <div style="background: rgba(255,255,255,0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h4>💭 Inspirational Quote</h4>
-                    <blockquote style="font-style: italic; font-size: 1.1em; margin: 10px 0;">
-                        "${data.quote.quote}"
-                    </blockquote>
-                    <p style="text-align: right; font-weight: bold;">— ${data.quote.author}</p>
-                </div>
-                
-                <div style="background: rgba(255,255,255,0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h4>💡 Study Tip</h4>
-                    <p>${data.tip.tip}</p>
-                    <p><small><strong>Category:</strong> ${data.tip.category}</small></p>
-                </div>
-                
-                <div style="background: rgba(255,255,255,0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h4>🎯 Encouragement</h4>
-                    <p>${data.encouragement}</p>
-                </div>
-            </div>
-        `;
-        
-        resultsDiv.innerHTML = motivationHTML;
+        displayMotivationResults(data);
         
     } catch (error) {
-        console.error('Error:', error);
-        resultsDiv.innerHTML = `
-            <div class="error">
-                <strong>Error:</strong> Failed to get motivation. ${error.message}
-            </div>
-        `;
+        console.error('Error getting motivation:', error);
+        showError('motivation-results', `Failed to get motivation: ${error.message}`);
     } finally {
-        loadingDiv.style.display = 'none';
+        if (loadingDiv) loadingDiv.classList.remove('show');
+        if (generateBtn) generateBtn.disabled = false;
     }
 }
 
-// Load available subjects after authentication
-async function loadSubjects() {
-    try {
-        if (!authToken || !currentUser) {
-            console.log('No authentication token available, skipping subjects load');
-            return;
-        }
-        
-        console.log('Loading subjects with authentication...');
-        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/subjects`);
-        
-        if (response.ok) {
-            const data = await response.json();
-            const subjectSelect = document.getElementById('subject');
-            
-            if (subjectSelect) {
-                // Clear existing options except the first one
-                subjectSelect.innerHTML = '<option value="">Select a subject...</option>';
-                
-                // Add subjects from the database
-                data.subjects.forEach(subject => {
-                    const option = document.createElement('option');
-                    option.value = subject;
-                    option.textContent = subject;
-                    subjectSelect.appendChild(option);
-                });
-                
-                console.log('Subjects loaded successfully:', data.subjects.length);
-            }
-        } else {
-            const errorText = await response.text();
-            console.error('Failed to load subjects:', response.status, response.statusText, errorText);
-            
-            // If it's an authentication error (401), redirect to login
-            if (response.status === 401) {
-                console.log('Authentication failed, redirecting to login');
-                logout();
-            }
-        }
-    } catch (error) {
-        console.error('Error loading subjects:', error);
-        // If it's an authentication error, redirect to login
-        if (error.message.includes('Authentication failed')) {
-            logout();
-        }
-    }
-}
-
-// Update authentication initialization to load subjects after auth
-function initializeAuth() {
-    const savedToken = localStorage.getItem('ai_study_planner_token');
-    const savedUser = localStorage.getItem('ai_study_planner_user');
+function displayMotivationResults(data) {
+    const resultsDiv = document.getElementById('motivation-results');
+    if (!resultsDiv) return;
     
-    if (savedToken && savedUser) {
-        try {
-            authToken = savedToken;
-            currentUser = JSON.parse(savedUser);
-            showUserInfo();
-            // Load subjects after successful authentication
-            loadSubjects();
-        } catch (e) {
-            // Clear invalid data
-            localStorage.removeItem('ai_study_planner_token');
-            localStorage.removeItem('ai_study_planner_user');
-            redirectToLogin();
-        }
-    } else {
-        redirectToLogin();
+    const sentiment = data.sentiment || {};
+    const motivation = data.motivation || {};
+    
+    resultsDiv.innerHTML = `
+        <div class="results">
+            <h3>💪 Personalized Motivation</h3>
+            
+            ${sentiment.mood ? `
+                <div style="margin-bottom: 2rem; padding: 1rem; background: ${getSentimentColor(sentiment.mood)}; border-radius: 0.5rem;">
+                    <h4>🎭 Your Current Mood: ${sentiment.mood.charAt(0).toUpperCase() + sentiment.mood.slice(1)}</h4>
+                </div>
+            ` : ''}
+            
+            ${motivation.quote ? `
+                <div class="quote-section">
+                    <div class="quote-text">"${motivation.quote.quote}"</div>
+                    <div class="quote-author">— ${motivation.quote.author}</div>
+                </div>
+            ` : ''}
+            
+            ${motivation.tip ? `
+                <div class="tip-section">
+                    <h4>💡 Study Tip</h4>
+                    <p>${motivation.tip.tip}</p>
+                </div>
+            ` : ''}
+            
+            ${motivation.encouragement ? `
+                <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 0.75rem; border-left: 4px solid #0ea5e9;">
+                    <h4>🌟 Personal Message</h4>
+                    <p>${motivation.encouragement}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function getSentimentColor(mood) {
+    switch (mood) {
+        case 'positive': return 'rgba(16, 185, 129, 0.2)';
+        case 'negative': return 'rgba(239, 68, 68, 0.2)';
+        default: return 'rgba(99, 102, 241, 0.2)';
     }
 }
 
-// Add some visual feedback for form interactions
-document.addEventListener('DOMContentLoaded', function() {
-    // Add focus effects to form elements
-    const formElements = document.querySelectorAll('input, select, textarea');
-    formElements.forEach(element => {
-        element.addEventListener('focus', function() {
-            this.style.transform = 'scale(1.02)';
-        });
-        
-        element.addEventListener('blur', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
-});
+// Error display helper
+function showError(elementId, message) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.innerHTML = `
+            <div class="error-message">
+                <h4>❌ Error</h4>
+                <p>${message}</p>
+            </div>
+        `;
+    } else {
+        console.error('Error element not found:', elementId, 'Message:', message);
+    }
+}
+
+// Add this function at the top of enhanced-app.js for debugging
+function debugAuthState() {
+    console.log('=== AUTH DEBUG ===');
+    console.log('authToken:', localStorage.getItem('authToken'));
+    console.log('currentUser:', localStorage.getItem('currentUser'));
+    console.log('currentUser var:', currentUser);
+    console.log('loginRequired element:', document.getElementById('loginRequired'));
+    console.log('mainContent element:', document.getElementById('mainContent'));
+    console.log('==================');
+}

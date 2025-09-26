@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -26,13 +26,13 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
             position: relative;
         }
         
         .auth-header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-align: center;
             padding: 30px 20px;
@@ -46,6 +46,15 @@
         .auth-header p {
             opacity: 0.9;
             font-size: 16px;
+        }
+        
+        .security-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-top: 10px;
+            display: inline-block;
         }
         
         .auth-tabs {
@@ -67,8 +76,8 @@
         
         .auth-tab.active {
             background: white;
-            color: #4CAF50;
-            border-bottom: 3px solid #4CAF50;
+            color: #6366f1;
+            border-bottom: 3px solid #6366f1;
         }
         
         .auth-content {
@@ -105,14 +114,14 @@
         
         .form-group input:focus, .form-group select:focus {
             outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
         
         .submit-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -156,7 +165,7 @@
             width: 20px;
             height: 20px;
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #4CAF50;
+            border-top: 3px solid #6366f1;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 10px;
@@ -187,13 +196,14 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
+            margin-right: 10px;
         }
         
         .study-planner-link {
             display: inline-block;
             margin-top: 15px;
             padding: 12px 24px;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -204,6 +214,19 @@
         .study-planner-link:hover {
             transform: translateY(-2px);
         }
+
+        .token-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #6366f1;
+        }
+        
+        .token-info h4 {
+            color: #6366f1;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -211,6 +234,7 @@
         <div class="auth-header">
             <h1>🤖 AI Study Planner</h1>
             <p>Your Personal Learning Assistant</p>
+            <div class="security-badge">🛡️ Multi-Agent System</div>
         </div>
         
         <div class="auth-tabs">
@@ -234,7 +258,7 @@
                 </div>
                 
                 <button type="submit" class="submit-btn" id="login-btn">
-                    Sign In
+                    🔑 Sign In
                 </button>
             </form>
             
@@ -271,7 +295,7 @@
                 </div>
                 
                 <button type="submit" class="submit-btn" id="register-btn">
-                    Create Account
+                    📝 Create Account
                 </button>
             </form>
             
@@ -280,9 +304,9 @@
                 <div class="user-info" id="user-info">
                     <!-- User information will be populated here -->
                 </div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
                 <a href="enhanced-index.html" class="study-planner-link">
-                    📚 Go to Study Planner
+                    📚 Access Study Planner
                 </a>
             </div>
         </div>
@@ -291,19 +315,28 @@
     <script>
         const API_BASE_URL = 'http://127.0.0.1:8000';
         let currentUser = null;
+        let authToken = null;
 
         // Check if user is already logged in
         document.addEventListener('DOMContentLoaded', function() {
-            const savedUser = localStorage.getItem('ai_study_planner_user');
-            if (savedUser) {
+            checkAuthStatus();
+        });
+
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('currentUser');
+            
+            if (token && userData) {
                 try {
-                    currentUser = JSON.parse(savedUser);
+                    authToken = token;
+                    currentUser = JSON.parse(userData);
                     showUserDashboard();
                 } catch (e) {
-                    localStorage.removeItem('ai_study_planner_user');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('currentUser');
                 }
             }
-        });
+        }
 
         function switchTab(tab) {
             // Update tab buttons
@@ -346,18 +379,25 @@
                 });
                 
                 const data = await response.json();
+                console.log('Login response:', data);
                 
-                if (response.ok && data.status === 'success') {
+                if (response.ok && data.access_token) {
+                    // Store JWT token and user data
+                    authToken = data.access_token;
                     currentUser = data.user;
-                    localStorage.setItem('ai_study_planner_user', JSON.stringify(currentUser));
-                    showMessage('Login successful! Welcome back!', 'success');
+                    
+                    // Store in the format expected by enhanced-index.html
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    showMessage('🎉 Login successful! Welcome back!', 'success');
                     setTimeout(() => showUserDashboard(), 1500);
                 } else {
-                    showMessage(data.message || 'Login failed', 'error');
+                    showMessage(`❌ ${data.detail || data.message || 'Login failed'}`, 'error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage('Network error. Please try again.', 'error');
+                showMessage('🌐 Network error. Please check server connection.', 'error');
             } finally {
                 setLoading('login-btn', false);
             }
@@ -410,16 +450,16 @@
                 const data = await response.json();
                 
                 if (response.ok && data.status === 'success') {
-                    showMessage('Account created successfully! Please log in.', 'success');
-                    // Switch to login tab
-                    switchTab('login');
+                    showMessage('✅ Account created successfully! Please log in.', 'success');
+                    // Switch to login tab and pre-fill email
+                    document.querySelector('.auth-tab').click();
                     document.getElementById('login-email').value = email;
                 } else {
-                    showMessage(data.message || 'Registration failed', 'error');
+                    showMessage(`❌ ${data.message || data.detail || 'Registration failed'}`, 'error');
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage('Network error. Please try again.', 'error');
+                showMessage('🌐 Network error. Please check server connection.', 'error');
             } finally {
                 setLoading('register-btn', false);
             }
@@ -433,9 +473,10 @@
             const userInfo = document.getElementById('user-info');
             
             userInfo.innerHTML = `
-                <h3>Welcome, ${currentUser.first_name} ${currentUser.last_name}! 👋</h3>
-                <p><strong>Username:</strong> ${currentUser.username}</p>
-                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <h3>🎉 Welcome, ${currentUser.first_name} ${currentUser.last_name}! 👋</h3>
+                <p><strong>📧 Email:</strong> ${currentUser.email}</p>
+                <p><strong>👤 Username:</strong> ${currentUser.username}</p>
+                <p><strong>🔐 Status:</strong> <span style="color: green;">Authenticated</span></p>
             `;
             
             dashboard.style.display = 'block';
@@ -443,7 +484,9 @@
 
         function logout() {
             currentUser = null;
-            localStorage.removeItem('ai_study_planner_user');
+            authToken = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
             location.reload();
         }
 
@@ -463,9 +506,9 @@
                 button.disabled = true;
             } else {
                 if (buttonId === 'login-btn') {
-                    button.innerHTML = 'Sign In';
+                    button.innerHTML = '🔑 Sign In';
                 } else {
-                    button.innerHTML = 'Create Account';
+                    button.innerHTML = '📝 Create Account';
                 }
                 button.disabled = false;
             }
