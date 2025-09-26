@@ -7,7 +7,6 @@ import asyncio
 import jwt
 import os
 from datetime import datetime, timedelta
-from functools import wraps
 
 # Import both legacy and simplified multi-agent functions
 from agents import generate_schedule, find_resource
@@ -32,7 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pydantic models for request/response
+# Pydantic models
 class StudyGoal(BaseModel):
     goal: str
 
@@ -42,6 +41,14 @@ class AdvancedStudyRequest(BaseModel):
     total_days: int
     learning_style: Optional[str] = "mixed"
     knowledge_level: Optional[str] = "beginner"
+
+class ResourceRequest(BaseModel):
+    subject: str
+    resource_type: Optional[str] = None
+    limit: Optional[int] = 5
+
+class MotivationRequest(BaseModel):
+    mood_text: str
 
 class UserRegistration(BaseModel):
     first_name: str
@@ -54,24 +61,7 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
-class UserProfile(BaseModel):
-    id: str
-    first_name: str
-    last_name: str
-    username: str
-    email: str
-
-class LoginResponse(BaseModel):
-    access_token: str
-    token_type: str
-    user: dict
-    expires_in: int
-
-class ProtectedRequest(BaseModel):
-    """Base class for requests that require authentication"""
-    pass
-
-# ===== JWT Authentication Functions =====
+# JWT Authentication Functions
 def create_access_token(data: dict):
     """Create JWT access token"""
     to_encode = data.copy()
@@ -119,123 +109,6 @@ async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, 
     
     return user
 
-# Legacy endpoint for backward compatibility
-@app.post("/api/generate-plan")
-async def generate_plan_legacy(data: dict):
-    """Legacy endpoint for backward compatibility"""
-    goal = data.get('goal')
-    if not goal:
-        return {"error": "Goal not provided"}
-
-    try:
-        # Import and use the original synchronous functions
-        from agents import generate_schedule as sync_generate_schedule, find_resource as sync_find_resource
-        
-        # 1. Call Agent 1 (synchronous)
-        schedule_topics = sync_generate_schedule(goal)
-
-        # 2. Call Agent 2 (synchronous)
-        if not schedule_topics or "Could not" in str(schedule_topics[0]):
-            return {"error": "Failed to generate a schedule."}
-
-        first_topic_full = str(schedule_topics[0])
-        # Clean up the topic text (e.g., "1. Learn about Rome" -> "Learn about Rome")
-        first_topic_clean = first_topic_full.split('. ', 1)[-1] if '. ' in first_topic_full else first_topic_full
-        resource_link = sync_find_resource(first_topic_clean)
-
-        # 3. Return the combined result
-        return {
-            "schedule": schedule_topics,
-            "first_resource": {
-                "topic": first_topic_clean,
-                "link": resource_link
-            }
-        }
-    except Exception as e:
-        print(f"Error in legacy endpoint: {e}")
-        return {"error": str(e)}
-
-# ===== PROTECTED Study Planner Endpoints =====
-@app.post("/api/v2/generate-advanced-plan")
-async def generate_advanced_plan(
-    request: AdvancedStudyRequest, 
-    current_user: dict = Depends(get_current_user)
-):
-    """Generate a comprehensive study plan using the multi-agent system (PROTECTED)"""
-    try:
-        result = await coordinator.generate_complete_study_plan(
-            user_id=current_user["id"],  # Use authenticated user ID
-            subject=request.subject,
-            available_hours_per_day=request.available_hours_per_day,
-            total_days=request.total_days,
-            learning_style=request.learning_style or "mixed",  # Use default if not provided
-            knowledge_level=request.knowledge_level or "beginner"  # Use default if not provided
-        )
-        
-        if result["status"] == "error":
-            raise HTTPException(status_code=500, detail=result["message"])
-        
-        return result["study_plan"]
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/resources/{subject}")
-async def get_resources(
-    subject: str, 
-    difficulty: str = "beginner", 
-    limit: int = 5,
-    current_user: dict = Depends(get_current_user)
-):
-    """Get educational resources for a subject (PROTECTED)"""
-    try:
-        # Use default difficulty if beginner is specified
-        if difficulty == "beginner":
-            difficulty = "beginner"  # Keep as beginner since that's the default
-            
-        resources = coordinator.resource_agent.find_best_resources(
-            subject=subject,
-            difficulty=difficulty,
-            limit=limit
-        )
-        return {"resources": resources, "user_id": current_user["id"]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/motivation")
-async def get_motivation(
-    text: str = "", 
-    current_user: dict = Depends(get_current_user)
-):
-    """Get motivational message based on user mood (PROTECTED)"""
-    try:
-        if text:
-            sentiment = coordinator.motivation_agent.analyze_sentiment(text)
-            mood = sentiment["mood"]
-        else:
-            mood = "neutral"
-        
-        motivation = coordinator.motivation_agent.get_motivation_message(mood, 0.5)
-        motivation["user_id"] = current_user["id"]
-        return motivation
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/subjects")
-async def get_available_subjects(current_user: dict = Depends(get_current_user)):
-    """Get list of available subjects (PROTECTED)"""
-    try:
-        subjects = list(coordinator.schedule_agent.subjects_db.keys())
-        return {
-            "subjects": subjects, 
-            "user_id": current_user["id"],
-            "username": current_user["username"]
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 # ===== Authentication Endpoints =====
 @app.post("/api/register")
 async def register_user(user_data: UserRegistration):
@@ -253,10 +126,12 @@ async def register_user(user_data: UserRegistration):
             raise HTTPException(status_code=400, detail=result["message"])
         
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/login", response_model=LoginResponse)
+@app.post("/api/login")
 async def login_user(login_data: UserLogin):
     """Authenticate user and return JWT token"""
     try:
@@ -288,44 +163,167 @@ async def login_user(login_data: UserLogin):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ===== PROTECTED Study Planner Endpoints =====
+@app.get("/api/subjects")
+async def get_available_subjects(current_user: dict = Depends(get_current_user)):
+    """Get list of available subjects (PROTECTED)"""
+    try:
+        subjects = list(coordinator.schedule_agent.subjects_db.keys())
+        return subjects  # Return as simple list for frontend compatibility
+    except Exception as e:
+        print(f"Error getting subjects: {e}")
+        # Fallback subjects
+        return [
+            "Machine Learning",
+            "Python Programming", 
+            "Data Science",
+            "Web Development",
+            "Database Management",
+            "Cybersecurity",
+            "Cloud Computing",
+            "Mobile Development"
+        ]
+
+@app.post("/api/generate-advanced-plan")
+async def generate_advanced_plan(
+    request: AdvancedStudyRequest, 
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate a comprehensive study plan using the multi-agent system (PROTECTED)"""
+    try:
+        print(f"[DEBUG] Generating advanced plan for user: {current_user['id']}")
+        print(f"[DEBUG] Request: {request}")
+        
+        result = await coordinator.generate_complete_study_plan(
+            user_id=current_user["id"],
+            subject=request.subject,
+            available_hours_per_day=request.available_hours_per_day,
+            total_days=request.total_days,
+            learning_style=request.learning_style or "mixed",
+            knowledge_level=request.knowledge_level or "beginner"
+        )
+        
+        print(f"[DEBUG] Plan generation result: {result}")
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=500, detail=result["message"])
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Exception in generate_advanced_plan: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/find-resources")
+async def find_resources(
+    request: ResourceRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Find educational resources for a subject (PROTECTED)"""
+    try:
+        print(f"[DEBUG] Finding resources for: {request.subject}")
+        
+        resources = coordinator.resource_agent.find_best_resources(
+            subject=request.subject,
+            difficulty="beginner",  # Default difficulty
+            resource_type=request.resource_type,
+            limit=request.limit or 5
+        )
+        
+        print(f"[DEBUG] Found {len(resources)} resources")
+        
+        return {"resources": resources}
+    except Exception as e:
+        print(f"[ERROR] Exception in find_resources: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/get-motivation")
+async def get_motivation(
+    request: MotivationRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get motivational message based on user mood (PROTECTED)"""
+    try:
+        print(f"[DEBUG] Getting motivation for mood: {request.mood_text}")
+        
+        # Analyze sentiment
+        sentiment = coordinator.motivation_agent.analyze_sentiment(request.mood_text)
+        
+        # Get motivation message
+        motivation = coordinator.motivation_agent.get_motivation_message(
+            mood=sentiment["mood"], 
+            progress_percentage=0.5
+        )
+        
+        return {
+            "sentiment": sentiment,
+            "motivation": motivation
+        }
+    except Exception as e:
+        print(f"[ERROR] Exception in get_motivation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Legacy endpoint for simple plan generation (for homepage demo)
+@app.post("/api/generate-plan")
+async def generate_study_plan_legacy(request: StudyGoal):
+    """Legacy endpoint - generates simple 3-day plan"""
+    try:
+        print(f"[DEBUG] Received legacy request for goal: '{request.goal}'")
+        
+        # Import here to avoid circular imports
+        from simple_agents import generate_schedule, find_resource
+        
+        # Generate schedule using the async function
+        print("[DEBUG] Calling generate_schedule...")
+        schedule_items = await generate_schedule(request.goal)
+        print(f"[DEBUG] Generated schedule items: {schedule_items}")
+        
+        # Find resource using the async function
+        print("[DEBUG] Calling find_resource...")
+        resource_info = await find_resource(request.goal)
+        print(f"[DEBUG] Found resource: {resource_info}")
+        
+        # Ensure we return a proper response structure
+        response_data = {
+            "schedule": schedule_items if schedule_items else [
+                f"Day 1: Introduction to {request.goal}",
+                f"Day 2: Core concepts and practice", 
+                f"Day 3: Advanced topics and review"
+            ],
+            "resource": resource_info if resource_info else {
+                "topic": request.goal,
+                "link": f"https://www.google.com/search?q={request.goal.replace(' ', '+')}"
+            }
+        }
+        
+        print(f"[DEBUG] Final response: {response_data}")
+        return response_data
+        
+    except Exception as e:
+        print(f"[ERROR] Exception in generate_study_plan_legacy: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Return a structured error response instead of raising HTTPException
+        return {
+            "schedule": [
+                f"Day 1: Begin learning {request.goal}",
+                f"Day 2: Practice {request.goal} fundamentals",
+                f"Day 3: Review and apply {request.goal} concepts"
+            ],
+            "resource": {
+                "topic": f"{request.goal} - Basic Resources",
+                "link": f"https://www.google.com/search?q={request.goal.replace(' ', '+')}"
+            },
+            "error": f"Generated fallback plan due to error: {str(e)}"
+        }
+
 @app.get("/api/user/profile")
 async def get_user_profile(current_user: dict = Depends(get_current_user)):
     """Get current user profile (protected endpoint)"""
     return {"status": "success", "user": current_user}
-
-@app.post("/api/logout")
-async def logout_user():
-    """Logout user (client should delete token)"""
-    return {"status": "success", "message": "Logged out successfully"}
-
-@app.post("/api/login")
-async def login_user(login_data: UserLogin):
-    """Authenticate user login"""
-    try:
-        result = coordinator.security_agent.authenticate_user(
-            email=login_data.email,
-            password=login_data.password
-        )
-        
-        if result["status"] == "error":
-            raise HTTPException(status_code=401, detail=result["message"])
-        
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/user/{user_id}")
-async def get_user_profile(user_id: str):
-    """Get user profile information"""
-    try:
-        user = coordinator.security_agent.get_user_by_id(user_id)
-        
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        return {"status": "success", "user": user}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")
 async def root():
