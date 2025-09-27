@@ -128,6 +128,50 @@ class DatabaseManager:
             )
         ''')
         
+        # Study sessions table - for detailed session tracking
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS study_sessions (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                plan_id TEXT,
+                subject TEXT,
+                topic TEXT,
+                duration_minutes INTEGER,
+                completed BOOLEAN DEFAULT 0,
+                notes TEXT,
+                created_at TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id),
+                FOREIGN KEY (plan_id) REFERENCES study_plans (id)
+            )
+        ''')
+        
+        # User achievements table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_achievements (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                achievement_type TEXT,
+                description TEXT,
+                earned_at TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
+        # Daily progress table - for chart data
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS daily_progress (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                date TEXT,
+                hours_studied REAL,
+                topics_completed INTEGER,
+                efficiency_score REAL,
+                mood_rating INTEGER,
+                created_at TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
         conn.commit()
         conn.close()
 
@@ -912,6 +956,204 @@ class MotivationCoachAgent:
             "encouragement": f"You're {progress_percentage:.1%} through your journey. Keep it up!"
         }
 
+class ProgressAgent:
+    """Handles user progress tracking, analytics, and progress visualization"""
+    
+    def __init__(self):
+        self.db = DatabaseManager()
+    
+    def record_study_session(self, user_id: str, plan_id: str, subject: str, 
+                           topic: str, duration_minutes: int, completed: bool = True, 
+                           notes: str = "") -> Dict:
+        """Record a completed study session"""
+        conn = None
+        try:
+            session_id = hashlib.md5(f"{user_id}_{datetime.now().isoformat()}".encode()).hexdigest()
+            
+            conn = sqlite3.connect(self.db.db_path, timeout=30.0)
+            conn.execute('PRAGMA journal_mode=WAL')
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO study_sessions (id, user_id, plan_id, subject, topic, 
+                                          duration_minutes, completed, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (session_id, user_id, plan_id, subject, topic, duration_minutes, 
+                  completed, notes, datetime.now().isoformat()))
+            
+            # Update daily progress
+            today = datetime.now().date().isoformat()
+            self._update_daily_progress(cursor, user_id, today, duration_minutes/60.0, 1 if completed else 0)
+            
+            conn.commit()
+            return {"status": "success", "session_id": session_id, "message": "Study session recorded"}
+            
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            return {"status": "error", "message": f"Failed to record session: {str(e)}"}
+        finally:
+            if conn:
+                conn.close()
+    
+    def _update_daily_progress(self, cursor, user_id: str, date: str, hours: float, topics: int):
+        """Internal method to update daily progress"""
+        # Check if entry exists for today
+        cursor.execute('''
+            SELECT id, hours_studied, topics_completed FROM daily_progress 
+            WHERE user_id = ? AND date = ?
+        ''', (user_id, date))
+        
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Update existing entry
+            new_hours = existing[1] + hours
+            new_topics = existing[2] + topics
+            cursor.execute('''
+                UPDATE daily_progress 
+                SET hours_studied = ?, topics_completed = ?, created_at = ?
+                WHERE id = ?
+            ''', (new_hours, new_topics, datetime.now().isoformat(), existing[0]))
+        else:
+            # Create new entry
+            progress_id = hashlib.md5(f"{user_id}_{date}".encode()).hexdigest()
+            cursor.execute('''
+                INSERT INTO daily_progress (id, user_id, date, hours_studied, 
+                                          topics_completed, efficiency_score, mood_rating, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (progress_id, user_id, date, hours, topics, 0.8, 5, datetime.now().isoformat()))
+    
+    def get_user_progress_data(self, user_id: str, days: int = 30) -> Dict:
+        """Get comprehensive progress data for charts"""
+        conn = None
+        try:
+            conn = sqlite3.connect(self.db.db_path, timeout=30.0)
+            cursor = conn.cursor()
+            
+            # Get daily progress for the last N days
+            cursor.execute('''
+                SELECT date, hours_studied, topics_completed, efficiency_score, mood_rating
+                FROM daily_progress 
+                WHERE user_id = ? 
+                ORDER BY date DESC 
+                LIMIT ?
+            ''', (user_id, days))
+            
+            daily_data = cursor.fetchall()
+            
+            # Get total statistics
+            cursor.execute('''
+                SELECT 
+                    COUNT(*) as total_sessions,
+                    SUM(duration_minutes) as total_minutes,
+                    AVG(duration_minutes) as avg_session_length
+                FROM study_sessions 
+                WHERE user_id = ? AND completed = 1
+            ''', (user_id,))
+            
+            stats = cursor.fetchone()
+            
+            # Get subject breakdown
+            cursor.execute('''
+                SELECT subject, COUNT(*) as sessions, SUM(duration_minutes) as minutes
+                FROM study_sessions 
+                WHERE user_id = ? AND completed = 1
+                GROUP BY subject
+            ''', (user_id,))
+            
+            subjects = cursor.fetchall()
+            
+            return {
+                "status": "success",
+                "daily_progress": [
+                    {
+                        "date": row[0],
+                        "hours_studied": row[1],
+                        "topics_completed": row[2],
+                        "efficiency_score": row[3],
+                        "mood_rating": row[4]
+                    } for row in daily_data
+                ],
+                "statistics": {
+                    "total_sessions": stats[0] or 0,
+                    "total_hours": round((stats[1] or 0) / 60, 2),
+                    "avg_session_length": round((stats[2] or 0), 1)
+                },
+                "subjects": [
+                    {
+                        "subject": row[0],
+                        "sessions": row[1],
+                        "hours": round(row[2] / 60, 2)
+                    } for row in subjects
+                ]
+            }
+            
+        except Exception as e:
+            return {"status": "error", "message": f"Failed to get progress data: {str(e)}"}
+        finally:
+            if conn:
+                conn.close()
+    
+    def add_achievement(self, user_id: str, achievement_type: str, description: str) -> Dict:
+        """Add an achievement for the user"""
+        conn = None
+        try:
+            achievement_id = hashlib.md5(f"{user_id}_{achievement_type}_{datetime.now().isoformat()}".encode()).hexdigest()
+            
+            conn = sqlite3.connect(self.db.db_path, timeout=30.0)
+            conn.execute('PRAGMA journal_mode=WAL')
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO user_achievements (id, user_id, achievement_type, description, earned_at)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (achievement_id, user_id, achievement_type, description, datetime.now().isoformat()))
+            
+            conn.commit()
+            return {"status": "success", "achievement_id": achievement_id, "message": "Achievement unlocked!"}
+            
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            return {"status": "error", "message": f"Failed to add achievement: {str(e)}"}
+        finally:
+            if conn:
+                conn.close()
+    
+    def get_user_achievements(self, user_id: str) -> Dict:
+        """Get all achievements for a user"""
+        conn = None
+        try:
+            conn = sqlite3.connect(self.db.db_path, timeout=30.0)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT achievement_type, description, earned_at
+                FROM user_achievements 
+                WHERE user_id = ? 
+                ORDER BY earned_at DESC
+            ''', (user_id,))
+            
+            achievements = cursor.fetchall()
+            
+            return {
+                "status": "success",
+                "achievements": [
+                    {
+                        "type": row[0],
+                        "description": row[1],
+                        "earned_at": row[2]
+                    } for row in achievements
+                ]
+            }
+            
+        except Exception as e:
+            return {"status": "error", "message": f"Failed to get achievements: {str(e)}"}
+        finally:
+            if conn:
+                conn.close()
+
 class CoordinatorAgent:
     """Coordinates between all agents and manages the overall system"""
     
@@ -920,6 +1162,7 @@ class CoordinatorAgent:
         self.schedule_agent = ScheduleCreatorAgent()
         self.resource_agent = ResourceFinderAgent()
         self.motivation_agent = MotivationCoachAgent()
+        self.progress_agent = ProgressAgent()
     
     async def generate_complete_study_plan(self, user_id: str, subject: str, 
                                          available_hours_per_day: int,

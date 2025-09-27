@@ -291,6 +291,9 @@ async function generateAdvancedPlan() {
         
         displayAdvancedResults(data, learningStyle);
         
+        // Record achievement for generating a plan
+        await addAchievement('plan_generated', `Generated advanced study plan for ${subject}`);
+        
     } catch (error) {
         console.error('Error generating advanced plan:', error);
         showError('advanced-results', `Failed to generate advanced plan: ${error.message}`);
@@ -797,6 +800,66 @@ function showError(elementId, message) {
         `;
     } else {
         console.error('Error element not found:', elementId, 'Message:', message);
+    }
+}
+
+// Progress tracking utilities
+async function recordStudySession(subject, topic, durationMinutes, notes = '') {
+    if (!authToken) {
+        console.log('No auth token, skipping session recording');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/record-session`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                plan_id: `auto-${Date.now()}`,
+                subject: subject,
+                topic: topic,
+                duration_minutes: durationMinutes,
+                completed: true,
+                notes: notes || `Auto-recorded: ${subject} - ${topic}`
+            })
+        });
+
+        if (response.ok) {
+            console.log('Study session recorded successfully');
+            return await response.json();
+        } else {
+            console.error('Failed to record session:', response.status);
+        }
+    } catch (error) {
+        console.error('Error recording session:', error);
+    }
+}
+
+async function addAchievement(type, description) {
+    if (!authToken) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/achievements`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                achievement_type: type,
+                description: description
+            })
+        });
+
+        if (response.ok) {
+            console.log('Achievement added:', description);
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Error adding achievement:', error);
     }
 }
 

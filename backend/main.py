@@ -75,6 +75,21 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+class StudySessionRequest(BaseModel):
+    plan_id: str
+    subject: str
+    topic: str
+    duration_minutes: int
+    completed: bool = True
+    notes: Optional[str] = ""
+
+class ProgressRequest(BaseModel):
+    days: Optional[int] = 30
+
+class AchievementRequest(BaseModel):
+    achievement_type: str
+    description: str
+
 # JWT Authentication Functions
 def create_access_token(data: dict):
     """Create JWT access token"""
@@ -338,6 +353,83 @@ async def generate_study_plan_legacy(request: StudyGoal):
 async def get_user_profile(current_user: dict = Depends(get_current_user)):
     """Get current user profile (protected endpoint)"""
     return {"status": "success", "user": current_user}
+
+# ===== Progress Tracking Endpoints =====
+@app.post("/api/record-session")
+async def record_study_session(session_data: StudySessionRequest, current_user: dict = Depends(get_current_user)):
+    """Record a completed study session"""
+    try:
+        user_id = current_user["user_id"]
+        result = coordinator.progress_agent.record_study_session(
+            user_id=user_id,
+            plan_id=session_data.plan_id,
+            subject=session_data.subject,
+            topic=session_data.topic,
+            duration_minutes=session_data.duration_minutes,
+            completed=session_data.completed,
+            notes=session_data.notes
+        )
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/progress")
+async def get_user_progress(days: int = 30, current_user: dict = Depends(get_current_user)):
+    """Get user progress data for charts"""
+    try:
+        user_id = current_user["user_id"]
+        result = coordinator.progress_agent.get_user_progress_data(user_id, days)
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/achievements")
+async def add_achievement(achievement_data: AchievementRequest, current_user: dict = Depends(get_current_user)):
+    """Add an achievement for the user"""
+    try:
+        user_id = current_user["user_id"]
+        result = coordinator.progress_agent.add_achievement(
+            user_id=user_id,
+            achievement_type=achievement_data.achievement_type,
+            description=achievement_data.description
+        )
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/achievements")
+async def get_user_achievements(current_user: dict = Depends(get_current_user)):
+    """Get all achievements for the user"""
+    try:
+        user_id = current_user["user_id"]
+        result = coordinator.progress_agent.get_user_achievements(user_id)
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")
 async def root():
