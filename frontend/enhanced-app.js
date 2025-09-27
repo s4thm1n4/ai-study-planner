@@ -164,6 +164,11 @@ function switchTab(tabName) {
         selectedTab.classList.add('active');
         selectedContent.classList.add('active');
         console.log('Tab switched successfully to:', tabName);
+        
+        // Load progress data when progress tab is selected
+        if (tabName === 'progress') {
+            loadProgressData();
+        }
     } else {
         console.error('Tab switching failed for:', tabName);
     }
@@ -861,6 +866,310 @@ async function addAchievement(type, description) {
     } catch (error) {
         console.error('Error adding achievement:', error);
     }
+}
+
+// Progress Dashboard Functions
+let progressCharts = {};
+let progressData = null;
+
+async function loadProgressData() {
+    if (!authToken) {
+        showProgressError('Please log in to view your progress.');
+        return;
+    }
+
+    try {
+        console.log('Loading progress data...');
+        const response = await makeAuthenticatedRequest('/api/progress?days=30');
+
+        if (!response.ok) {
+            throw new Error('Failed to load progress data');
+        }
+
+        progressData = await response.json();
+        console.log('Progress data loaded:', progressData);
+        
+        updateProgressStatistics();
+        createProgressCharts();
+        loadAchievements();
+
+    } catch (error) {
+        console.error('Error loading progress data:', error);
+        showProgressError('Failed to load progress data. Please try again.');
+    }
+}
+
+function showProgressError(message) {
+    const container = document.getElementById('progress-error-container');
+    if (container) {
+        container.innerHTML = `<div class="progress-error">${message}</div>`;
+    }
+}
+
+function updateProgressStatistics() {
+    if (!progressData) return;
+
+    const stats = progressData.statistics || {};
+    document.getElementById('progress-total-hours').textContent = stats.total_hours || 0;
+    document.getElementById('progress-total-sessions').textContent = stats.total_sessions || 0;
+    document.getElementById('progress-avg-session').textContent = stats.avg_session_length || 0;
+}
+
+async function loadAchievements() {
+    if (!authToken) return;
+
+    try {
+        const response = await makeAuthenticatedRequest('/api/achievements');
+        if (response.ok) {
+            const data = await response.json();
+            const achievementCount = data.achievements ? data.achievements.length : 0;
+            document.getElementById('progress-achievements').textContent = achievementCount;
+        }
+    } catch (error) {
+        console.error('Error loading achievements:', error);
+    }
+}
+
+function createProgressCharts() {
+    if (!progressData) return;
+
+    createDailyHoursChart();
+    createSubjectsChart();
+    createTopicsChart();
+    createEfficiencyChart();
+}
+
+function createDailyHoursChart() {
+    const ctx = document.getElementById('progress-daily-hours-chart');
+    if (!ctx) return;
+
+    // Destroy existing chart if it exists
+    if (progressCharts.dailyHours) {
+        progressCharts.dailyHours.destroy();
+    }
+
+    const data = progressData.daily_progress || [];
+    const labels = data.map(d => new Date(d.date).toLocaleDateString()).reverse();
+    const hours = data.map(d => d.hours_studied).reverse();
+
+    progressCharts.dailyHours = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Hours Studied',
+                data: hours,
+                borderColor: 'rgb(102, 126, 234)',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Hours'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createSubjectsChart() {
+    const ctx = document.getElementById('progress-subjects-chart');
+    if (!ctx) return;
+
+    if (progressCharts.subjects) {
+        progressCharts.subjects.destroy();
+    }
+
+    const subjects = progressData.subjects || [];
+    if (subjects.length === 0) {
+        // Show placeholder
+        const chartContainer = ctx.parentElement;
+        chartContainer.innerHTML = '<div class="progress-loading">No subject data available</div>';
+        return;
+    }
+
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+    ];
+
+    progressCharts.subjects = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: subjects.map(s => s.subject),
+            datasets: [{
+                data: subjects.map(s => s.hours),
+                backgroundColor: colors.slice(0, subjects.length),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function createTopicsChart() {
+    const ctx = document.getElementById('progress-topics-chart');
+    if (!ctx) return;
+
+    if (progressCharts.topics) {
+        progressCharts.topics.destroy();
+    }
+
+    const data = progressData.daily_progress || [];
+    const labels = data.map(d => new Date(d.date).toLocaleDateString()).reverse();
+    const topics = data.map(d => d.topics_completed).reverse();
+
+    progressCharts.topics = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Topics Completed',
+                data: topics,
+                backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                borderColor: 'rgb(118, 75, 162)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Topics'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createEfficiencyChart() {
+    const ctx = document.getElementById('progress-efficiency-chart');
+    if (!ctx) return;
+
+    if (progressCharts.efficiency) {
+        progressCharts.efficiency.destroy();
+    }
+
+    // Sample efficiency metrics
+    progressCharts.efficiency = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Focus', 'Completion', 'Consistency', 'Engagement', 'Growth'],
+            datasets: [{
+                label: 'Study Metrics',
+                data: [85, 90, 78, 88, 92],
+                borderColor: 'rgb(102, 126, 234)',
+                backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                pointBackgroundColor: 'rgb(102, 126, 234)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(102, 126, 234)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { display: true },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            }
+        }
+    });
+}
+
+function recordQuickSession() {
+    const subject = prompt('Enter subject:');
+    if (!subject) return;
+    
+    const topic = prompt('Enter topic:');
+    if (!topic) return;
+    
+    const duration = prompt('Enter duration in minutes:');
+    if (!duration || isNaN(duration)) {
+        alert('Please enter a valid number for duration.');
+        return;
+    }
+    
+    recordStudySession(subject, topic, parseInt(duration), 'Manually recorded session');
+    
+    // Refresh data after a short delay
+    setTimeout(() => {
+        refreshProgressData();
+    }, 1000);
+}
+
+function refreshProgressData() {
+    loadProgressData();
+}
+
+function downloadProgressReport() {
+    if (!progressData) {
+        alert('No progress data available to download.');
+        return;
+    }
+
+    const report = generateProgressReport();
+    const blob = new Blob([report], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `study-progress-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function generateProgressReport() {
+    const stats = progressData.statistics || {};
+    const subjects = progressData.subjects || [];
+    const dailyData = progressData.daily_progress || [];
+    
+    return `
+STUDY PROGRESS REPORT
+Generated: ${new Date().toLocaleDateString()}
+
+OVERALL STATISTICS
+==================
+Total Hours Studied: ${stats.total_hours || 0}
+Total Sessions: ${stats.total_sessions || 0}
+Average Session Length: ${stats.avg_session_length || 0} minutes
+
+SUBJECT BREAKDOWN
+================
+${subjects.map(s => `${s.subject}: ${s.hours} hours (${s.sessions} sessions)`).join('\n')}
+
+RECENT DAILY PROGRESS
+====================
+${dailyData.slice(0, 10).map(d => 
+    `${d.date}: ${d.hours_studied} hours, ${d.topics_completed} topics`
+).join('\n')}
+    `.trim();
 }
 
 // Add this function at the top of enhanced-app.js for debugging
