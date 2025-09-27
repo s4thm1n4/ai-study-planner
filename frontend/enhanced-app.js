@@ -406,7 +406,7 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                 <div class="plan-overview">
                     <div class="plan-stat">
                         <div class="plan-stat-value">${plan.subject}</div>
-                        <div class="plan-stat-label">Subject</div>
+                        <div class="plan-stat-label">Subject${plan.nlp_feedback ? ' <span style="font-size: 0.8em; color: #666;">(' + plan.nlp_feedback + ')</span>' : ''}</div>
                     </div>
                     <div class="plan-stat">
                         <div class="plan-stat-value">${plan.total_hours}h</div>
@@ -540,7 +540,7 @@ async function findResources() {
         const data = await response.json();
         console.log('Resources found:', data);
         
-        displayResourceResults(data.resources || []);
+        displayResourceResults(data.resources || [], data.search_feedback);
         
     } catch (error) {
         console.error('Error finding resources:', error);
@@ -551,7 +551,7 @@ async function findResources() {
     }
 }
 
-function displayResourceResults(resources) {
+function displayResourceResults(resources, searchFeedback) {
     const resultsDiv = document.getElementById('resources-results');
     if (!resultsDiv) return;
     
@@ -614,6 +614,7 @@ function displayResourceResults(resources) {
         <div class="results">
             <div class="results-header">
                 <h3>📚 Found ${resources.length} Resource${resources.length !== 1 ? 's' : ''}</h3>
+                ${searchFeedback ? `<p style="font-size: 0.9em; color: #666; margin-top: 0.5rem; font-style: italic;">${searchFeedback}</p>` : ''}
             </div>
             <div class="results-content">
                 <div class="resources-grid">
