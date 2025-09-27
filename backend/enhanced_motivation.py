@@ -243,6 +243,50 @@ class AdvancedSentimentAnalyzer:
             if any(pattern in text for pattern in patterns):
                 detected[context] = True
         return detected
+    
+    def generate_personalized_quote_sync(self, mood_profile: MoodProfile, subject: str = None, user_input: str = None) -> MotivationContent:
+        """Generate a personalized motivational quote based on mood and subject (using processed subject)"""
+        
+        # Create mood-appropriate content using processed subject
+        if mood_profile.energy_level > 0.7:
+            if subject:
+                content = f"Your enthusiasm for {subject} is inspiring! Channel that energy into deep, focused learning."
+            else:
+                content = "Your high energy is perfect for tackling challenging concepts! Dive in with confidence."
+            author = "Energy Coach"
+            category = "high_energy"
+            
+        elif mood_profile.stress_level > 0.7:
+            if subject:
+                content = f"Take a deep breath. {subject} can be challenging, but we'll break it down step by step."
+            else:
+                content = "Stress is normal when learning something new. Break it down into smaller, manageable pieces."
+            author = "Stress Management Guide"
+            category = "stress_relief"
+            
+        elif mood_profile.confidence_level < 0.4:
+            if subject:
+                content = f"Every expert in {subject} started where you are now. Trust the learning process."
+            else:
+                content = "Confidence grows with practice. Every small step forward is progress worth celebrating."
+            author = "Confidence Builder"
+            category = "confidence_boost"
+            
+        else:
+            if subject:
+                content = f"You're on a great learning path with {subject}. Stay consistent and trust your progress."
+            else:
+                content = "Steady progress and consistent effort lead to mastery. Keep moving forward!"
+            author = "Learning Mentor"
+            category = "general_encouragement"
+        
+        return MotivationContent(
+            content=content,
+            author=author,
+            category=category,
+            mood_targets=[mood_profile.primary_mood],
+            effectiveness_score=0.8
+        )
 
 class DynamicContentGenerator:
     """Generates fresh motivational content using AI and external APIs"""

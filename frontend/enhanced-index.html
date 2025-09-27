@@ -314,6 +314,89 @@
             transform: none;
         }
 
+        /* Mood Selector Styles */
+        .mood-selector {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .mood-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .mood-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .mood-btn.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mood-emoji {
+            font-size: 1.5rem;
+            animation: bounceIn 0.6s ease-out;
+            transition: transform 0.2s ease;
+        }
+
+        .mood-btn:hover .mood-emoji {
+            transform: scale(1.2);
+            animation: pulse 1s infinite;
+        }
+
+        .mood-btn.selected .mood-emoji {
+            animation: celebrate 0.8s ease-out;
+        }
+
+        .mood-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mood-btn.selected .mood-label {
+            color: white;
+        }
+
+        /* Mood Animations */
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-5deg); }
+            75% { transform: scale(1.2) rotate(5deg); }
+        }
+
         /* Results Section */
         .results {
             margin-top: 2rem;
@@ -1148,6 +1231,36 @@
                                     <option value="kinesthetic">Kinesthetic (Hands-on, Interactive)</option>
                                 </select>
                                 <small class="input-help">Choose your preferred learning style for better resource recommendations</small>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>
+                                    <i class="fas fa-smile"></i> How are you feeling today? (Optional)
+                                </label>
+                                <div class="mood-selector">
+                                    <button type="button" class="mood-btn" data-mood="excited" title="Excited & Motivated">
+                                        <span class="mood-emoji">🚀</span>
+                                        <span class="mood-label">Excited</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="focused" title="Focused & Ready">
+                                        <span class="mood-emoji">🎯</span>
+                                        <span class="mood-label">Focused</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="neutral" title="Neutral & Calm">
+                                        <span class="mood-emoji">😌</span>
+                                        <span class="mood-label">Neutral</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="stressed" title="Stressed & Overwhelmed">
+                                        <span class="mood-emoji">😰</span>
+                                        <span class="mood-label">Stressed</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="tired" title="Tired & Low Energy">
+                                        <span class="mood-emoji">😴</span>
+                                        <span class="mood-label">Tired</span>
+                                    </button>
+                                </div>
+                                <small class="input-help">Your mood helps us personalize the motivational message</small>
+                                <input type="hidden" id="selectedMood" value="">
                             </div>
                         </div>
                         

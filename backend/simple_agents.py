@@ -1236,12 +1236,20 @@ class CoordinatorAgent:
         self.schedule_agent = ScheduleCreatorAgent()
         self.resource_agent = ResourceFinderAgent()
         self.motivation_agent = MotivationCoachAgent()
+        # Initialize enhanced motivation agent for mood-based responses
+        try:
+            from enhanced_motivation import AdvancedSentimentAnalyzer
+            self.enhanced_motivation_agent = AdvancedSentimentAnalyzer()
+        except ImportError:
+            print("[DEBUG] Enhanced motivation not available")
+            self.enhanced_motivation_agent = None
     
     async def generate_complete_study_plan(self, user_id: str, subject: str, 
                                          available_hours_per_day: int,
                                          total_days: int,
                                          learning_style: str = "mixed",
-                                         knowledge_level: str = "beginner") -> Dict:
+                                         knowledge_level: str = "beginner",
+                                         user_mood: str = "neutral") -> Dict:
         """Generate a complete study plan using all agents"""
         
         try:
@@ -1256,8 +1264,40 @@ class CoordinatorAgent:
             )
             study_plan.resources = resources
             
-            # 3. Get initial motivation
-            motivation = self.motivation_agent.get_motivation_message("positive", 0.0)
+            # 3. Get personalized motivation based on user mood (use processed subject)
+            processed_subject = study_plan.subject  # Use the cleaned subject from NLP processing
+            if self.enhanced_motivation_agent:
+                try:
+                    # Use enhanced motivation with processed subject and user mood
+                    # First analyze the mood
+                    mood_profile = self.enhanced_motivation_agent.analyze_mood(
+                        text=f"I'm feeling {user_mood} about learning {processed_subject}",
+                        context={"subject": processed_subject, "user_mood": user_mood}
+                    )
+                    # Generate personalized quote
+                    motivation_content = self.enhanced_motivation_agent.generate_personalized_quote_sync(
+                        mood_profile=mood_profile,
+                        subject=processed_subject,
+                        user_input=f"I'm feeling {user_mood} about learning {processed_subject}"
+                    )
+                    # Convert to expected format
+                    motivation = {
+                        "quote": {
+                            "content": motivation_content.content,
+                            "author": motivation_content.author
+                        },
+                        "encouragement": f"Keep going! Your progress in {processed_subject} matters."
+                    }
+                except Exception as e:
+                    print(f"[DEBUG] Enhanced motivation failed, using fallback: {e}")
+                    motivation = self._get_mood_based_motivation(user_mood, processed_subject)
+            else:
+                motivation = self._get_mood_based_motivation(user_mood, processed_subject)
+            
+            # Debug logging for hour calculation
+            print(f"[HOUR DEBUG] Daily hours: {study_plan.daily_hours}")
+            print(f"[HOUR DEBUG] Total hours: {study_plan.total_hours}")
+            print(f"[HOUR DEBUG] Calculated: {study_plan.daily_hours} * days = total")
             
             return {
                 "status": "success",
@@ -1268,7 +1308,9 @@ class CoordinatorAgent:
                     "difficulty": study_plan.difficulty,
                     "schedule": study_plan.schedule,
                     "resources": study_plan.resources,
-                    "motivation": motivation
+                    "motivation": motivation,
+                    "original_subject": getattr(study_plan, 'original_subject', None),
+                    "nlp_feedback": getattr(study_plan, 'nlp_feedback', None)
                 }
             }
             
@@ -1277,6 +1319,40 @@ class CoordinatorAgent:
                 "status": "error",
                 "message": f"Failed to generate study plan: {str(e)}"
             }
+    
+    def _get_mood_based_motivation(self, user_mood: str, subject: str):
+        """Generate mood-specific motivation messages"""
+        mood_messages = {
+            "excited": {
+                "quote": f"Your excitement for {subject} is contagious! Channel that energy into focused learning sessions.",
+                "author": "Enthusiasm Coach"
+            },
+            "focused": {
+                "quote": f"Perfect mindset for learning {subject}! Your focus will be your superpower today.",
+                "author": "Concentration Expert"
+            },
+            "neutral": {
+                "quote": f"Starting with a calm mind is perfect for {subject}. Let's build momentum together!",
+                "author": "Learning Strategist"
+            },
+            "stressed": {
+                "quote": f"Take a deep breath. {subject} might seem overwhelming, but we'll break it down into manageable steps.",
+                "author": "Stress Management Coach"
+            },
+            "tired": {
+                "quote": f"Rest when needed, but don't give up on {subject}. Small steps lead to big achievements!",
+                "author": "Wellness Guide"
+            }
+        }
+        
+        mood_data = mood_messages.get(user_mood, mood_messages["neutral"])
+        return {
+            "quote": {
+                "content": mood_data["quote"],
+                "author": mood_data["author"]
+            },
+            "encouragement": f"Remember: every expert was once a beginner in {subject}. You're on the right path!"
+        }
 
 # Initialize the coordinator agent
 coordinator = CoordinatorAgent()

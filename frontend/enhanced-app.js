@@ -248,6 +248,7 @@ async function generateAdvancedPlan() {
     
     const knowledgeLevel = document.getElementById('knowledgeLevel')?.value || 'beginner';
     const learningStyle = document.getElementById('learningStyle')?.value || 'mixed';
+    const selectedMood = document.getElementById('selectedMood')?.value || 'neutral';
     
     if (!subject) {
         showError('advanced-results', 'Please enter a subject you want to learn!');
@@ -268,7 +269,7 @@ async function generateAdvancedPlan() {
         showEnhancedLoading(loadingDiv, resultsDiv, 'Generating your personalized study plan...');
         if (generateBtn) generateBtn.disabled = true;
         
-        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle });
+        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle, selectedMood });
         
         const response = await makeAuthenticatedRequest('/api/generate-advanced-plan', {
             method: 'POST',
@@ -277,6 +278,7 @@ async function generateAdvancedPlan() {
                 available_hours_per_day: dailyHours,
                 total_days: totalDays,
                 knowledge_level: knowledgeLevel,
+                user_mood: selectedMood,
                 learning_style: learningStyle
             })
         });
@@ -406,7 +408,7 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                 <div class="plan-overview">
                     <div class="plan-stat">
                         <div class="plan-stat-value">${plan.subject}</div>
-                        <div class="plan-stat-label">Subject</div>
+                        <div class="plan-stat-label">Subject${plan.nlp_feedback ? ' <span style="font-size: 0.8em; color: #666;">(' + plan.nlp_feedback + ')</span>' : ''}</div>
                     </div>
                     <div class="plan-stat">
                         <div class="plan-stat-value">${plan.total_hours}h</div>
@@ -540,7 +542,7 @@ async function findResources() {
         const data = await response.json();
         console.log('Resources found:', data);
         
-        displayResourceResults(data.resources || []);
+        displayResourceResults(data.resources || [], data.search_feedback);
         
     } catch (error) {
         console.error('Error finding resources:', error);
@@ -551,7 +553,7 @@ async function findResources() {
     }
 }
 
-function displayResourceResults(resources) {
+function displayResourceResults(resources, searchFeedback) {
     const resultsDiv = document.getElementById('resources-results');
     if (!resultsDiv) return;
     
@@ -614,6 +616,7 @@ function displayResourceResults(resources) {
         <div class="results">
             <div class="results-header">
                 <h3>📚 Found ${resources.length} Resource${resources.length !== 1 ? 's' : ''}</h3>
+                ${searchFeedback ? `<p style="font-size: 0.9em; color: #666; margin-top: 0.5rem; font-style: italic;">${searchFeedback}</p>` : ''}
             </div>
             <div class="results-content">
                 <div class="resources-grid">
@@ -855,6 +858,41 @@ function showError(elementId, message) {
         console.error('Error element not found:', elementId, 'Message:', message);
     }
 }
+
+// Mood Selection Functionality
+function initializeMoodSelector() {
+    const moodButtons = document.querySelectorAll('.mood-btn');
+    const selectedMoodInput = document.getElementById('selectedMood');
+    
+    moodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove selected class from all buttons
+            moodButtons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Add selected class to clicked button
+            this.classList.add('selected');
+            
+            // Update hidden input value
+            const mood = this.getAttribute('data-mood');
+            selectedMoodInput.value = mood;
+            
+            console.log('Mood selected:', mood);
+            
+            // Add celebratory animation
+            const emoji = this.querySelector('.mood-emoji');
+            emoji.style.animation = 'none';
+            setTimeout(() => {
+                emoji.style.animation = 'celebrate 0.8s ease-out';
+            }, 10);
+        });
+    });
+}
+
+// Initialize mood selector when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for the content to load
+    setTimeout(initializeMoodSelector, 500);
+});
 
 // Add this function at the top of enhanced-app.js for debugging
 function debugAuthState() {
