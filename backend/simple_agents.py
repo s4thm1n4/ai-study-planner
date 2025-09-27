@@ -273,12 +273,20 @@ class ScheduleCreatorAgent:
                                    knowledge_level: str = "beginner") -> StudyPlan:
         """Create a personalized study schedule"""
         
-        # Get subject information from database
-        subject_info = self.subjects_db.get(subject, {
-            "estimated_hours": 20,
-            "difficulty": "intermediate",
-            "topics": ["Introduction", "Core Concepts", "Advanced Topics", "Practice"]
-        })
+        # Try to get subject information from database first
+        subject_info = self.subjects_db.get(subject)
+        
+        # If subject not in database, generate dynamic content using AI
+        if not subject_info and GENAI_AVAILABLE:
+            subject_info = self._generate_subject_info_with_ai(subject, knowledge_level, total_days)
+        
+        # Fallback to generic structure if AI not available or fails
+        if not subject_info:
+            subject_info = {
+                "estimated_hours": max(10, available_hours_per_day * total_days),
+                "difficulty": "intermediate",
+                "topics": self._generate_dynamic_topics(subject, total_days)
+            }
         
         total_available_hours = available_hours_per_day * total_days
         estimated_hours = subject_info["estimated_hours"]
@@ -291,16 +299,19 @@ class ScheduleCreatorAgent:
         else:
             adjusted_hours = estimated_hours
         
+        # Ensure we don't exceed available time
+        final_hours = min(adjusted_hours, total_available_hours)
+        
         # Create detailed schedule
         schedule = self._generate_detailed_schedule(
-            subject, subject_info, adjusted_hours, 
+            subject, subject_info, final_hours, 
             available_hours_per_day, total_days
         )
         
         return StudyPlan(
             user_id=user_id,
             subject=subject,
-            total_hours=adjusted_hours,
+            total_hours=final_hours,
             daily_hours=available_hours_per_day,
             difficulty=subject_info.get("difficulty", "intermediate"),
             start_date=datetime.now().isoformat(),
@@ -350,6 +361,96 @@ class ScheduleCreatorAgent:
             schedule.append(day_plan)
         
         return schedule
+    
+    def _generate_subject_info_with_ai(self, subject: str, knowledge_level: str, total_days: int) -> Dict:
+        """Generate subject information using AI when available"""
+        try:
+            prompt = f"""
+            Create a comprehensive study plan structure for the subject: "{subject}"
+            
+            Requirements:
+            - Knowledge level: {knowledge_level}
+            - Total study days: {total_days}
+            - Provide estimated total hours needed
+            - Create specific, actionable topics that progress logically
+            - Determine appropriate difficulty level
+            
+            Return a JSON structure with:
+            {{
+                "estimated_hours": <number>,
+                "difficulty": "<beginner|intermediate|advanced>",
+                "topics": ["Topic 1", "Topic 2", "Topic 3", ...]
+            }}
+            
+            Make topics specific to {subject} and appropriate for {knowledge_level} level.
+            Create {min(total_days, 8)} main topics that can be studied progressively.
+            """
+            
+            response = self.model.generate_content(prompt)
+            
+            # Try to parse JSON from response
+            import re
+            json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+            if json_match:
+                try:
+                    return json.loads(json_match.group())
+                except json.JSONDecodeError:
+                    pass
+            
+            # If JSON parsing fails, create structured data from text
+            return self._extract_info_from_text(response.text, subject)
+            
+        except Exception as e:
+            print(f"AI generation failed: {e}")
+            return None
+    
+    def _extract_info_from_text(self, text: str, subject: str) -> Dict:
+        """Extract structured information from AI response text"""
+        import re
+        lines = text.strip().split('\n')
+        topics = []
+        
+        for line in lines:
+            line = line.strip()
+            if any(starter in line.lower() for starter in ['day', 'week', 'topic', 'chapter', 'learn', 'study']):
+                # Clean and extract topic
+                topic = re.sub(r'^[\d\.\-\*\s]*', '', line)  # Remove numbering
+                topic = re.sub(r':\s*.*$', '', topic)  # Remove descriptions after colon
+                if len(topic) > 3 and topic not in topics:
+                    topics.append(topic[:50])  # Limit length
+        
+        # If no topics found, generate based on subject
+        if not topics:
+            topics = self._generate_dynamic_topics(subject, 6)
+        
+        return {
+            "estimated_hours": len(topics) * 3,  # 3 hours per topic
+            "difficulty": "intermediate",
+            "topics": topics[:8]  # Limit to 8 topics
+        }
+    
+    def _generate_dynamic_topics(self, subject: str, total_days: int) -> List[str]:
+        """Generate dynamic topics based on subject when AI is not available"""
+        # Create intelligent topic progression based on common learning patterns
+        topics = []
+        
+        # Basic structure for any subject
+        base_topics = [
+            f"Introduction to {subject}",
+            f"Fundamental Concepts of {subject}",
+            f"Core Principles in {subject}",
+            f"Practical Applications of {subject}",
+            f"Advanced Topics in {subject}",
+            f"Best Practices and Techniques",
+            f"Real-world Examples and Case Studies",
+            f"Review and Practice"
+        ]
+        
+        # Adjust number of topics based on available days
+        num_topics = min(len(base_topics), max(3, total_days))
+        topics = base_topics[:num_topics]
+        
+        return topics
 
 class ResourceFinderAgent:
     """Resource finder with basic search capabilities"""
@@ -393,28 +494,82 @@ class ResourceFinderAgent:
     
     def find_best_resources(self, subject: str, difficulty: str = "beginner", 
                           resource_type: str = None, limit: int = 3) -> List[Dict]:
-        """Find best resources using simple matching"""
-        if not self.resources_db:
-            return []
-        
+        """Find best resources using simple matching and generate fallbacks"""
         best_resources = []
         
-        for resource in self.resources_db:
-            # Simple matching based on subject
-            if (subject.lower() in resource.get('subject', '').lower() or
-                subject.lower() in resource.get('title', '').lower() or
-                any(subject.lower() in tag.lower() for tag in resource.get('tags', []))):
-                
-                # Filter by resource type if specified
-                if resource_type is None or resource.get('resource_type') == resource_type:
-                    # Add similarity score for sorting
-                    resource['similarity_score'] = 0.8  # Placeholder score
-                    best_resources.append(resource)
+        # First, try to find resources in the database
+        if self.resources_db:
+            for resource in self.resources_db:
+                # Simple matching based on subject
+                if (subject.lower() in resource.get('subject', '').lower() or
+                    subject.lower() in resource.get('title', '').lower() or
+                    any(subject.lower() in tag.lower() for tag in resource.get('tags', []))):
                     
-                    if len(best_resources) >= limit:
-                        break
+                    # Filter by resource type if specified
+                    if resource_type is None or resource.get('resource_type') == resource_type:
+                        # Add similarity score for sorting
+                        resource['similarity_score'] = 0.9  # High score for database matches
+                        best_resources.append(resource)
+                        
+                        if len(best_resources) >= limit:
+                            break
         
-        return best_resources
+        # If we don't have enough resources, generate fallback resources
+        if len(best_resources) < limit:
+            fallback_resources = self._generate_fallback_resources(subject, difficulty, limit - len(best_resources))
+            best_resources.extend(fallback_resources)
+        
+        return best_resources[:limit]
+    
+    def _generate_fallback_resources(self, subject: str, difficulty: str, count: int) -> List[Dict]:
+        """Generate fallback resources for any subject"""
+        resources = []
+        
+        # Common educational platforms with search URLs
+        platforms = [
+            {
+                "name": "Coursera",
+                "url_template": "https://www.coursera.org/search?query={}",
+                "type": "online_course"
+            },
+            {
+                "name": "YouTube",
+                "url_template": "https://www.youtube.com/results?search_query={}+tutorial",
+                "type": "video"
+            },
+            {
+                "name": "Khan Academy",
+                "url_template": "https://www.khanacademy.org/search?page_search_query={}",
+                "type": "interactive"
+            },
+            {
+                "name": "edX",
+                "url_template": "https://www.edx.org/search?q={}",
+                "type": "online_course"
+            },
+            {
+                "name": "Udemy",
+                "url_template": "https://www.udemy.com/courses/search/?q={}",
+                "type": "online_course"
+            }
+        ]
+        
+        for i, platform in enumerate(platforms[:count]):
+            encoded_subject = subject.replace(" ", "+")
+            resources.append({
+                "id": f"fallback_{i+1}",
+                "title": f"{subject} - {platform['name']} Course",
+                "subject": subject,
+                "resource_type": platform["type"],
+                "difficulty": difficulty,
+                "url": platform["url_template"].format(encoded_subject),
+                "description": f"Comprehensive {subject} learning resources on {platform['name']}",
+                "similarity_score": 0.7,  # Lower score for generated resources
+                "source": platform["name"],
+                "tags": [subject.lower(), "learning", difficulty]
+            })
+        
+        return resources
 
 class MotivationCoachAgent:
     """Provides motivation and tracks progress"""

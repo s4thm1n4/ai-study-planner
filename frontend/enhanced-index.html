@@ -280,6 +280,14 @@
             border-color: #6366f1;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
+        
+        .input-help {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-style: italic;
+        }
 
         .generate-btn {
             width: 100%;
@@ -584,9 +592,11 @@
                                 <label for="advancedSubject">
                                     <i class="fas fa-book"></i> Subject
                                 </label>
-                                <select id="advancedSubject">
-                                    <option value="">Loading subjects...</option>
-                                </select>
+                                <input type="text" id="advancedSubject" placeholder="Enter any subject you want to learn..." list="advancedSubjectList">
+                                <datalist id="advancedSubjectList">
+                                    <!-- Suggestions will be loaded here -->
+                                </datalist>
+                                <small class="input-help">Start typing or select from popular suggestions</small>
                             </div>
                             <div class="input-group">
                                 <label for="dailyHours">
@@ -647,9 +657,11 @@
                                 <label for="resourceSubject">
                                     <i class="fas fa-book-open"></i> Subject
                                 </label>
-                                <select id="resourceSubject">
-                                    <option value="">Select a subject...</option>
-                                </select>
+                                <input type="text" id="resourceSubject" placeholder="Enter any subject to find resources..." list="resourceSubjectList">
+                                <datalist id="resourceSubjectList">
+                                    <!-- Suggestions will be loaded here -->
+                                </datalist>
+                                <small class="input-help">Start typing or select from popular suggestions</small>
                             </div>
                             <div class="input-group">
                                 <label for="resourceType">

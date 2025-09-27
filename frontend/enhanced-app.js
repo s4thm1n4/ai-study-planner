@@ -169,7 +169,7 @@ function switchTab(tabName) {
     }
 }
 
-// Load subjects for dropdowns
+// Load subjects for suggestions
 async function loadSubjects() {
     try {
         console.log('Loading subjects from API...');
@@ -179,24 +179,24 @@ async function loadSubjects() {
             const subjects = await response.json();
             console.log('Subjects loaded successfully:', subjects.length, subjects);
             
-            // Update Advanced Planner dropdown
-            const advancedSubjectSelect = document.getElementById('advancedSubject');
-            if (advancedSubjectSelect) {
-                advancedSubjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+            // Update Advanced Planner datalist for suggestions
+            const advancedSubjectList = document.getElementById('advancedSubjectList');
+            if (advancedSubjectList) {
+                advancedSubjectList.innerHTML = '';
                 subjects.forEach(subject => {
-                    advancedSubjectSelect.innerHTML += `<option value="${subject}">${subject}</option>`;
+                    advancedSubjectList.innerHTML += `<option value="${subject}">`;
                 });
-                console.log('Advanced subject dropdown updated');
+                console.log('Advanced subject suggestions updated');
             } else {
-                console.error('Advanced subject dropdown not found');
+                console.error('Advanced subject suggestions list not found');
             }
             
-            // Update Resources dropdown
-            const resourceSubjectSelect = document.getElementById('resourceSubject');
-            if (resourceSubjectSelect) {
-                resourceSubjectSelect.innerHTML = '<option value="">Select a subject...</option>';
+            // Update Resources datalist for suggestions
+            const resourceSubjectList = document.getElementById('resourceSubjectList');
+            if (resourceSubjectList) {
+                resourceSubjectList.innerHTML = '';
                 subjects.forEach(subject => {
-                    resourceSubjectSelect.innerHTML += `<option value="${subject}">${subject}</option>`;
+                    resourceSubjectList.innerHTML += `<option value="${subject}">`;
                 });
                 console.log('Resource subject dropdown updated');
             } else {
@@ -214,13 +214,18 @@ async function loadSubjects() {
 
 // Advanced Plan Generation
 async function generateAdvancedPlan() {
-    const subject = document.getElementById('advancedSubject')?.value;
+    const subject = document.getElementById('advancedSubject')?.value?.trim();
     const dailyHours = parseInt(document.getElementById('dailyHours')?.value || '2');
     const totalDays = parseInt(document.getElementById('totalDays')?.value || '7');
     const knowledgeLevel = document.getElementById('knowledgeLevel')?.value || 'beginner';
     
     if (!subject) {
-        showError('advanced-results', 'Please select a subject!');
+        showError('advanced-results', 'Please enter a subject you want to learn!');
+        return;
+    }
+    
+    if (subject.length < 2) {
+        showError('advanced-results', 'Please enter a more specific subject (at least 2 characters).');
         return;
     }
     
@@ -348,11 +353,16 @@ function displayAdvancedResults(data) {
 
 // Find Resources
 async function findResources() {
-    const subject = document.getElementById('resourceSubject')?.value;
+    const subject = document.getElementById('resourceSubject')?.value?.trim();
     const resourceType = document.getElementById('resourceType')?.value;
     
     if (!subject) {
-        showError('resources-results', 'Please select a subject!');
+        showError('resources-results', 'Please enter a subject you want to find resources for!');
+        return;
+    }
+    
+    if (subject.length < 2) {
+        showError('resources-results', 'Please enter a more specific subject (at least 2 characters).');
         return;
     }
     
