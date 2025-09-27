@@ -247,8 +247,20 @@ async def find_resources(
     try:
         print(f"[DEBUG] Finding resources for: {request.subject}")
         
+        # Process subject with NLP for coursework demonstration
+        processed_subject = None
+        try:
+            processed_subject = coordinator.schedule_agent.process_subject_with_nlp(request.subject)
+        except Exception as nlp_error:
+            print(f"[DEBUG] NLP processing failed: {nlp_error}")
+            processed_subject = request.subject  # Fallback to original
+        
+        # Use processed subject for better search results
+        search_subject = processed_subject if processed_subject else request.subject
+        print(f"[DEBUG] Searching with processed subject: '{search_subject}' (from '{request.subject}')")
+        
         resources = coordinator.resource_agent.find_best_resources(
-            subject=request.subject,
+            subject=search_subject,
             difficulty="beginner",  # Default difficulty
             resource_type=request.resource_type,
             limit=request.limit or 5
@@ -256,7 +268,13 @@ async def find_resources(
         
         print(f"[DEBUG] Found {len(resources)} resources")
         
-        return {"resources": resources}
+        return {
+            "resources": resources,
+            "original_query": request.subject,
+            "processed_query": processed_subject,
+            "search_feedback": f"Results shown for '{search_subject}'" + 
+                             (f" (processed from '{request.subject}')" if processed_subject != request.subject else "")
+        }
     except Exception as e:
         print(f"[ERROR] Exception in find_resources: {e}")
         raise HTTPException(status_code=500, detail=str(e))
