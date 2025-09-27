@@ -229,6 +229,14 @@ async def generate_advanced_plan(
         
         print(f"[DEBUG] Plan generation result: {result}")
         
+        # Debug hours specifically
+        if result["status"] == "success" and "study_plan" in result:
+            plan = result["study_plan"]
+            print(f"[API DEBUG] Returning to frontend:")
+            print(f"[API DEBUG] - daily_hours: {plan.get('daily_hours')}")
+            print(f"[API DEBUG] - total_hours: {plan.get('total_hours')}")
+            print(f"[API DEBUG] - Input was: {request.available_hours_per_day}h/day * {request.total_days} days")
+        
         if result["status"] == "error":
             raise HTTPException(status_code=500, detail=result["message"])
         

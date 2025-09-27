@@ -1264,19 +1264,40 @@ class CoordinatorAgent:
             )
             study_plan.resources = resources
             
-            # 3. Get personalized motivation based on user mood
+            # 3. Get personalized motivation based on user mood (use processed subject)
+            processed_subject = study_plan.subject  # Use the cleaned subject from NLP processing
             if self.enhanced_motivation_agent:
                 try:
-                    # Use enhanced motivation with user mood
-                    motivation = self.enhanced_motivation_agent.generate_enhanced_motivation(
-                        user_input=f"I'm feeling {user_mood} about learning {subject}",
-                        subject=subject
+                    # Use enhanced motivation with processed subject and user mood
+                    # First analyze the mood
+                    mood_profile = self.enhanced_motivation_agent.analyze_mood(
+                        text=f"I'm feeling {user_mood} about learning {processed_subject}",
+                        context={"subject": processed_subject, "user_mood": user_mood}
                     )
+                    # Generate personalized quote
+                    motivation_content = self.enhanced_motivation_agent.generate_personalized_quote_sync(
+                        mood_profile=mood_profile,
+                        subject=processed_subject,
+                        user_input=f"I'm feeling {user_mood} about learning {processed_subject}"
+                    )
+                    # Convert to expected format
+                    motivation = {
+                        "quote": {
+                            "content": motivation_content.content,
+                            "author": motivation_content.author
+                        },
+                        "encouragement": f"Keep going! Your progress in {processed_subject} matters."
+                    }
                 except Exception as e:
                     print(f"[DEBUG] Enhanced motivation failed, using fallback: {e}")
-                    motivation = self._get_mood_based_motivation(user_mood, subject)
+                    motivation = self._get_mood_based_motivation(user_mood, processed_subject)
             else:
-                motivation = self._get_mood_based_motivation(user_mood, subject)
+                motivation = self._get_mood_based_motivation(user_mood, processed_subject)
+            
+            # Debug logging for hour calculation
+            print(f"[HOUR DEBUG] Daily hours: {study_plan.daily_hours}")
+            print(f"[HOUR DEBUG] Total hours: {study_plan.total_hours}")
+            print(f"[HOUR DEBUG] Calculated: {study_plan.daily_hours} * days = total")
             
             return {
                 "status": "success",
