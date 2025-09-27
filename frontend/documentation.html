@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Planner - Project Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .documentation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .doc-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .doc-card h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            margin: 0.75rem 0;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-left: 4px solid #667eea;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list li i {
+            color: #667eea;
+            width: 20px;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .requirements-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .requirement-item {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+        }
+
+        .requirement-item h4 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .requirement-item p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .architecture-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .architecture-diagram {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .layer {
+            background: white;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid #e5e7eb;
+            position: relative;
+        }
+
+        .layer h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .layer-content {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .component {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #667eea;
+            margin: 0.5rem 0;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: #667eea;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .documentation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="enhanced-index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Application
+        </a>
+
+        <div class="header">
+            <h1><i class="fas fa-robot"></i> AI Study Planner</h1>
+            <p>Comprehensive Project Documentation & Architecture</p>
+        </div>
+
+        <!-- Project Overview -->
+        <div class="requirements-section">
+            <h2><i class="fas fa-info-circle"></i> Project Overview</h2>
+            <p>An intelligent, multi-agent study planning system that leverages Natural Language Processing, sentiment analysis, and gamification to create personalized learning experiences.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>6</h3>
+                    <p>NLP Techniques</p>
+                </div>
+                <div class="stat-card">
+                    <h3>4</h3>
+                    <p>AI Agents</p>
+                </div>
+                <div class="stat-card">
+                    <h3>5</h3>
+                    <p>Core Features</p>
+                </div>
+                <div class="stat-card">
+                    <h3>100%</h3>
+                    <p>Requirements Met</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Features Documentation -->
+        <div class="documentation-grid">
+            <!-- NLP Processing -->
+            <div class="doc-card">
+                <h2><i class="fas fa-language"></i> NLP Processing Engine</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> <strong>Lowercasing:</strong> Normalizes text input</li>
+                    <li><i class="fas fa-check"></i> <strong>Punctuation Removal:</strong> Cleans special characters</li>
+                    <li><i class="fas fa-check"></i> <strong>Tokenization:</strong> Splits text into meaningful units</li>
+                    <li><i class="fas fa-check"></i> <strong>Stopword Removal:</strong> Filters common words</li>
+                    <li><i class="fas fa-check"></i> <strong>Stemming:</strong> Reduces words to root forms</li>
+                    <li><i class="fas fa-check"></i> <strong>Lemmatization:</strong> Dictionary-based normalization</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">RegEx</span>
+                    <span class="tech-badge">String Processing</span>
+                </div>
+            </div>
+
+            <!-- Multi-Agent System -->
+            <div class="doc-card">
+                <h2><i class="fas fa-users"></i> Multi-Agent Architecture</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-shield-alt"></i> <strong>Security Agent:</strong> Input validation & sanitization</li>
+                    <li><i class="fas fa-calendar-alt"></i> <strong>Schedule Agent:</strong> Personalized study plans</li>
+                    <li><i class="fas fa-search"></i> <strong>Resource Agent:</strong> Educational content discovery</li>
+                    <li><i class="fas fa-heart"></i> <strong>Motivation Agent:</strong> Mood-aware encouragement</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">FastAPI</span>
+                    <span class="tech-badge">Async Processing</span>
+                    <span class="tech-badge">Agent Coordination</span>
+                </div>
+            </div>
+
+            <!-- Sentiment Analysis -->
+            <div class="doc-card">
+                <h2><i class="fas fa-brain"></i> Advanced Sentiment Analysis</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-chart-line"></i> <strong>Multi-dimensional Analysis:</strong> Energy, confidence, stress</li>
+                    <li><i class="fas fa-palette"></i> <strong>Mood Detection:</strong> 5 distinct emotional states</li>
+                    <li><i class="fas fa-magic"></i> <strong>Dynamic Responses:</strong> Context-aware motivation</li>
+                    <li><i class="fas fa-target"></i> <strong>Personalization:</strong> Subject-specific messaging</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">Sentiment AI</span>
+                    <span class="tech-badge">Mood Profiling</span>
+                    <span class="tech-badge">Context Analysis</span>
+                </div>
+            </div>
+
+            <!-- Information Retrieval -->
+            <div class="doc-card">
+                <h2><i class="fas fa-database"></i> Information Retrieval System</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-search-plus"></i> <strong>Smart Search:</strong> Fuzzy matching algorithms</li>
+                    <li><i class="fas fa-filter"></i> <strong>Content Filtering:</strong> Relevance scoring</li>
+                    <li><i class="fas fa-link"></i> <strong>URL Optimization:</strong> Clean resource links</li>
+                    <li><i class="fas fa-star"></i> <strong>Quality Ranking:</strong> Educational resource scoring</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">JSON Database</span>
+                    <span class="tech-badge">Similarity Matching</span>
+                    <span class="tech-badge">Content Curation</span>
+                </div>
+            </div>
+
+            <!-- Progress Tracking -->
+            <div class="doc-card">
+                <h2><i class="fas fa-chart-pie"></i> Gamified Progress Tracking</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check-square"></i> <strong>Daily Tracking:</strong> Hour-by-hour completion</li>
+                    <li><i class="fas fa-fire"></i> <strong>Streak Counter:</strong> Consistency motivation</li>
+                    <li><i class="fas fa-trophy"></i> <strong>Achievements:</strong> Milestone celebrations</li>
+                    <li><i class="fas fa-chart-bar"></i> <strong>Analytics:</strong> Progress visualization</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">Chart.js</span>
+                    <span class="tech-badge">Local Storage</span>
+                    <span class="tech-badge">CSS Animations</span>
+                </div>
+            </div>
+
+            <!-- User Experience -->
+            <div class="doc-card">
+                <h2><i class="fas fa-user-friends"></i> Enhanced User Experience</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-mobile-alt"></i> <strong>Responsive Design:</strong> Cross-device compatibility</li>
+                    <li><i class="fas fa-paint-brush"></i> <strong>Modern UI:</strong> Gradient themes & animations</li>
+                    <li><i class="fas fa-lock"></i> <strong>Secure Auth:</strong> JWT-based authentication</li>
+                    <li><i class="fas fa-cog"></i> <strong>Personalization:</strong> Learning style preferences</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">HTML5/CSS3</span>
+                    <span class="tech-badge">JavaScript ES6+</span>
+                    <span class="tech-badge">JWT Security</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- IRWA Requirements Alignment -->
+        <div class="requirements-section">
+            <h2><i class="fas fa-clipboard-check"></i> IRWA Requirements Alignment</h2>
+            <div class="requirements-grid">
+                <div class="requirement-item">
+                    <h4><i class="fas fa-language"></i> Natural Language Processing</h4>
+                    <p><strong>✓ Fully Implemented:</strong> All 6 core NLP techniques integrated throughout the system with visible processing feedback and logging for demonstration.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-search"></i> Information Retrieval</h4>
+                    <p><strong>✓ Advanced Implementation:</strong> Multi-layered search with fuzzy matching, relevance scoring, and clean URL generation for optimal resource discovery.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-chart-line"></i> Data Analytics</h4>
+                    <p><strong>✓ Comprehensive Analytics:</strong> User behavior tracking, progress analytics, sentiment analysis with multi-dimensional mood profiling.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-robot"></i> AI Integration</h4>
+                    <p><strong>✓ Multi-Agent AI:</strong> Coordinated AI agents for security, scheduling, resource finding, and personalized motivation generation.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-users"></i> User Experience</h4>
+                    <p><strong>✓ Enhanced UX:</strong> Gamified interface, mood-based interactions, responsive design, and satisfying progress tracking animations.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-cogs"></i> System Architecture</h4>
+                    <p><strong>✓ Professional Architecture:</strong> Clean separation of concerns, RESTful APIs, secure authentication, and scalable multi-agent design.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Architecture -->
+        <div class="architecture-section">
+            <h2><i class="fas fa-sitemap"></i> System Architecture</h2>
+            <div style="text-align: center; margin: 1rem 0;">
+                <a href="architecture.html" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #667eea; color: white; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; transition: all 0.3s ease;" 
+                   onmouseover="this.style.background='#5a67d8'" 
+                   onmouseout="this.style.background='#667eea'">
+                    <i class="fas fa-external-link-alt"></i> View Detailed Technical Architecture
+                </a>
+            </div>
+            <div class="architecture-diagram">
+                <div class="layer">
+                    <h4><i class="fas fa-desktop"></i> Frontend Layer</h4>
+                    <div class="layer-content">
+                        <div class="component">HTML5/CSS3 Interface</div>
+                        <div class="component">JavaScript ES6+</div>
+                        <div class="component">Chart.js Visualizations</div>
+                        <div class="component">Responsive Design</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↕️</div>
+                
+                <div class="layer">
+                    <h4><i class="fas fa-server"></i> API Gateway</h4>
+                    <div class="layer-content">
+                        <div class="component">FastAPI Framework</div>
+                        <div class="component">JWT Authentication</div>
+                        <div class="component">RESTful Endpoints</div>
+                        <div class="component">Request Validation</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↕️</div>
+                
+                <div class="layer">
+                    <h4><i class="fas fa-users"></i> Multi-Agent System</h4>
+                    <div class="layer-content">
+                        <div class="component">Security Agent</div>
+                        <div class="component">Schedule Agent</div>
+                        <div class="component">Resource Agent</div>
+                        <div class="component">Motivation Agent</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↕️</div>
+                
+                <div class="layer">
+                    <h4><i class="fas fa-brain"></i> AI Processing Layer</h4>
+                    <div class="layer-content">
+                        <div class="component">NLP Engine</div>
+                        <div class="component">Sentiment Analyzer</div>
+                        <div class="component">Content Generator</div>
+                        <div class="component">Recommendation Engine</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↕️</div>
+                
+                <div class="layer">
+                    <h4><i class="fas fa-database"></i> Data Layer</h4>
+                    <div class="layer-content">
+                        <div class="component">SQLite Database</div>
+                        <div class="component">JSON Datasets</div>
+                        <div class="component">User Progress Storage</div>
+                        <div class="component">Authentication Store</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Implementation -->
+        <div class="requirements-section">
+            <h2><i class="fas fa-code"></i> Technical Implementation Highlights</h2>
+            <div class="requirements-grid">
+                <div class="requirement-item">
+                    <h4><i class="fas fa-shield-alt"></i> Security</h4>
+                    <p>JWT-based authentication, input sanitization, XSS protection, and secure password hashing with comprehensive validation.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-rocket"></i> Performance</h4>
+                    <p>Async processing, efficient NLP algorithms, optimized database queries, and client-side caching for smooth user experience.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-expand"></i> Scalability</h4>
+                    <p>Modular agent architecture, clean API design, separation of concerns, and easily extensible component structure.</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h4><i class="fas fa-bug"></i> Quality Assurance</h4>
+                    <p>Comprehensive error handling, fallback mechanisms, detailed logging, and extensive testing of core functionalities.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; color: white; margin-top: 3rem; opacity: 0.8;">
+            <p><i class="fas fa-graduation-cap"></i> AI Study Planner - Advanced IRWA Implementation</p>
+            <p>Created with ❤️ using Python, FastAPI, JavaScript, and modern web technologies</p>
+        </div>
+    </div>
+</body>
+</html>
