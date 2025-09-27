@@ -248,6 +248,7 @@ async function generateAdvancedPlan() {
     
     const knowledgeLevel = document.getElementById('knowledgeLevel')?.value || 'beginner';
     const learningStyle = document.getElementById('learningStyle')?.value || 'mixed';
+    const selectedMood = document.getElementById('selectedMood')?.value || 'neutral';
     
     if (!subject) {
         showError('advanced-results', 'Please enter a subject you want to learn!');
@@ -268,7 +269,7 @@ async function generateAdvancedPlan() {
         showEnhancedLoading(loadingDiv, resultsDiv, 'Generating your personalized study plan...');
         if (generateBtn) generateBtn.disabled = true;
         
-        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle });
+        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle, selectedMood });
         
         const response = await makeAuthenticatedRequest('/api/generate-advanced-plan', {
             method: 'POST',
@@ -277,6 +278,7 @@ async function generateAdvancedPlan() {
                 available_hours_per_day: dailyHours,
                 total_days: totalDays,
                 knowledge_level: knowledgeLevel,
+                user_mood: selectedMood,
                 learning_style: learningStyle
             })
         });
@@ -406,7 +408,7 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                 <div class="plan-overview">
                     <div class="plan-stat">
                         <div class="plan-stat-value">${plan.subject}</div>
-                        <div class="plan-stat-label">Subject</div>
+                        <div class="plan-stat-label">Subject${plan.nlp_feedback ? ' <span style="font-size: 0.8em; color: #666;">(' + plan.nlp_feedback + ')</span>' : ''}</div>
                     </div>
                     <div class="plan-stat">
                         <div class="plan-stat-value">${plan.total_hours}h</div>
@@ -465,17 +467,39 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                                 </div>
                                 <h3 class="section-title" style="color: white;">Stay Motivated</h3>
                             </div>
-                            <div class="motivation-quote">"${plan.motivation.quote.quote}"</div>
-                            <div class="motivation-author">— ${plan.motivation.quote.author}</div>
-                            <div class="motivation-tip">
-                                <strong>💡 Pro Tip:</strong> ${plan.motivation.tip.tip}
-                            </div>
+                            <div class="motivation-quote">"${plan.motivation.quote.content || plan.motivation.quote.quote || 'Stay motivated on your learning journey!'}"</div>
+                            <div class="motivation-author">— ${plan.motivation.quote.author || 'Study Planner AI'}</div>
+                            ${plan.motivation.encouragement ? `
+                                <div class="motivation-encouragement">
+                                    <strong>💪 Encouragement:</strong> ${plan.motivation.encouragement}
+                                </div>
+                            ` : ''}
+                            ${plan.motivation.tip ? `
+                                <div class="motivation-tip">
+                                    <strong>💡 Pro Tip:</strong> ${plan.motivation.tip.tip || plan.motivation.tip}
+                                </div>
+                            ` : ''}
+                            ${plan.motivation.mood_analysis ? `
+                                <div class="mood-insights">
+                                    <strong>🧠 Mood Insights:</strong> 
+                                    <span class="mood-badge mood-${plan.motivation.mood_analysis.detected_mood}">
+                                        ${plan.motivation.mood_analysis.detected_mood}
+                                    </span>
+                                    <div class="mood-levels">
+                                        Energy: ${(plan.motivation.mood_analysis.energy_level * 100).toFixed(0)}% | 
+                                        Confidence: ${(plan.motivation.mood_analysis.confidence_level * 100).toFixed(0)}%
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 ` : ''}
             </div>
         </div>
     `;
+    
+    // Update progress tracker with new plan
+    updateProgressWithNewPlan(plan);
 }
 
 // Find Resources
@@ -521,7 +545,7 @@ async function findResources() {
         const data = await response.json();
         console.log('Resources found:', data);
         
-        displayResourceResults(data.resources || []);
+        displayResourceResults(data.resources || [], data.search_feedback);
         
     } catch (error) {
         console.error('Error finding resources:', error);
@@ -532,7 +556,7 @@ async function findResources() {
     }
 }
 
-function displayResourceResults(resources) {
+function displayResourceResults(resources, searchFeedback) {
     const resultsDiv = document.getElementById('resources-results');
     if (!resultsDiv) return;
     
@@ -595,6 +619,7 @@ function displayResourceResults(resources) {
         <div class="results">
             <div class="results-header">
                 <h3>📚 Found ${resources.length} Resource${resources.length !== 1 ? 's' : ''}</h3>
+                ${searchFeedback ? `<p style="font-size: 0.9em; color: #666; margin-top: 0.5rem; font-style: italic;">${searchFeedback}</p>` : ''}
             </div>
             <div class="results-content">
                 <div class="resources-grid">
@@ -682,10 +707,10 @@ async function getMotivation() {
         
         console.log('Getting motivation for mood:', mood);
         
-        const response = await makeAuthenticatedRequest('/api/get-motivation', {
+        const response = await makeAuthenticatedRequest('/api/enhanced-motivation', {
             method: 'POST',
             body: JSON.stringify({
-                mood_text: mood
+                user_input: mood
             })
         });
         
@@ -712,20 +737,25 @@ function displayMotivationResults(data) {
     const resultsDiv = document.getElementById('motivation-results');
     if (!resultsDiv) return;
     
-    const sentiment = data.sentiment || {};
-    const motivation = data.motivation || {};
+    console.log('Displaying enhanced motivation results:', data);
+    
+    // Handle enhanced motivation response structure
+    const motivation = data.motivation || data;
+    const moodAnalysis = motivation.mood_analysis || {};
     
     resultsDiv.innerHTML = `
         <div class="results">
             <div class="results-header">
-                <h3>💪 Your Daily Motivation</h3>
+                <h3>💪 Your Enhanced Motivation</h3>
             </div>
             <div class="results-content">
-                ${sentiment.mood ? `
+                ${moodAnalysis.detected_mood ? `
                     <div class="plan-overview" style="margin-bottom: 2rem;">
-                        <div class="plan-stat" style="grid-column: 1 / -1; background: ${getSentimentColor(sentiment.mood)};">
-                            <div class="plan-stat-value">🎭 ${sentiment.mood.charAt(0).toUpperCase() + sentiment.mood.slice(1)}</div>
-                            <div class="plan-stat-label" style="color: rgba(255,255,255,0.8);">Current Mood</div>
+                        <div class="plan-stat" style="grid-column: 1 / -1; background: ${getEnhancedMoodColor(moodAnalysis.detected_mood)};">
+                            <div class="plan-stat-value">🎭 ${moodAnalysis.detected_mood.charAt(0).toUpperCase() + moodAnalysis.detected_mood.slice(1)}</div>
+                            <div class="plan-stat-label" style="color: rgba(255,255,255,0.8);">
+                                Detected Mood | Energy: ${(moodAnalysis.energy_level * 100).toFixed(0)}% | Confidence: ${(moodAnalysis.confidence_level * 100).toFixed(0)}%
+                            </div>
                         </div>
                     </div>
                 ` : ''}
@@ -737,11 +767,20 @@ function displayMotivationResults(data) {
                                 <div class="section-icon" style="background: rgba(255,255,255,0.2);">
                                     <i class="fas fa-quote-left"></i>
                                 </div>
-                                <h3 class="section-title" style="color: white;">Inspirational Quote</h3>
+                                <h3 class="section-title" style="color: white;">AI-Personalized Quote</h3>
                             </div>
-                            <div class="motivation-quote">"${motivation.quote.quote}"</div>
-                            <div class="motivation-author">— ${motivation.quote.author}</div>
+                            <div class="motivation-quote">"${motivation.quote.content || motivation.quote.quote || motivation.quote}"</div>
+                            <div class="motivation-author">— ${motivation.quote.author || 'AI Study Coach'}</div>
                         </div>
+                    </div>
+                ` : ''}
+                
+                ${motivation.encouragement ? `
+                    <div class="resource-item" style="border-left-color: #f59e0b; margin-bottom: 1.5rem;">
+                        <div class="resource-header">
+                            <h4 class="resource-title">💪 Personalized Encouragement</h4>
+                        </div>
+                        <p class="resource-description">${motivation.encouragement}</p>
                     </div>
                 ` : ''}
                 
@@ -750,16 +789,27 @@ function displayMotivationResults(data) {
                         <div class="resource-header">
                             <h4 class="resource-title">💡 Study Tip</h4>
                         </div>
-                        <p class="resource-description">${motivation.tip.tip}</p>
+                        <p class="resource-description">${motivation.tip.tip || motivation.tip}</p>
                     </div>
                 ` : ''}
                 
-                ${motivation.encouragement ? `
-                    <div class="resource-item" style="border-left-color: #f59e0b; margin-top: 1.5rem;">
+                ${moodAnalysis.suggestions && moodAnalysis.suggestions.length > 0 ? `
+                    <div class="resource-item" style="border-left-color: #8b5cf6; margin-top: 1.5rem;">
                         <div class="resource-header">
-                            <h4 class="resource-title">🌟 Personal Message</h4>
+                            <h4 class="resource-title">🧠 AI Mood Insights</h4>
                         </div>
-                        <p class="resource-description">${motivation.encouragement}</p>
+                        <ul style="margin: 0; padding-left: 1.5rem;">
+                            ${moodAnalysis.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                ${data.ethics_validation ? `
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 0.75rem; border-left: 4px solid #10b981;">
+                        <div style="font-size: 0.875rem; color: #065f46;">
+                            <strong>🛡️ AI Ethics:</strong> This content has been validated for bias, appropriateness, and cultural sensitivity.
+                            ${data.ethics_validation.transparency ? `<br><strong>Confidence:</strong> ${(data.ethics_validation.transparency.confidence * 100).toFixed(0)}%` : ''}
+                        </div>
                     </div>
                 ` : ''}
             </div>
@@ -772,6 +822,18 @@ function getSentimentColor(mood) {
         case 'positive': return 'rgba(16, 185, 129, 0.2)';
         case 'negative': return 'rgba(239, 68, 68, 0.2)';
         default: return 'rgba(99, 102, 241, 0.2)';
+    }
+}
+
+function getEnhancedMoodColor(mood) {
+    switch (mood?.toLowerCase()) {
+        case 'optimistic': return 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        case 'confident': return 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+        case 'neutral': return 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+        case 'anxious': return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+        case 'frustrated': return 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        case 'overwhelmed': return 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
+        default: return 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)';
     }
 }
 
@@ -798,6 +860,495 @@ function showError(elementId, message) {
     } else {
         console.error('Error element not found:', elementId, 'Message:', message);
     }
+}
+
+// Mood Selection Functionality
+function initializeMoodSelector() {
+    const moodButtons = document.querySelectorAll('.mood-btn');
+    const selectedMoodInput = document.getElementById('selectedMood');
+    
+    moodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove selected class from all buttons
+            moodButtons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Add selected class to clicked button
+            this.classList.add('selected');
+            
+            // Update hidden input value
+            const mood = this.getAttribute('data-mood');
+            selectedMoodInput.value = mood;
+            
+            console.log('Mood selected:', mood);
+            
+            // Add celebratory animation
+            const emoji = this.querySelector('.mood-emoji');
+            emoji.style.animation = 'none';
+            setTimeout(() => {
+                emoji.style.animation = 'celebrate 0.8s ease-out';
+            }, 10);
+        });
+    });
+}
+
+// Initialize mood selector when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for the content to load
+    setTimeout(initializeMoodSelector, 500);
+    setTimeout(initializeProgressTracker, 600);
+});
+
+// ============================================
+// PROGRESS TRACKER SYSTEM
+// ============================================
+
+let progressData = {
+    currentPlan: null,
+    dailyProgress: {},
+    streak: 0,
+    achievements: [],
+    startDate: null
+};
+
+function initializeProgressTracker() {
+    console.log('Initializing Progress Tracker...');
+    
+    // Load saved progress data
+    loadProgressData();
+    
+    // Update displays
+    updateStreakDisplay();
+    updateAchievements();
+    
+    // Set up tab switching listener
+    setupProgressTabListener();
+}
+
+function setupProgressTabListener() {
+    const progressTabButton = document.querySelector('[onclick="switchTab(\'progress\')"]');
+    if (progressTabButton) {
+        progressTabButton.addEventListener('click', function() {
+            setTimeout(() => {
+                refreshProgressDisplay();
+            }, 100);
+        });
+    }
+}
+
+function loadProgressData() {
+    const saved = localStorage.getItem('studyProgressData');
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            progressData = { ...progressData, ...parsed };
+        } catch (e) {
+            console.error('Error loading progress data:', e);
+        }
+    }
+}
+
+function saveProgressData() {
+    try {
+        localStorage.setItem('studyProgressData', JSON.stringify(progressData));
+    } catch (e) {
+        console.error('Error saving progress data:', e);
+    }
+}
+
+function updateCurrentPlan(studyPlan) {
+    if (!studyPlan) return;
+    
+    progressData.currentPlan = {
+        subject: studyPlan.subject,
+        dailyHours: studyPlan.daily_hours,
+        totalHours: studyPlan.total_hours,
+        difficulty: studyPlan.difficulty,
+        startDate: new Date().toISOString().split('T')[0]
+    };
+    
+    // Initialize daily progress if starting new plan
+    if (!progressData.startDate) {
+        progressData.startDate = progressData.currentPlan.startDate;
+        progressData.dailyProgress = {};
+    }
+    
+    saveProgressData();
+    refreshProgressDisplay();
+    
+    console.log('Updated current plan:', progressData.currentPlan);
+}
+
+function refreshProgressDisplay() {
+    updateCurrentPlanInfo();
+    updateOverallProgress();
+    generateDailyGrid();
+    updateStreakDisplay();
+    updateAchievements();
+}
+
+function updateCurrentPlanInfo() {
+    const currentPlanInfo = document.getElementById('currentPlanInfo');
+    const overallProgressContainer = document.getElementById('overallProgressContainer');
+    const dailyTrackingSection = document.getElementById('dailyTrackingSection');
+    
+    if (!currentPlanInfo) return;
+    
+    if (progressData.currentPlan) {
+        currentPlanInfo.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h4 style="margin: 0; color: #1f2937;">${progressData.currentPlan.subject}</h4>
+                    <p style="margin: 0.25rem 0 0 0; color: #6b7280;">
+                        ${progressData.currentPlan.dailyHours}h/day • ${progressData.currentPlan.totalHours}h total • ${progressData.currentPlan.difficulty}
+                    </p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">${calculateCompletionPercentage()}%</div>
+                    <div style="font-size: 0.8rem; color: #6b7280;">Complete</div>
+                </div>
+            </div>
+        `;
+        
+        if (overallProgressContainer) overallProgressContainer.style.display = 'block';
+        if (dailyTrackingSection) dailyTrackingSection.style.display = 'block';
+    } else {
+        currentPlanInfo.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                <p style="color: #6b7280; margin: 0;">Create a study plan in the Advanced Planner tab to start tracking your progress!</p>
+            </div>
+        `;
+        
+        if (overallProgressContainer) overallProgressContainer.style.display = 'none';
+        if (dailyTrackingSection) dailyTrackingSection.style.display = 'none';
+    }
+}
+
+function updateOverallProgress() {
+    const percentage = calculateCompletionPercentage();
+    const progressBar = document.getElementById('overallProgressBar');
+    const progressPercentage = document.getElementById('overallPercentage');
+    const progressSpark = document.getElementById('overallSpark');
+    
+    if (progressBar) {
+        // Animate progress bar
+        progressBar.style.width = '0%';
+        progressBar.classList.add('animating');
+        
+        setTimeout(() => {
+            progressBar.style.width = percentage + '%';
+        }, 100);
+        
+        setTimeout(() => {
+            progressBar.classList.remove('animating');
+        }, 900);
+    }
+    
+    if (progressPercentage) {
+        progressPercentage.textContent = percentage + '%';
+    }
+}
+
+function generateDailyGrid() {
+    const dailyGrid = document.getElementById('dailyGrid');
+    if (!dailyGrid || !progressData.currentPlan) return;
+    
+    const startDate = new Date(progressData.startDate);
+    const totalDays = Math.ceil(progressData.currentPlan.totalHours / progressData.currentPlan.dailyHours);
+    const today = new Date();
+    
+    let gridHTML = '';
+    
+    for (let i = 0; i < totalDays; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const dayNum = i + 1;
+        
+        const isToday = dateStr === today.toISOString().split('T')[0];
+        const isCompleted = progressData.dailyProgress[dateStr] === true;
+        const isPast = currentDate < today && !isToday;
+        
+        const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
+        
+        gridHTML += `
+            <div class="day-box ${isCompleted ? 'completed' : ''} ${isToday ? 'today' : ''}" 
+                 onclick="toggleDayCompletion('${dateStr}')" 
+                 title="${dayName}, ${currentDate.toLocaleDateString()}">
+                <div class="day-number">Day ${dayNum}</div>
+                <div class="day-label">${dayName}</div>
+                ${isCompleted ? '<div class="completion-indicator">✅</div>' : ''}
+            </div>
+        `;
+    }
+    
+    dailyGrid.innerHTML = gridHTML;
+}
+
+function toggleDayCompletion(dateStr) {
+    const wasCompleted = progressData.dailyProgress[dateStr];
+    progressData.dailyProgress[dateStr] = !wasCompleted;
+    
+    saveProgressData();
+    
+    // Update displays
+    generateDailyGrid();
+    updateOverallProgress();
+    updateStreakDisplay();
+    
+    // Check for achievements and celebrations
+    if (!wasCompleted) {
+        checkAchievements();
+        
+        // Celebrate if day was just completed
+        setTimeout(() => {
+            const percentage = calculateCompletionPercentage();
+            if (percentage === 100) {
+                showCelebration('🎉 Plan Complete!', 'Congratulations! You finished your study plan!');
+            } else if (percentage > 0 && percentage % 25 === 0) {
+                showCelebration('🚀 Milestone Reached!', `${percentage}% complete! Keep going!`);
+            }
+        }, 500);
+    }
+    
+    updateAchievements();
+}
+
+function calculateCompletionPercentage() {
+    if (!progressData.currentPlan) return 0;
+    
+    const totalDays = Math.ceil(progressData.currentPlan.totalHours / progressData.currentPlan.dailyHours);
+    const completedDays = Object.values(progressData.dailyProgress).filter(Boolean).length;
+    
+    return Math.round((completedDays / totalDays) * 100);
+}
+
+function calculateStreak() {
+    if (!progressData.startDate) return 0;
+    
+    const today = new Date();
+    let streak = 0;
+    let currentDate = new Date(today);
+    
+    // Count backward from today
+    while (true) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        if (progressData.dailyProgress[dateStr] === true) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+        } else {
+            break;
+        }
+    }
+    
+    return streak;
+}
+
+function updateStreakDisplay() {
+    const streak = calculateStreak();
+    progressData.streak = streak;
+    
+    const streakNumber = document.getElementById('streakNumber');
+    const streakMessage = document.getElementById('streakMessage');
+    
+    if (streakNumber) {
+        streakNumber.textContent = streak;
+    }
+    
+    if (streakMessage) {
+        if (streak === 0) {
+            streakMessage.textContent = 'Start your journey!';
+        } else if (streak === 1) {
+            streakMessage.textContent = 'Great start! Keep it up!';
+        } else if (streak < 7) {
+            streakMessage.textContent = `${streak} days strong! 🔥`;
+        } else if (streak < 30) {
+            streakMessage.textContent = `Amazing ${streak}-day streak! 🌟`;
+        } else {
+            streakMessage.textContent = `Legendary ${streak}-day streak! 👑`;
+        }
+    }
+    
+    saveProgressData();
+}
+
+function checkAchievements() {
+    const newAchievements = [];
+    const completedDays = Object.values(progressData.dailyProgress).filter(Boolean).length;
+    const streak = calculateStreak();
+    
+    // First Day achievement
+    if (completedDays >= 1 && !progressData.achievements.includes('first-day')) {
+        newAchievements.push('first-day');
+    }
+    
+    // Hot Streak achievement  
+    if (streak >= 3 && !progressData.achievements.includes('three-streak')) {
+        newAchievements.push('three-streak');
+    }
+    
+    // Week Warrior achievement
+    if (completedDays >= 7 && !progressData.achievements.includes('week-warrior')) {
+        newAchievements.push('week-warrior');
+    }
+    
+    // Perfect Week achievement
+    if (calculateCompletionPercentage() === 100 && !progressData.achievements.includes('perfect-week')) {
+        newAchievements.push('perfect-week');
+    }
+    
+    // Add new achievements
+    newAchievements.forEach(achievement => {
+        if (!progressData.achievements.includes(achievement)) {
+            progressData.achievements.push(achievement);
+            showAchievementUnlocked(achievement);
+        }
+    });
+    
+    saveProgressData();
+}
+
+function updateAchievements() {
+    const achievementsGrid = document.getElementById('achievementsGrid');
+    if (!achievementsGrid) return;
+    
+    const achievements = achievementsGrid.querySelectorAll('.achievement');
+    achievements.forEach(achievement => {
+        const achievementId = achievement.getAttribute('data-achievement');
+        if (progressData.achievements.includes(achievementId)) {
+            achievement.classList.remove('locked');
+            achievement.classList.add('unlocked');
+        }
+    });
+}
+
+function showAchievementUnlocked(achievementId) {
+    // Find achievement element
+    const achievement = document.querySelector(`[data-achievement="${achievementId}"]`);
+    if (achievement) {
+        achievement.classList.remove('locked');
+        achievement.classList.add('unlocked');
+        
+        // Animate unlock
+        achievement.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            achievement.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                achievement.style.transform = 'scale(1)';
+            }, 200);
+        }, 100);
+    }
+    
+    // Show celebration
+    const achievementNames = {
+        'first-day': 'First Day Complete!',
+        'three-streak': 'Hot Streak Unlocked!',
+        'week-warrior': 'Week Warrior!',
+        'perfect-week': 'Perfect Week!'
+    };
+    
+    setTimeout(() => {
+        showCelebration('🏆 Achievement Unlocked!', achievementNames[achievementId] || 'New achievement!');
+    }, 300);
+}
+
+function showCelebration(title, subtitle) {
+    const overlay = document.getElementById('celebrationOverlay');
+    const message = document.getElementById('celebrationMessage');
+    const confetti = document.getElementById('confetti');
+    
+    if (!overlay || !message) return;
+    
+    // Update message
+    message.querySelector('.celebration-text').textContent = title;
+    message.querySelector('.celebration-subtext').textContent = subtitle;
+    
+    // Create confetti
+    createConfetti(confetti);
+    
+    // Show celebration
+    overlay.classList.add('show');
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        overlay.classList.remove('show');
+    }, 3000);
+    
+    // Click to close
+    overlay.onclick = () => {
+        overlay.classList.remove('show');
+    };
+}
+
+function createConfetti(container) {
+    container.innerHTML = '';
+    
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];
+    const shapes = ['circle', 'square', 'triangle'];
+    
+    for (let i = 0; i < 50; i++) {
+        const confettiPiece = document.createElement('div');
+        confettiPiece.style.position = 'absolute';
+        confettiPiece.style.width = Math.random() * 10 + 5 + 'px';
+        confettiPiece.style.height = confettiPiece.style.width;
+        confettiPiece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confettiPiece.style.left = Math.random() * 100 + '%';
+        confettiPiece.style.top = -20 + 'px';
+        confettiPiece.style.borderRadius = shapes[Math.floor(Math.random() * shapes.length)] === 'circle' ? '50%' : '0';
+        confettiPiece.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+        confettiPiece.style.animationDelay = Math.random() * 2 + 's';
+        
+        container.appendChild(confettiPiece);
+    }
+    
+    // Add confetti animation CSS if not exists
+    if (!document.getElementById('confettiStyles')) {
+        const style = document.createElement('style');
+        style.id = 'confettiStyles';
+        style.textContent = `
+            @keyframes confettiFall {
+                to {
+                    transform: translateY(100vh) rotate(720deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+function markTodayComplete() {
+    const today = new Date().toISOString().split('T')[0];
+    progressData.dailyProgress[today] = true;
+    
+    saveProgressData();
+    refreshProgressDisplay();
+    checkAchievements();
+    
+    showCelebration('✅ Day Complete!', 'Great job on today\'s study session!');
+}
+
+function resetProgress() {
+    if (confirm('Are you sure you want to reset your progress? This cannot be undone.')) {
+        progressData = {
+            currentPlan: null,
+            dailyProgress: {},
+            streak: 0,
+            achievements: [],
+            startDate: null
+        };
+        
+        saveProgressData();
+        refreshProgressDisplay();
+        
+        alert('Progress has been reset!');
+    }
+}
+
+// Hook into study plan generation to update progress
+function updateProgressWithNewPlan(studyPlan) {
+    updateCurrentPlan(studyPlan);
 }
 
 // Add this function at the top of enhanced-app.js for debugging

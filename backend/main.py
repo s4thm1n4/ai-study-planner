@@ -7,15 +7,25 @@ import asyncio
 from jose import jwt
 from jose.exceptions import JWTError
 import os
+import sys
 from datetime import datetime, timedelta
 
-# ✅ Import agents robustly for both layouts
+# Add current directory to Python path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+# ✅ Import from simple_agents (updated module structure)
 try:
-    from .agents import generate_schedule, find_resource
-    from .simple_agents import coordinator
+    # Try relative import first (when running as module)
+    from .simple_agents import generate_schedule, find_resource, coordinator
 except ImportError:
-    from agents import generate_schedule, find_resource
-    from simple_agents import coordinator
+    try:
+        # Try absolute import from backend directory
+        from backend.simple_agents import generate_schedule, find_resource, coordinator
+    except ImportError:
+        # Fallback for direct execution from backend directory
+        from simple_agents import generate_schedule, find_resource, coordinator
 app = FastAPI(title="AI Study Planner - Multi-Agent System", version="2.0.0")
 
 # JWT Configuration
@@ -45,6 +55,7 @@ class AdvancedStudyRequest(BaseModel):
     total_days: int
     learning_style: Optional[str] = "mixed"
     knowledge_level: Optional[str] = "beginner"
+    user_mood: Optional[str] = "neutral"
 
 class ResourceRequest(BaseModel):
     subject: str
@@ -53,6 +64,14 @@ class ResourceRequest(BaseModel):
 
 class MotivationRequest(BaseModel):
     mood_text: str
+    subject: Optional[str] = None
+    progress_percentage: Optional[float] = 0.0
+
+class EnhancedMotivationRequest(BaseModel):
+    user_input: str
+    subject: Optional[str] = None
+    progress_percentage: Optional[float] = 0.0
+    context: Optional[dict] = None
 
 class UserRegistration(BaseModel):
     first_name: str
@@ -204,10 +223,19 @@ async def generate_advanced_plan(
             available_hours_per_day=request.available_hours_per_day,
             total_days=request.total_days,
             learning_style=request.learning_style or "mixed",
-            knowledge_level=request.knowledge_level or "beginner"
+            knowledge_level=request.knowledge_level or "beginner",
+            user_mood=request.user_mood or "neutral"
         )
         
         print(f"[DEBUG] Plan generation result: {result}")
+        
+        # Debug hours specifically
+        if result["status"] == "success" and "study_plan" in result:
+            plan = result["study_plan"]
+            print(f"[API DEBUG] Returning to frontend:")
+            print(f"[API DEBUG] - daily_hours: {plan.get('daily_hours')}")
+            print(f"[API DEBUG] - total_hours: {plan.get('total_hours')}")
+            print(f"[API DEBUG] - Input was: {request.available_hours_per_day}h/day * {request.total_days} days")
         
         if result["status"] == "error":
             raise HTTPException(status_code=500, detail=result["message"])
@@ -229,8 +257,20 @@ async def find_resources(
     try:
         print(f"[DEBUG] Finding resources for: {request.subject}")
         
+        # Process subject with NLP for coursework demonstration
+        processed_subject = None
+        try:
+            processed_subject = coordinator.schedule_agent.process_subject_with_nlp(request.subject)
+        except Exception as nlp_error:
+            print(f"[DEBUG] NLP processing failed: {nlp_error}")
+            processed_subject = request.subject  # Fallback to original
+        
+        # Use processed subject for better search results
+        search_subject = processed_subject if processed_subject else request.subject
+        print(f"[DEBUG] Searching with processed subject: '{search_subject}' (from '{request.subject}')")
+        
         resources = coordinator.resource_agent.find_best_resources(
-            subject=request.subject,
+            subject=search_subject,
             difficulty="beginner",  # Default difficulty
             resource_type=request.resource_type,
             limit=request.limit or 5
@@ -238,7 +278,13 @@ async def find_resources(
         
         print(f"[DEBUG] Found {len(resources)} resources")
         
-        return {"resources": resources}
+        return {
+            "resources": resources,
+            "original_query": request.subject,
+            "processed_query": processed_subject,
+            "search_feedback": f"Results shown for '{search_subject}'" + 
+                             (f" (processed from '{request.subject}')" if processed_subject != request.subject else "")
+        }
     except Exception as e:
         print(f"[ERROR] Exception in find_resources: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -248,25 +294,57 @@ async def get_motivation(
     request: MotivationRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Get motivational message based on user mood (PROTECTED)"""
+    """Get motivational message based on user mood (PROTECTED) - Legacy version"""
     try:
         print(f"[DEBUG] Getting motivation for mood: {request.mood_text}")
         
-        # Analyze sentiment
-        sentiment = coordinator.motivation_agent.analyze_sentiment(request.mood_text)
-        
-        # Get motivation message
+        # Use enhanced system if available
         motivation = coordinator.motivation_agent.get_motivation_message(
-            mood=sentiment["mood"], 
-            progress_percentage=0.5
+            user_input=request.mood_text,
+            progress_percentage=request.progress_percentage,
+            subject=request.subject,
+            user_id=current_user.get("id")
         )
         
         return {
-            "sentiment": sentiment,
-            "motivation": motivation
+            "status": "success",
+            "motivation": motivation,
+            "enhanced": coordinator.motivation_agent.enhanced_mode
         }
     except Exception as e:
         print(f"[ERROR] Exception in get_motivation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/enhanced-motivation")
+async def get_enhanced_motivation(
+    request: EnhancedMotivationRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get AI-powered personalized motivation with ethics compliance (PROTECTED)"""
+    try:
+        print(f"[DEBUG] Enhanced motivation for user: {current_user.get('username')}")
+        
+        motivation_result = coordinator.motivation_agent.get_motivation_message(
+            user_input=request.user_input,
+            progress_percentage=request.progress_percentage or 0.0,
+            subject=request.subject,
+            user_id=current_user.get("id")
+        )
+        
+        return {
+            "status": "success",
+            "motivation": motivation_result,
+            "user_id": current_user.get("id"),
+            "timestamp": datetime.now().isoformat(),
+            "features": {
+                "ai_powered": coordinator.motivation_agent.enhanced_mode,
+                "ethics_validated": motivation_result.get("transparency", {}).get("ethics_validated", False),
+                "personalized": True,
+                "mood_aware": "mood_analysis" in motivation_result
+            }
+        }
+    except Exception as e:
+        print(f"[ERROR] Exception in enhanced motivation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Legacy endpoint for simple plan generation (for homepage demo)
@@ -328,6 +406,88 @@ async def generate_study_plan_legacy(request: StudyGoal):
 async def get_user_profile(current_user: dict = Depends(get_current_user)):
     """Get current user profile (protected endpoint)"""
     return {"status": "success", "user": current_user}
+
+@app.get("/api/privacy/report")
+async def get_privacy_report(current_user: dict = Depends(get_current_user)):
+    """Get user's privacy and data protection report (PROTECTED)"""
+    try:
+        # Import privacy manager
+        from ai_ethics import PrivacyManager
+        privacy_manager = PrivacyManager()
+        
+        # Generate privacy report
+        report = privacy_manager.generate_privacy_report(current_user.get("id"))
+        
+        return {
+            "status": "success",
+            "privacy_report": report,
+            "generated_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        print(f"[ERROR] Privacy report generation failed: {e}")
+        raise HTTPException(status_code=500, detail="Privacy report generation failed")
+
+@app.post("/api/privacy/delete-data")
+async def request_data_deletion(current_user: dict = Depends(get_current_user)):
+    """Process user's right to be forgotten request (PROTECTED)"""
+    try:
+        from ai_ethics import PrivacyManager
+        privacy_manager = PrivacyManager()
+        
+        # Process deletion request
+        deletion_report = privacy_manager.process_deletion_request(current_user.get("id"))
+        
+        return {
+            "status": "success",
+            "message": "Data deletion request processed",
+            "deletion_report": deletion_report
+        }
+    except Exception as e:
+        print(f"[ERROR] Data deletion failed: {e}")
+        raise HTTPException(status_code=500, detail="Data deletion request failed")
+
+@app.get("/api/ethics/transparency")
+async def get_ai_transparency_info():
+    """Get information about AI decision-making transparency (PUBLIC)"""
+    return {
+        "ai_systems": {
+            "schedule_creator": {
+                "description": "Creates personalized study schedules based on subject, time, and learning preferences",
+                "data_used": ["subject", "available_time", "difficulty_level", "learning_style"],
+                "decision_factors": ["topic complexity", "time constraints", "user preferences", "educational best practices"],
+                "bias_mitigation": "Content reviewed for cultural, demographic, and educational bias",
+                "confidence_reporting": "All recommendations include confidence scores"
+            },
+            "resource_finder": {
+                "description": "Finds educational resources using information retrieval algorithms",
+                "data_used": ["search_topic", "difficulty_preference", "resource_type"],
+                "decision_factors": ["content_relevance", "quality_rating", "difficulty_match", "resource_diversity"],
+                "bias_mitigation": "Diverse resource sources, accessibility considerations, cost-free options included",
+                "confidence_reporting": "Resource recommendations ranked by relevance score"
+            },
+            "motivation_coach": {
+                "description": "Provides personalized motivational content based on emotional state analysis",
+                "data_used": ["user_text_input", "detected_mood", "learning_progress", "time_context"],
+                "decision_factors": ["mood_analysis", "historical_effectiveness", "content_freshness", "personalization"],
+                "bias_mitigation": "Content screened for inclusive language, diverse perspectives, accessibility",
+                "confidence_reporting": "Motivation selection includes effectiveness and confidence metrics"
+            }
+        },
+        "ethical_principles": {
+            "fairness": "AI systems designed to work equally well for all users regardless of background",
+            "transparency": "Decision-making process explained with 'why this recommendation' information",
+            "privacy": "User data protected, minimal collection, user control over personal information",
+            "accountability": "Human oversight, audit trails, user feedback integration",
+            "beneficence": "Systems designed to help users learn effectively and safely"
+        },
+        "user_rights": {
+            "explanation": "Right to understand how AI decisions are made",
+            "correction": "Right to provide feedback and request alternative recommendations", 
+            "privacy": "Right to know what data is collected and how it's used",
+            "deletion": "Right to delete personal data and account",
+            "human_review": "Right to request human review of AI decisions"
+        }
+    }
 
 @app.get("/")
 async def root():

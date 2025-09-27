@@ -314,6 +314,427 @@
             transform: none;
         }
 
+        /* Mood Selector Styles */
+        .mood-selector {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .mood-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .mood-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .mood-btn.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mood-emoji {
+            font-size: 1.5rem;
+            animation: bounceIn 0.6s ease-out;
+            transition: transform 0.2s ease;
+        }
+
+        .mood-btn:hover .mood-emoji {
+            transform: scale(1.2);
+            animation: pulse 1s infinite;
+        }
+
+        .mood-btn.selected .mood-emoji {
+            animation: celebrate 0.8s ease-out;
+        }
+
+        .mood-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mood-btn.selected .mood-label {
+            color: white;
+        }
+
+        /* Mood Animations */
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-5deg); }
+            75% { transform: scale(1.2) rotate(5deg); }
+        }
+
+        /* Progress Tracker Styles */
+        .streak-counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+        }
+
+        .streak-flame {
+            font-size: 3rem;
+            animation: flicker 1.5s infinite alternate;
+        }
+
+        .streak-info {
+            text-align: center;
+        }
+
+        .streak-number {
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .streak-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .streak-message {
+            font-size: 1.1rem;
+            font-style: italic;
+            opacity: 0.95;
+        }
+
+        @keyframes flicker {
+            0%, 100% { transform: scale(1) rotate(-2deg); }
+            50% { transform: scale(1.1) rotate(2deg); }
+        }
+
+        .progress-overview {
+            margin-bottom: 2rem;
+        }
+
+        .progress-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-container {
+            margin-top: 1.5rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .progress-percentage {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar-container {
+            position: relative;
+            background: #f1f5f9;
+            border-radius: 1rem;
+            height: 12px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 1rem;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-spark {
+            position: absolute;
+            top: 0;
+            right: -2px;
+            width: 4px;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .progress-bar.animating .progress-spark {
+            opacity: 0.8;
+            animation: spark 0.8s ease-in-out;
+        }
+
+        @keyframes spark {
+            0%, 100% { opacity: 0; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(-10px); }
+        }
+
+        .daily-tracking {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .daily-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .day-box {
+            aspect-ratio: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            position: relative;
+        }
+
+        .day-box:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-box.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .day-box.today {
+            border-color: #667eea;
+            border-width: 3px;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .day-number {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .day-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        .completion-indicator {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 0.8rem;
+        }
+
+        .day-box.completed .completion-indicator {
+            animation: checkBounce 0.6s ease-out;
+        }
+
+        @keyframes checkBounce {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: #6b7280;
+        }
+
+        .action-btn.secondary:hover {
+            box-shadow: 0 8px 25px rgba(107, 114, 128, 0.4);
+        }
+
+        .achievements-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .achievement.unlocked {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #fbbf24;
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .achievement.locked {
+            opacity: 0.6;
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .celebration-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .celebration-message {
+            background: white;
+            padding: 3rem;
+            border-radius: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .celebration-overlay.show .celebration-message {
+            transform: scale(1);
+        }
+
+        .celebration-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: celebrationBounce 1s ease-in-out infinite;
+        }
+
+        .celebration-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .celebration-subtext {
+            font-size: 1.2rem;
+            color: #6b7280;
+        }
+
+        @keyframes celebrationBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+
         /* Results Section */
         .results {
             margin-top: 2rem;
@@ -653,6 +1074,62 @@
             backdrop-filter: blur(10px);
         }
 
+        .motivation-encouragement {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 1rem;
+        }
+
+        .mood-insights {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            backdrop-filter: blur(10px);
+            margin-top: 1rem;
+        }
+
+        .mood-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            margin-left: 0.5rem;
+        }
+
+        .mood-badge.mood-optimistic {
+            background: rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .mood-badge.mood-neutral {
+            background: rgba(59, 130, 246, 0.2);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .mood-badge.mood-anxious {
+            background: rgba(245, 158, 11, 0.2);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .mood-badge.mood-frustrated {
+            background: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .mood-levels {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
         .section-header {
             display: flex;
             align-items: center;
@@ -975,6 +1452,9 @@
                     <a href="index.html" class="nav-link">
                         <i class="fas fa-home"></i> Home
                     </a>
+                    <a href="documentation.html" class="nav-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; margin-left: 0.5rem;">
+                        <i class="fas fa-book"></i> Documentation
+                    </a>
                 </div>
                 <div class="user-info" id="userDisplay">
                     <i class="fas fa-user-circle"></i>
@@ -1093,6 +1573,36 @@
                                 </select>
                                 <small class="input-help">Choose your preferred learning style for better resource recommendations</small>
                             </div>
+                            
+                            <div class="input-group">
+                                <label>
+                                    <i class="fas fa-smile"></i> How are you feeling today? (Optional)
+                                </label>
+                                <div class="mood-selector">
+                                    <button type="button" class="mood-btn" data-mood="excited" title="Excited & Motivated">
+                                        <span class="mood-emoji">🚀</span>
+                                        <span class="mood-label">Excited</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="focused" title="Focused & Ready">
+                                        <span class="mood-emoji">🎯</span>
+                                        <span class="mood-label">Focused</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="neutral" title="Neutral & Calm">
+                                        <span class="mood-emoji">😌</span>
+                                        <span class="mood-label">Neutral</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="stressed" title="Stressed & Overwhelmed">
+                                        <span class="mood-emoji">😰</span>
+                                        <span class="mood-label">Stressed</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="tired" title="Tired & Low Energy">
+                                        <span class="mood-emoji">😴</span>
+                                        <span class="mood-label">Tired</span>
+                                    </button>
+                                </div>
+                                <small class="input-help">Your mood helps us personalize the motivational message</small>
+                                <input type="hidden" id="selectedMood" value="">
+                            </div>
                         </div>
                         
                         <button class="generate-btn" onclick="generateAdvancedPlan()">
@@ -1181,20 +1691,117 @@
                     <!-- Progress Tab -->
                     <div id="progress-tab" class="tab-content">
                         <div class="tab-header">
-                            <h2>📈 My Progress</h2>
-                            <p>Track your learning progress and see insights about your study patterns.</p>
+                            <h2>🎮 My Progress</h2>
+                            <p>Track your daily study hours and maintain your learning streak!</p>
                         </div>
 
-                        <div style="text-align: center; padding: 3rem; color: #6b7280;">
-                            <i class="fas fa-chart-line" style="font-size: 4rem; margin-bottom: 1rem; color: #d1d5db;"></i>
-                            <h3>Progress Tracking Coming Soon</h3>
-                            <p>We're working on advanced progress analytics to help you track your learning journey.</p>
+                        <!-- Study Streak Counter -->
+                        <div class="streak-counter">
+                            <div class="streak-flame">🔥</div>
+                            <div class="streak-info">
+                                <div class="streak-number" id="streakNumber">0</div>
+                                <div class="streak-label">Day Streak</div>
+                            </div>
+                            <div class="streak-message" id="streakMessage">Start your journey!</div>
+                        </div>
+
+                        <!-- Overall Progress -->
+                        <div class="progress-overview">
+                            <div class="progress-card">
+                                <h3>📊 Current Study Plan</h3>
+                                <div id="currentPlanInfo">
+                                    <p>Create a study plan to start tracking!</p>
+                                </div>
+                                
+                                <!-- Overall Progress Bar -->
+                                <div class="progress-container" id="overallProgressContainer" style="display: none;">
+                                    <div class="progress-header">
+                                        <span>Overall Progress</span>
+                                        <span class="progress-percentage" id="overallPercentage">0%</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" id="overallProgressBar"></div>
+                                        <div class="progress-spark" id="overallSpark"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Tracking Grid -->
+                        <div class="daily-tracking" id="dailyTrackingSection" style="display: none;">
+                            <h3>📅 Daily Progress</h3>
+                            <div class="daily-grid" id="dailyGrid">
+                                <!-- Daily boxes will be generated here -->
+                            </div>
+                            
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                                <button class="action-btn" onclick="markTodayComplete()">
+                                    <i class="fas fa-check"></i> Complete Today
+                                </button>
+                                <button class="action-btn secondary" onclick="resetProgress()">
+                                    <i class="fas fa-refresh"></i> Reset Progress
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Achievements Section -->
+                        <div class="achievements-section" id="achievementsSection">
+                            <h3>🏆 Achievements</h3>
+                            <div class="achievements-grid" id="achievementsGrid">
+                                <div class="achievement locked" data-achievement="first-day">
+                                    <div class="achievement-icon">🎯</div>
+                                    <div class="achievement-name">First Day</div>
+                                    <div class="achievement-desc">Complete your first study session</div>
+                                </div>
+                                <div class="achievement locked" data-achievement="three-streak">
+                                    <div class="achievement-icon">🔥</div>
+                                    <div class="achievement-name">Hot Streak</div>
+                                    <div class="achievement-desc">Study for 3 days in a row</div>
+                                </div>
+                                <div class="achievement locked" data-achievement="week-warrior">
+                                    <div class="achievement-icon">⚡</div>
+                                    <div class="achievement-name">Week Warrior</div>
+                                    <div class="achievement-desc">Complete a full week</div>
+                                </div>
+                                <div class="achievement locked" data-achievement="perfect-week">
+                                    <div class="achievement-icon">💎</div>
+                                    <div class="achievement-name">Perfect Week</div>
+                                    <div class="achievement-desc">100% completion for 7 days</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Celebration Overlay -->
+                        <div class="celebration-overlay" id="celebrationOverlay">
+                            <div class="confetti" id="confetti"></div>
+                            <div class="celebration-message" id="celebrationMessage">
+                                <div class="celebration-icon">🎉</div>
+                                <div class="celebration-text">Congratulations!</div>
+                                <div class="celebration-subtext">You're making great progress!</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Footer -->
+    <footer style="background: rgba(255,255,255,0.1); padding: 1rem; text-align: center; margin-top: 2rem; backdrop-filter: blur(10px);">
+        <div style="max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="color: white; opacity: 0.8; font-size: 0.9rem;">
+                <i class="fas fa-graduation-cap"></i> AI Study Planner - Advanced IRWA Implementation
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="documentation.html" style="color: white; text-decoration: none; font-size: 0.95rem; padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.25); border-radius: 0.75rem; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.3); font-weight: 600;" 
+                   onmouseover="this.style.background='rgba(255,255,255,0.35)'; this.style.transform='translateY(-1px)'" 
+                   onmouseout="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='translateY(0)'"
+                    <i class="fas fa-book"></i> Project Documentation
+                </a>
+            </div>
+        </div>
+    </footer>
 
     <script src="enhanced-app.js"></script>
 </body>
