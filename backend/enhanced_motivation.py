@@ -14,6 +14,12 @@ import re
 from collections import defaultdict
 import asyncio
 
+# Import NLP processor for coursework demonstration
+try:
+    from backend.nlp_processor import nlp_processor
+except ImportError:
+    from nlp_processor import nlp_processor
+
 # Try to import advanced libraries
 try:
     import google.generativeai as genai
@@ -94,27 +100,59 @@ class AdvancedSentimentAnalyzer:
         }
     
     def analyze_mood(self, text: str, context: Dict = None) -> MoodProfile:
-        """Perform advanced multi-dimensional mood analysis"""
-        text_lower = text.lower()
+        """Perform advanced multi-dimensional mood analysis with NLP preprocessing"""
+        
+        # COURSEWORK DEMONSTRATION: Apply NLP techniques to user input
+        print(f"\n[COURSEWORK] Applying NLP techniques to analyze mood...")
+        
+        # Process text through NLP pipeline 
+        nlp_result = nlp_processor.process_text_full_pipeline(text)
+        
+        # Extract sentiment keywords using NLP preprocessing
+        sentiment_keywords = nlp_processor.extract_key_sentiment_words(text)
+        
+        # Use both original text and processed text for analysis
+        text_lower = nlp_result.lowercased
+        processed_tokens = nlp_result.final_processed
+        
+        print(f"[COURSEWORK] NLP processing complete. Using {len(processed_tokens)} processed tokens for analysis.")
+        
         scores = {}
         
-        # Calculate dimension scores
+        # Calculate dimension scores using NLP-processed tokens
         for dimension, levels in self.mood_keywords.items():
             dimension_scores = []
             
             for level, keywords in levels.items():
                 weight = {'high': 1.0, 'medium': 0.5, 'low': 0.0}.get(level, 0.5)
-                keyword_matches = [keyword for keyword in keywords if keyword in text_lower]
+                
+                # Check both original text and processed tokens for better matching
+                keyword_matches = []
+                
+                # Original text matching (as before)
+                original_matches = [keyword for keyword in keywords if keyword in text_lower]
+                keyword_matches.extend(original_matches)
+                
+                # NLP-processed token matching (NEW: using stemmed/lemmatized words)
+                for token in processed_tokens:
+                    for keyword in keywords:
+                        # Check if processed token matches keyword root
+                        if token == keyword or (len(token) > 3 and token in keyword) or (len(keyword) > 3 and keyword in token):
+                            if token not in [match for match in keyword_matches]:  # Avoid duplicates
+                                keyword_matches.append(f"{token}(processed)")
                 
                 # Add weight for each keyword match
                 for match in keyword_matches:
                     dimension_scores.append(weight)
+                    print(f"[NLP MATCH] Found '{match}' for {dimension} ({level}) -> weight: {weight}")
             
             # Calculate final score for dimension
             if dimension_scores:
                 scores[dimension] = sum(dimension_scores) / len(dimension_scores)
+                print(f"[NLP ANALYSIS] {dimension} final score: {scores[dimension]:.2f} (from {len(dimension_scores)} matches)")
             else:
                 scores[dimension] = 0.5  # Default neutral
+                print(f"[NLP ANALYSIS] {dimension} default neutral: 0.5")
         
         # Determine primary mood
         primary_mood = self._determine_primary_mood(scores, text_lower)

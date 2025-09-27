@@ -22,6 +22,18 @@ except ImportError:
         def generate_contextual_topics(self, subject, num_topics=8):
             return [f"Topic {i+1}: {subject} Learning" for i in range(num_topics)]
 
+# Import NLP processor for coursework demonstration
+try:
+    from backend.nlp_processor import nlp_processor
+    NLP_AVAILABLE = True
+except ImportError:
+    try:
+        from nlp_processor import nlp_processor
+        NLP_AVAILABLE = True
+    except ImportError:
+        NLP_AVAILABLE = False
+        print("[WARNING] NLP processor not available - coursework features disabled")
+
 # Try to import optional libraries, fall back to basic functionality if not available
 try:
     from dotenv import load_dotenv
@@ -46,6 +58,8 @@ class StudyPlan:
     start_date: str
     schedule: List[Dict]
     resources: List[Dict]
+    original_subject: str = None  # For NLP demonstration
+    nlp_feedback: str = None  # For NLP demonstration
 
 @dataclass
 class User:
@@ -256,6 +270,39 @@ class ScheduleCreatorAgent:
         else:
             self.topic_generator = IntelligentTopicGenerator()  # Uses fallback class
     
+    def process_subject_with_nlp(self, raw_subject: str) -> str:
+        """
+        COURSEWORK DEMONSTRATION: Process subject input using NLP techniques
+        Handles messy input like 'MACHINE LEARNING!!!', 'python programming???', etc.
+        """
+        if not NLP_AVAILABLE:
+            return raw_subject.strip().title()
+        
+        print(f"\n[COURSEWORK] Applying NLP techniques to subject input...")
+        print(f"[COURSEWORK] Raw input: '{raw_subject}'")
+        
+        # Apply full NLP pipeline to demonstrate all 6 techniques
+        processed_subject = nlp_processor.process_subject_input(raw_subject)
+        
+        print(f"[COURSEWORK] Processed subject: '{processed_subject}'")
+        
+        # Try to match to existing subjects in database
+        cleaned_subject = processed_subject.lower()
+        
+        # Look for matches in subject database using cleaned input
+        best_match = None
+        for subject_name in self.subjects_db.keys():
+            if cleaned_subject in subject_name.lower() or subject_name.lower() in cleaned_subject:
+                best_match = subject_name
+                break
+        
+        # Use matched subject or processed input
+        final_subject = best_match if best_match else processed_subject
+        
+        print(f"[COURSEWORK] Final subject: '{final_subject}' {'(matched from database)' if best_match else '(user input processed)'}")
+        
+        return final_subject
+    
     def load_subjects_database(self):
         """Load subjects database with estimated hours and topics"""
         try:
@@ -310,10 +357,17 @@ class ScheduleCreatorAgent:
                                    available_hours_per_day: int, 
                                    total_days: int, 
                                    knowledge_level: str = "beginner") -> StudyPlan:
-        """Create a personalized study schedule"""
+        """Create a personalized study schedule with NLP-processed subject input"""
         
-        # Try to get subject information from database first
-        subject_info = self.subjects_db.get(subject)
+        # COURSEWORK DEMONSTRATION: Apply NLP techniques to subject input
+        processed_subject = self.process_subject_with_nlp(subject)
+        
+        # Try to get subject information from database using processed subject
+        subject_info = self.subjects_db.get(processed_subject)
+        
+        # Also try original subject if processed didn't match
+        if not subject_info:
+            subject_info = self.subjects_db.get(subject)
         
         # If not found, try fuzzy matching with keywords
         if not subject_info:
@@ -351,15 +405,22 @@ class ScheduleCreatorAgent:
             available_hours_per_day, total_days
         )
         
+        # Prepare NLP demonstration data
+        original_subject = subject  # Store the original input
+        display_subject = processed_subject if processed_subject else subject
+        nlp_feedback = f"Processed from '{original_subject}'" if processed_subject and processed_subject != subject else None
+        
         return StudyPlan(
             user_id=user_id,
-            subject=subject,
+            subject=display_subject,
             total_hours=final_hours,
             daily_hours=available_hours_per_day,
             difficulty=knowledge_level,  # Use user's selected knowledge level, not subject default
             start_date=datetime.now().isoformat(),
             schedule=schedule,
-            resources=[]
+            resources=[],
+            original_subject=original_subject,  # For NLP demonstration
+            nlp_feedback=nlp_feedback  # For NLP demonstration
         )
     
     def _generate_detailed_schedule(self, subject: str, subject_info: Dict, 
@@ -549,6 +610,13 @@ class ResourceFinderAgent:
     
     def __init__(self):
         self.load_resources_database()
+        # Initialize NLP processor for coursework demonstration
+        try:
+            from nlp_processor import EnhancedNLPProcessor
+            self.nlp_processor = EnhancedNLPProcessor()
+        except ImportError:
+            print("[DEBUG] NLP processor not available for ResourceFinderAgent")
+            self.nlp_processor = None
     
     def load_resources_database(self):
         """Load educational resources database"""
@@ -800,37 +868,57 @@ class ResourceFinderAgent:
             selected_platforms.extend(remaining_platforms[:count - len(selected_platforms)])
         
         # Generate resources with better titles and descriptions
-        encoded_subject = subject.replace(" ", "+").replace("&", "and")
+        # Clean subject for URLs using NLP techniques
+        clean_subject = subject
+        try:
+            # Apply NLP cleaning for URL generation
+            if hasattr(self, 'nlp_processor') and self.nlp_processor:
+                clean_subject = self.nlp_processor.process_subject_input(subject)
+            else:
+                # Basic cleaning as fallback
+                import re
+                clean_subject = re.sub(r'[^\w\s]', '', subject)  # Remove punctuation
+                clean_subject = ' '.join(clean_subject.split())  # Normalize whitespace
+                clean_subject = clean_subject.lower().title()    # Proper case
+        except Exception as e:
+            print(f"[DEBUG] NLP processing failed for URL: {e}")
+            # Basic cleaning as fallback
+            import re
+            clean_subject = re.sub(r'[^\w\s]', '', subject)
+            clean_subject = ' '.join(clean_subject.split())
+            clean_subject = clean_subject.lower().title()
+        
+        encoded_subject = clean_subject.replace(" ", "+").replace("&", "and")
         
         for i, platform in enumerate(selected_platforms[:count]):
             # Create more descriptive titles based on platform type
             if platform['type'] == 'interactive':
-                title = f"Interactive {subject} Tutorial - {platform['name']}"
-                description = f"Hands-on interactive learning experience for {subject} on {platform['name']}"
+                title = f"Interactive {clean_subject} Tutorial - {platform['name']}"
+                description = f"Hands-on interactive learning experience for {clean_subject} on {platform['name']}"
             elif platform['type'] == 'video' or platform['type'] == 'video_series':
-                title = f"{subject} Video Course - {platform['name']}"
-                description = f"Comprehensive video tutorials and lectures on {subject}"
+                title = f"{clean_subject} Video Course - {platform['name']}"
+                description = f"Comprehensive video tutorials and lectures on {clean_subject}"
             elif platform['type'] == 'academic_course':
-                title = f"Academic {subject} Course - {platform['name']}"
-                description = f"University-level {subject} course materials and lectures"
+                title = f"Academic {clean_subject} Course - {platform['name']}"
+                description = f"University-level {clean_subject} course materials and lectures"
             elif platform['type'] == 'nanodegree':
-                title = f"{subject} Nanodegree Program - {platform['name']}"
-                description = f"Industry-focused {subject} program with real-world projects"
+                title = f"{clean_subject} Nanodegree Program - {platform['name']}"
+                description = f"Industry-focused {clean_subject} program with real-world projects"
             else:
-                title = f"{subject} Course - {platform['name']}"
-                description = f"Comprehensive {subject} learning resources and courses"
+                title = f"{clean_subject} Course - {platform['name']}"
+                description = f"Comprehensive {clean_subject} learning resources and courses"
             
             resources.append({
                 "id": f"fallback_{i+1}",
                 "title": title,
-                "subject": subject,
+                "subject": clean_subject,
                 "resource_type": platform["type"],
                 "difficulty": difficulty,
                 "url": platform["url_template"].format(encoded_subject),
                 "description": description,
                 "similarity_score": 0.75 - (i * 0.05),  # Slightly decrease score for lower priority
                 "source": platform["name"],
-                "tags": [subject.lower(), "learning", difficulty, platform["type"]]
+                "tags": [clean_subject.lower(), "learning", difficulty, platform["type"]]
             })
         
         return resources
