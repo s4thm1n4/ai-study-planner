@@ -465,11 +465,30 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                                 </div>
                                 <h3 class="section-title" style="color: white;">Stay Motivated</h3>
                             </div>
-                            <div class="motivation-quote">"${plan.motivation.quote.quote}"</div>
-                            <div class="motivation-author">— ${plan.motivation.quote.author}</div>
-                            <div class="motivation-tip">
-                                <strong>💡 Pro Tip:</strong> ${plan.motivation.tip.tip}
-                            </div>
+                            <div class="motivation-quote">"${plan.motivation.quote.content || plan.motivation.quote.quote || 'Stay motivated on your learning journey!'}"</div>
+                            <div class="motivation-author">— ${plan.motivation.quote.author || 'Study Planner AI'}</div>
+                            ${plan.motivation.encouragement ? `
+                                <div class="motivation-encouragement">
+                                    <strong>💪 Encouragement:</strong> ${plan.motivation.encouragement}
+                                </div>
+                            ` : ''}
+                            ${plan.motivation.tip ? `
+                                <div class="motivation-tip">
+                                    <strong>💡 Pro Tip:</strong> ${plan.motivation.tip.tip || plan.motivation.tip}
+                                </div>
+                            ` : ''}
+                            ${plan.motivation.mood_analysis ? `
+                                <div class="mood-insights">
+                                    <strong>🧠 Mood Insights:</strong> 
+                                    <span class="mood-badge mood-${plan.motivation.mood_analysis.detected_mood}">
+                                        ${plan.motivation.mood_analysis.detected_mood}
+                                    </span>
+                                    <div class="mood-levels">
+                                        Energy: ${(plan.motivation.mood_analysis.energy_level * 100).toFixed(0)}% | 
+                                        Confidence: ${(plan.motivation.mood_analysis.confidence_level * 100).toFixed(0)}%
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 ` : ''}
@@ -682,10 +701,10 @@ async function getMotivation() {
         
         console.log('Getting motivation for mood:', mood);
         
-        const response = await makeAuthenticatedRequest('/api/get-motivation', {
+        const response = await makeAuthenticatedRequest('/api/enhanced-motivation', {
             method: 'POST',
             body: JSON.stringify({
-                mood_text: mood
+                user_input: mood
             })
         });
         
@@ -712,20 +731,25 @@ function displayMotivationResults(data) {
     const resultsDiv = document.getElementById('motivation-results');
     if (!resultsDiv) return;
     
-    const sentiment = data.sentiment || {};
-    const motivation = data.motivation || {};
+    console.log('Displaying enhanced motivation results:', data);
+    
+    // Handle enhanced motivation response structure
+    const motivation = data.motivation || data;
+    const moodAnalysis = motivation.mood_analysis || {};
     
     resultsDiv.innerHTML = `
         <div class="results">
             <div class="results-header">
-                <h3>💪 Your Daily Motivation</h3>
+                <h3>💪 Your Enhanced Motivation</h3>
             </div>
             <div class="results-content">
-                ${sentiment.mood ? `
+                ${moodAnalysis.detected_mood ? `
                     <div class="plan-overview" style="margin-bottom: 2rem;">
-                        <div class="plan-stat" style="grid-column: 1 / -1; background: ${getSentimentColor(sentiment.mood)};">
-                            <div class="plan-stat-value">🎭 ${sentiment.mood.charAt(0).toUpperCase() + sentiment.mood.slice(1)}</div>
-                            <div class="plan-stat-label" style="color: rgba(255,255,255,0.8);">Current Mood</div>
+                        <div class="plan-stat" style="grid-column: 1 / -1; background: ${getEnhancedMoodColor(moodAnalysis.detected_mood)};">
+                            <div class="plan-stat-value">🎭 ${moodAnalysis.detected_mood.charAt(0).toUpperCase() + moodAnalysis.detected_mood.slice(1)}</div>
+                            <div class="plan-stat-label" style="color: rgba(255,255,255,0.8);">
+                                Detected Mood | Energy: ${(moodAnalysis.energy_level * 100).toFixed(0)}% | Confidence: ${(moodAnalysis.confidence_level * 100).toFixed(0)}%
+                            </div>
                         </div>
                     </div>
                 ` : ''}
@@ -737,11 +761,20 @@ function displayMotivationResults(data) {
                                 <div class="section-icon" style="background: rgba(255,255,255,0.2);">
                                     <i class="fas fa-quote-left"></i>
                                 </div>
-                                <h3 class="section-title" style="color: white;">Inspirational Quote</h3>
+                                <h3 class="section-title" style="color: white;">AI-Personalized Quote</h3>
                             </div>
-                            <div class="motivation-quote">"${motivation.quote.quote}"</div>
-                            <div class="motivation-author">— ${motivation.quote.author}</div>
+                            <div class="motivation-quote">"${motivation.quote.content || motivation.quote.quote || motivation.quote}"</div>
+                            <div class="motivation-author">— ${motivation.quote.author || 'AI Study Coach'}</div>
                         </div>
+                    </div>
+                ` : ''}
+                
+                ${motivation.encouragement ? `
+                    <div class="resource-item" style="border-left-color: #f59e0b; margin-bottom: 1.5rem;">
+                        <div class="resource-header">
+                            <h4 class="resource-title">💪 Personalized Encouragement</h4>
+                        </div>
+                        <p class="resource-description">${motivation.encouragement}</p>
                     </div>
                 ` : ''}
                 
@@ -750,16 +783,27 @@ function displayMotivationResults(data) {
                         <div class="resource-header">
                             <h4 class="resource-title">💡 Study Tip</h4>
                         </div>
-                        <p class="resource-description">${motivation.tip.tip}</p>
+                        <p class="resource-description">${motivation.tip.tip || motivation.tip}</p>
                     </div>
                 ` : ''}
                 
-                ${motivation.encouragement ? `
-                    <div class="resource-item" style="border-left-color: #f59e0b; margin-top: 1.5rem;">
+                ${moodAnalysis.suggestions && moodAnalysis.suggestions.length > 0 ? `
+                    <div class="resource-item" style="border-left-color: #8b5cf6; margin-top: 1.5rem;">
                         <div class="resource-header">
-                            <h4 class="resource-title">🌟 Personal Message</h4>
+                            <h4 class="resource-title">🧠 AI Mood Insights</h4>
                         </div>
-                        <p class="resource-description">${motivation.encouragement}</p>
+                        <ul style="margin: 0; padding-left: 1.5rem;">
+                            ${moodAnalysis.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                ${data.ethics_validation ? `
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 0.75rem; border-left: 4px solid #10b981;">
+                        <div style="font-size: 0.875rem; color: #065f46;">
+                            <strong>🛡️ AI Ethics:</strong> This content has been validated for bias, appropriateness, and cultural sensitivity.
+                            ${data.ethics_validation.transparency ? `<br><strong>Confidence:</strong> ${(data.ethics_validation.transparency.confidence * 100).toFixed(0)}%` : ''}
+                        </div>
                     </div>
                 ` : ''}
             </div>
@@ -772,6 +816,18 @@ function getSentimentColor(mood) {
         case 'positive': return 'rgba(16, 185, 129, 0.2)';
         case 'negative': return 'rgba(239, 68, 68, 0.2)';
         default: return 'rgba(99, 102, 241, 0.2)';
+    }
+}
+
+function getEnhancedMoodColor(mood) {
+    switch (mood?.toLowerCase()) {
+        case 'optimistic': return 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        case 'confident': return 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+        case 'neutral': return 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+        case 'anxious': return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+        case 'frustrated': return 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        case 'overwhelmed': return 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
+        default: return 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)';
     }
 }
 

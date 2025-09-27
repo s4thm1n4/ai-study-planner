@@ -11,7 +11,16 @@ from typing import List, Dict, Any, Optional
 import asyncio
 from dataclasses import dataclass
 import hashlib
-from intelligent_topics import IntelligentTopicGenerator
+# Try to import intelligent topics generator
+try:
+    from intelligent_topics import IntelligentTopicGenerator
+    INTELLIGENT_TOPICS_AVAILABLE = True
+except ImportError:
+    INTELLIGENT_TOPICS_AVAILABLE = False
+    class IntelligentTopicGenerator:
+        def __init__(self): pass
+        def generate_contextual_topics(self, subject, num_topics=8):
+            return [f"Topic {i+1}: {subject} Learning" for i in range(num_topics)]
 
 # Try to import optional libraries, fall back to basic functionality if not available
 try:
@@ -242,7 +251,10 @@ class ScheduleCreatorAgent:
             self.model = genai.GenerativeModel('gemini-pro')
         self.load_subjects_database()
         # Initialize the intelligent topic generator
-        self.topic_generator = IntelligentTopicGenerator()
+        if INTELLIGENT_TOPICS_AVAILABLE:
+            self.topic_generator = IntelligentTopicGenerator()
+        else:
+            self.topic_generator = IntelligentTopicGenerator()  # Uses fallback class
     
     def load_subjects_database(self):
         """Load subjects database with estimated hours and topics"""
@@ -824,10 +836,27 @@ class ResourceFinderAgent:
         return resources
 
 class MotivationCoachAgent:
-    """Provides motivation and tracks progress"""
+    """Enhanced motivation coach with AI-powered personalization and ethics compliance"""
     
     def __init__(self):
         self.load_motivation_data()
+        # Import enhanced motivation components
+        try:
+            from enhanced_motivation import (
+                AdvancedSentimentAnalyzer, 
+                DynamicContentGenerator, 
+                IntelligentMotivationSelector
+            )
+            from ai_ethics import AIEthicsFramework
+            
+            self.sentiment_analyzer = AdvancedSentimentAnalyzer()
+            self.content_generator = DynamicContentGenerator()
+            self.content_selector = IntelligentMotivationSelector()
+            self.ethics_framework = AIEthicsFramework()
+            self.enhanced_mode = True
+        except ImportError:
+            print("Enhanced motivation system not available, using basic mode")
+            self.enhanced_mode = False
     
     def load_motivation_data(self):
         """Load motivational quotes and tips"""
@@ -888,19 +917,124 @@ class MotivationCoachAgent:
             "subjectivity": 0.5
         }
     
-    def get_motivation_message(self, mood: str = "neutral", 
-                             progress_percentage: float = 0) -> Dict:
-        """Get appropriate motivation based on mood and progress"""
+    def get_motivation_message(self, 
+                             user_input: str = "", 
+                             mood: str = "neutral", 
+                             progress_percentage: float = 0,
+                             subject: str = None,
+                             user_id: str = None) -> Dict:
+        """Enhanced motivation with AI-powered personalization and ethics validation"""
         
-        # Get motivational quote
+        if self.enhanced_mode and user_input:
+            return self._get_enhanced_motivation(user_input, progress_percentage, subject, user_id)
+        else:
+            return self._get_basic_motivation(mood, progress_percentage)
+    
+    def _get_enhanced_motivation(self, user_input: str, progress_percentage: float, 
+                               subject: str, user_id: str) -> Dict:
+        """Get AI-powered personalized motivation with ethics compliance"""
+        
+        # Analyze user's emotional state
+        mood_profile = self.sentiment_analyzer.analyze_mood(user_input)
+        
+        # Generate content options
+        available_content = []
+        
+        # Add database content
         quotes = self.motivation_data.get("motivational_quotes", [])
-        selected_quote = quotes[0] if quotes else {
-            "quote": "Keep going! You're doing great!",
-            "author": "Study Planner AI"
+        for quote_data in quotes:
+            if mood_profile.primary_mood in quote_data.get("mood_target", []):
+                from enhanced_motivation import MotivationContent
+                content = MotivationContent(
+                    content=quote_data["quote"],
+                    author=quote_data["author"],
+                    category=quote_data.get("category", "general"),
+                    mood_targets=[quote_data.get("mood_target", mood_profile.primary_mood)],
+                    effectiveness_score=0.7,
+                    source="database"
+                )
+                available_content.append(content)
+        
+        # Generate AI content using LLM for personalized responses
+        try:
+            # Always generate AI content for personalized experience
+            ai_content = self.content_generator.generate_personalized_quote_sync(mood_profile, subject, user_input)
+            if ai_content:
+                available_content.append(ai_content)
+                print(f"[SUCCESS] AI content generated: {ai_content.content[:50]}...")
+        except Exception as e:
+            print(f"[WARNING] AI content generation failed: {e}")
+            # Generate dynamic encouragement based on user input
+            dynamic_encouragement = self._generate_dynamic_encouragement(user_input, mood_profile)
+            if dynamic_encouragement:
+                available_content.append(dynamic_encouragement)
+        
+        # Select optimal content
+        if available_content:
+            selected_content = self.content_selector.select_optimal_content(
+                available_content, mood_profile, user_id, self._get_time_context()
+            )
+        else:
+            # Fallback
+            selected_content = self.content_generator._fallback_quote(mood_profile)
+        
+        # Create response with ethics validation
+        response_data = {
+            "quote": {
+                "content": selected_content.content,
+                "author": selected_content.author
+            },
+            "mood_analysis": {
+                "detected_mood": mood_profile.primary_mood,
+                "energy_level": mood_profile.energy_level,
+                "confidence_level": mood_profile.confidence_level,
+                "stress_level": mood_profile.stress_level
+            },
+            "personalization": {
+                "content_source": selected_content.source,
+                "effectiveness_score": selected_content.effectiveness_score,
+                "mood_match": mood_profile.primary_mood in selected_content.mood_targets
+            },
+            "encouragement": self._generate_contextual_encouragement(mood_profile, progress_percentage)
         }
         
-        # Get study tip
+        # Ethics validation
+        is_ethical, ethics_report = self.ethics_framework.validate_ai_decision(
+            agent_type="MotivationCoachAgent",
+            input_data={"user_input": user_input, "mood": mood_profile.primary_mood},
+            output_data=response_data,
+            confidence_score=selected_content.effectiveness_score,
+            reasoning=f"Selected {selected_content.source} content matching {mood_profile.primary_mood} mood",
+            user_id=user_id
+        )
+        
+        # Add transparency information
+        response_data["transparency"] = {
+            "why_this_content": f"Selected based on your detected mood ({mood_profile.primary_mood}) and current emotional state",
+            "confidence_level": ethics_report["transparency_info"]["confidence_level"],
+            "alternative_suggestions": ethics_report["transparency_info"]["alternative_options"][:2],
+            "ethics_validated": is_ethical
+        }
+        
+        if not is_ethical:
+            # Use fallback content if ethics validation fails
+            response_data = self._get_basic_motivation(mood_profile.primary_mood, progress_percentage)
+            response_data["note"] = "Using validated fallback content for safety"
+        
+        return response_data
+    
+    def _get_basic_motivation(self, mood: str, progress_percentage: float) -> Dict:
+        """Fallback basic motivation system"""
+        quotes = self.motivation_data.get("motivational_quotes", [])
         tips = self.motivation_data.get("study_tips", [])
+        
+        # Simple mood-based selection
+        mood_quotes = [q for q in quotes if mood in q.get("mood_target", [])]
+        selected_quote = mood_quotes[0] if mood_quotes else (quotes[0] if quotes else {
+            "quote": "Keep going! You're doing great!",
+            "author": "Study Planner AI"
+        })
+        
         selected_tip = tips[0] if tips else {
             "tip": "Take regular breaks to maintain focus.",
             "category": "general"
@@ -909,8 +1043,102 @@ class MotivationCoachAgent:
         return {
             "quote": selected_quote,
             "tip": selected_tip,
-            "encouragement": f"You're {progress_percentage:.1%} through your journey. Keep it up!"
+            "encouragement": f"You're {progress_percentage:.1%} through your journey. Keep it up!",
+            "mode": "basic"
         }
+    
+    def _generate_contextual_encouragement(self, mood_profile, progress_percentage: float) -> str:
+        """Generate contextual encouragement based on mood and progress"""
+        encouragements = {
+            'overwhelmed': [
+                f"You're {progress_percentage:.1%} complete. Take it one step at a time!",
+                "Breaking things down makes them manageable. You've got this!",
+                "Progress is progress, no matter how small. Keep going!"
+            ],
+            'doubtful': [
+                f"You've already made it {progress_percentage:.1%} of the way. That's proof you can do this!",
+                "Every expert started where you are now. Trust your journey.",
+                "Your willingness to learn shows your capability."
+            ],
+            'motivated': [
+                f"Amazing energy! You're {progress_percentage:.1%} through and going strong!",
+                "Channel this motivation - you're in the perfect mindset for learning!",
+                "This enthusiasm will take you far. Keep up the momentum!"
+            ],
+            'exhausted': [
+                f"You've made great progress at {progress_percentage:.1%}. Rest is part of success.",
+                "Take care of yourself. Learning happens when you're well-rested too.",
+                "Burnout is real. Your health comes first, learning comes second."
+            ]
+        }
+        
+        mood_messages = encouragements.get(mood_profile.primary_mood, [
+            f"You're {progress_percentage:.1%} through your learning journey. Every step counts!"
+        ])
+        
+        import random
+        return random.choice(mood_messages)
+    
+    def _generate_dynamic_encouragement(self, user_input: str, mood_profile):
+        """Generate dynamic encouragement based on user's specific input"""
+        try:
+            from backend.enhanced_motivation import MotivationContent
+        except ImportError:
+            from enhanced_motivation import MotivationContent
+        from datetime import datetime
+        
+        input_lower = user_input.lower()
+        
+        # Analyze user input for specific encouragement
+        if any(word in input_lower for word in ['machine learning', 'ml', 'ai', 'artificial intelligence']):
+            content = "Machine Learning is challenging but incredibly rewarding. Every algorithm you master opens new possibilities!"
+            author = "ML Mentor"
+        elif any(word in input_lower for word in ['python', 'programming', 'coding', 'code']):
+            content = "Programming is a superpower in today's world. Every line of code brings you closer to mastery!"
+            author = "Code Coach"
+        elif any(word in input_lower for word in ['math', 'mathematics', 'calculus', 'statistics']):
+            content = "Math is the language of the universe. Each problem you solve strengthens your analytical mind!"
+            author = "Math Mentor"
+        elif any(word in input_lower for word in ['exam', 'test', 'quiz']):
+            content = "Tests are opportunities to showcase your growth. You've prepared more than you realize!"
+            author = "Exam Expert"
+        elif any(word in input_lower for word in ['project', 'assignment', 'homework']):
+            content = "Projects are where theory meets practice. This is where real learning happens!"
+            author = "Project Guide"
+        elif any(word in input_lower for word in ['struggling', 'difficult', 'hard', 'confusing']):
+            content = "Struggle is the pathway to strength. Your brain is literally growing with each challenge!"
+            author = "Growth Mindset Coach"
+        elif any(word in input_lower for word in ['tired', 'exhausted', 'burned out']):
+            content = "Rest is productive. Your brain consolidates learning during breaks. Take care of yourself!"
+            author = "Wellness Guide"
+        else:
+            # Default dynamic encouragement
+            content = f"Your dedication to learning shines through. Keep pushing forward - you're making real progress!"
+            author = "Personal Learning Coach"
+        
+        return MotivationContent(
+            content=content,
+            author=author,
+            category="dynamic_encouragement",
+            mood_targets=[mood_profile.primary_mood],
+            effectiveness_score=0.8,
+            source="dynamic_ai_system",
+            generated_at=datetime.now()
+        )
+    
+    def _get_time_context(self) -> str:
+        """Determine time context for content selection"""
+        from datetime import datetime
+        hour = datetime.now().hour
+        
+        if 5 <= hour < 12:
+            return 'morning'
+        elif 12 <= hour < 17:
+            return 'afternoon'
+        elif 17 <= hour < 22:
+            return 'evening'
+        else:
+            return 'late_night'
 
 class CoordinatorAgent:
     """Coordinates between all agents and manages the overall system"""
