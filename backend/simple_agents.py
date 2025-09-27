@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional
 import asyncio
 from dataclasses import dataclass
 import hashlib
+from intelligent_topics import IntelligentTopicGenerator
 
 # Try to import optional libraries, fall back to basic functionality if not available
 try:
@@ -240,6 +241,8 @@ class ScheduleCreatorAgent:
             genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
             self.model = genai.GenerativeModel('gemini-pro')
         self.load_subjects_database()
+        # Initialize the intelligent topic generator
+        self.topic_generator = IntelligentTopicGenerator()
     
     def load_subjects_database(self):
         """Load subjects database with estimated hours and topics"""
@@ -247,25 +250,49 @@ class ScheduleCreatorAgent:
             with open('datasets/subjects_database.json', 'r') as f:
                 data = json.load(f)
                 self.subjects_db = {subject['name']: subject for subject in data['subjects']}
-        except:
+                
+            # Also create a searchable index by keywords
+            self.subjects_by_keywords = {}
+            for name, subject in self.subjects_db.items():
+                # Index by keywords
+                for keyword in subject.get('keywords', []):
+                    if keyword not in self.subjects_by_keywords:
+                        self.subjects_by_keywords[keyword] = []
+                    self.subjects_by_keywords[keyword].append(name)
+                
+                # Index by category
+                category = subject.get('category', '')
+                if category and category not in self.subjects_by_keywords:
+                    self.subjects_by_keywords[category] = []
+                if category:
+                    self.subjects_by_keywords[category].append(name)
+        except Exception as e:
+            print(f"Error loading subjects database: {e}")
             # Fallback subjects database
             self.subjects_db = {
                 "Machine Learning": {
                     "estimated_hours": 30,
                     "difficulty": "intermediate",
+                    "category": "Computer Science",
+                    "keywords": ["ML", "algorithms", "data science", "prediction"],
                     "topics": ["Introduction to ML", "Supervised Learning", "Unsupervised Learning", "Model Evaluation", "Deep Learning Basics"]
                 },
                 "Python Programming": {
                     "estimated_hours": 25,
                     "difficulty": "beginner",
+                    "category": "Programming",
+                    "keywords": ["python", "coding", "programming", "scripting"],
                     "topics": ["Python Basics", "Data Structures", "Functions", "Object-Oriented Programming", "Libraries"]
                 },
                 "Data Science": {
                     "estimated_hours": 35,
                     "difficulty": "intermediate",
+                    "category": "Computer Science",
+                    "keywords": ["data analysis", "statistics", "visualization", "insights"],
                     "topics": ["Data Analysis", "Statistics", "Data Visualization", "Machine Learning", "Big Data"]
                 }
             }
+            self.subjects_by_keywords = {}
     
     def create_personalized_schedule(self, user_id: str, subject: str, 
                                    available_hours_per_day: int, 
@@ -276,7 +303,11 @@ class ScheduleCreatorAgent:
         # Try to get subject information from database first
         subject_info = self.subjects_db.get(subject)
         
-        # If subject not in database, generate dynamic content using AI
+        # If not found, try fuzzy matching with keywords
+        if not subject_info:
+            subject_info = self._find_similar_subject(subject)
+        
+        # If still not found and AI is available, generate dynamic content
         if not subject_info and GENAI_AVAILABLE:
             subject_info = self._generate_subject_info_with_ai(subject, knowledge_level, total_days)
         
@@ -284,7 +315,7 @@ class ScheduleCreatorAgent:
         if not subject_info:
             subject_info = {
                 "estimated_hours": max(10, available_hours_per_day * total_days),
-                "difficulty": "intermediate",
+                "difficulty": knowledge_level,  # Use actual knowledge level
                 "topics": self._generate_dynamic_topics(subject, total_days)
             }
         
@@ -313,7 +344,7 @@ class ScheduleCreatorAgent:
             subject=subject,
             total_hours=final_hours,
             daily_hours=available_hours_per_day,
-            difficulty=subject_info.get("difficulty", "intermediate"),
+            difficulty=knowledge_level,  # Use user's selected knowledge level, not subject default
             start_date=datetime.now().isoformat(),
             schedule=schedule,
             resources=[]
@@ -430,27 +461,76 @@ class ScheduleCreatorAgent:
         }
     
     def _generate_dynamic_topics(self, subject: str, total_days: int) -> List[str]:
-        """Generate dynamic topics based on subject when AI is not available"""
-        # Create intelligent topic progression based on common learning patterns
-        topics = []
+        """
+        AI-powered topic generation that intelligently creates appropriate 
+        learning topics for any subject without hardcoding.
+        """
+        # Use the intelligent topic generator
+        num_topics = max(3, min(total_days, 8))  # Generate between 3-8 topics based on days
         
-        # Basic structure for any subject
-        base_topics = [
-            f"Introduction to {subject}",
-            f"Fundamental Concepts of {subject}",
-            f"Core Principles in {subject}",
-            f"Practical Applications of {subject}",
-            f"Advanced Topics in {subject}",
-            f"Best Practices and Techniques",
-            f"Real-world Examples and Case Studies",
-            f"Review and Practice"
-        ]
+        try:
+            # Generate contextually appropriate topics using AI
+            topics = self.topic_generator.generate_contextual_topics(subject, num_topics)
+            
+            # Ensure we have the right number of topics
+            if len(topics) < num_topics:
+                # Fill any gaps with basic topics
+                basic_topics = [
+                    f"Fundamentals of {subject}",
+                    f"Practical {subject} Applications", 
+                    f"Advanced {subject} Concepts",
+                    f"{subject} Best Practices",
+                    f"Professional {subject} Skills"
+                ]
+                
+                for topic in basic_topics:
+                    if len(topics) < num_topics and topic not in topics:
+                        topics.append(topic)
+            
+            return topics[:num_topics]
+            
+        except Exception as e:
+            # Fallback to simple generic topics if AI generation fails
+            print(f"AI topic generation failed: {e}. Using fallback.")
+            return [
+                f"Introduction to {subject}",
+                f"{subject} Fundamentals",
+                f"Practical {subject} Skills", 
+                f"Advanced {subject} Techniques",
+                f"{subject} Applications",
+                f"Professional {subject} Development"
+            ][:num_topics]
+    
+    def _find_similar_subject(self, subject: str) -> Dict:
+        """Find similar subjects using keyword matching and fuzzy search"""
+        subject_lower = subject.lower()
+        best_match = None
+        best_score = 0
         
-        # Adjust number of topics based on available days
-        num_topics = min(len(base_topics), max(3, total_days))
-        topics = base_topics[:num_topics]
+        # Check direct keyword matches first
+        for keyword, subject_names in getattr(self, 'subjects_by_keywords', {}).items():
+            if subject_lower in keyword.lower() or keyword.lower() in subject_lower:
+                for subject_name in subject_names:
+                    subject_data = self.subjects_db.get(subject_name)
+                    if subject_data:
+                        score = len(keyword) / len(subject_lower)  # Longer matches get higher scores
+                        if score > best_score:
+                            best_score = score
+                            best_match = subject_data.copy()
+                            best_match['matched_via'] = f'keyword: {keyword}'
         
-        return topics
+        # Check partial matches in subject names
+        for subject_name, subject_data in self.subjects_db.items():
+            # Check if search term is in subject name or vice versa
+            if (subject_lower in subject_name.lower() or 
+                any(word in subject_name.lower() for word in subject_lower.split())):
+                score = 0.8  # High score for name matches
+                if score > best_score:
+                    best_score = score
+                    best_match = subject_data.copy()
+                    best_match['matched_via'] = f'name similarity: {subject_name}'
+        
+        return best_match if best_score > 0.3 else None  # Only return if reasonably good match
 
 class ResourceFinderAgent:
     """Resource finder with basic search capabilities"""
@@ -493,26 +573,62 @@ class ResourceFinderAgent:
             ]
     
     def find_best_resources(self, subject: str, difficulty: str = "beginner", 
-                          resource_type: str = None, limit: int = 3) -> List[Dict]:
+                          resource_type: str = None, limit: int = 3, learning_style: str = "mixed") -> List[Dict]:
         """Find best resources using simple matching and generate fallbacks"""
         best_resources = []
         
         # First, try to find resources in the database
         if self.resources_db:
             for resource in self.resources_db:
-                # Simple matching based on subject
-                if (subject.lower() in resource.get('subject', '').lower() or
-                    subject.lower() in resource.get('title', '').lower() or
-                    any(subject.lower() in tag.lower() for tag in resource.get('tags', []))):
-                    
+                score = 0
+                subject_lower = subject.lower()
+                
+                # Enhanced matching with scoring
+                # Exact subject match gets highest score
+                if subject_lower == resource.get('subject', '').lower():
+                    score = 1.0
+                # Subject contains the search term
+                elif subject_lower in resource.get('subject', '').lower():
+                    score = 0.9
+                # Title contains the search term
+                elif subject_lower in resource.get('title', '').lower():
+                    score = 0.8
+                # Keywords match
+                elif any(subject_lower in keyword.lower() for keyword in resource.get('keywords', [])):
+                    score = 0.85
+                # Tags match
+                elif any(subject_lower in tag.lower() for tag in resource.get('tags', [])):
+                    score = 0.75
+                # Category match
+                elif subject_lower in resource.get('category', '').lower():
+                    score = 0.7
+                
+                # If we found a match
+                if score > 0:
                     # Filter by resource type if specified
                     if resource_type is None or resource.get('resource_type') == resource_type:
-                        # Add similarity score for sorting
-                        resource['similarity_score'] = 0.9  # High score for database matches
-                        best_resources.append(resource)
-                        
-                        if len(best_resources) >= limit:
-                            break
+                        # Filter by difficulty if specified
+                        if difficulty == "beginner" or resource.get('difficulty') == difficulty:
+                            resource_copy = resource.copy()
+                            
+                            # Boost score based on learning style preference
+                            if learning_style != "mixed":
+                                resource_type_val = resource.get('resource_type', '').lower()
+                                if learning_style == "visual" and resource_type_val in ['video_course', 'video_series', 'interactive_tutorial']:
+                                    score += 0.15
+                                elif learning_style == "auditory" and resource_type_val in ['video_course', 'podcast']:
+                                    score += 0.15
+                                elif learning_style == "reading" and resource_type_val in ['book', 'guide', 'tutorial', 'academic_paper']:
+                                    score += 0.15
+                                elif learning_style == "kinesthetic" and resource_type_val in ['interactive_course', 'interactive_tutorial', 'mobile_app']:
+                                    score += 0.15
+                            
+                            resource_copy['similarity_score'] = min(score, 1.0)  # Cap at 1.0
+                            best_resources.append(resource_copy)
+            
+            # Sort by similarity score (highest first)
+            best_resources.sort(key=lambda x: x.get('similarity_score', 0), reverse=True)
+            best_resources = best_resources[:limit]
         
         # If we don't have enough resources, generate fallback resources
         if len(best_resources) < limit:
@@ -525,22 +641,12 @@ class ResourceFinderAgent:
         """Generate fallback resources for any subject"""
         resources = []
         
-        # Common educational platforms with search URLs
+        # Comprehensive educational platforms with diverse learning formats
         platforms = [
             {
                 "name": "Coursera",
                 "url_template": "https://www.coursera.org/search?query={}",
                 "type": "online_course"
-            },
-            {
-                "name": "YouTube",
-                "url_template": "https://www.youtube.com/results?search_query={}+tutorial",
-                "type": "video"
-            },
-            {
-                "name": "Khan Academy",
-                "url_template": "https://www.khanacademy.org/search?page_search_query={}",
-                "type": "interactive"
             },
             {
                 "name": "edX",
@@ -551,22 +657,168 @@ class ResourceFinderAgent:
                 "name": "Udemy",
                 "url_template": "https://www.udemy.com/courses/search/?q={}",
                 "type": "online_course"
+            },
+            {
+                "name": "Khan Academy",
+                "url_template": "https://www.khanacademy.org/search?page_search_query={}",
+                "type": "interactive"
+            },
+            {
+                "name": "YouTube",
+                "url_template": "https://www.youtube.com/results?search_query={}+tutorial",
+                "type": "video"
+            },
+            {
+                "name": "Pluralsight",
+                "url_template": "https://www.pluralsight.com/search?q={}",
+                "type": "online_course"
+            },
+            {
+                "name": "LinkedIn Learning",
+                "url_template": "https://www.linkedin.com/learning/search?keywords={}",
+                "type": "online_course"
+            },
+            {
+                "name": "Skillshare",
+                "url_template": "https://www.skillshare.com/search?query={}",
+                "type": "creative_course"
+            },
+            {
+                "name": "FreeCodeCamp",
+                "url_template": "https://www.freecodecamp.org/learn",
+                "type": "interactive"
+            },
+            {
+                "name": "Codecademy",
+                "url_template": "https://www.codecademy.com/search?query={}",
+                "type": "interactive"
+            },
+            {
+                "name": "MIT OpenCourseWare",
+                "url_template": "https://ocw.mit.edu/search/?q={}",
+                "type": "academic_course"
+            },
+            {
+                "name": "Stanford Online",
+                "url_template": "https://online.stanford.edu/search-catalog?keywords={}",
+                "type": "academic_course"
+            },
+            {
+                "name": "Udacity",
+                "url_template": "https://www.udacity.com/catalog?query={}",
+                "type": "nanodegree"
+            },
+            {
+                "name": "Brilliant",
+                "url_template": "https://brilliant.org/search/?q={}",
+                "type": "interactive"
+            },
+            {
+                "name": "Datacamp",
+                "url_template": "https://www.datacamp.com/search?q={}",
+                "type": "data_science_course"
+            },
+            {
+                "name": "GitHub Learning Lab",
+                "url_template": "https://lab.github.com/",
+                "type": "hands_on"
+            },
+            {
+                "name": "W3Schools",
+                "url_template": "https://www.w3schools.com/",
+                "type": "tutorial"
+            },
+            {
+                "name": "MDN Web Docs",
+                "url_template": "https://developer.mozilla.org/en-US/search?q={}",
+                "type": "documentation"
+            },
+            {
+                "name": "Crash Course (YouTube)",
+                "url_template": "https://www.youtube.com/results?search_query=crash+course+{}",
+                "type": "video_series"
+            },
+            {
+                "name": "TED-Ed",
+                "url_template": "https://ed.ted.com/search?qs={}",
+                "type": "educational_video"
             }
         ]
         
-        for i, platform in enumerate(platforms[:count]):
-            encoded_subject = subject.replace(" ", "+")
+        # Intelligently select platforms based on subject type
+        subject_lower = subject.lower()
+        
+        # Define subject-specific platform preferences
+        programming_subjects = ['programming', 'coding', 'javascript', 'python', 'java', 'web development', 'software']
+        data_subjects = ['data science', 'machine learning', 'statistics', 'analytics', 'ai', 'artificial intelligence']
+        business_subjects = ['business', 'marketing', 'finance', 'management', 'entrepreneurship']
+        creative_subjects = ['design', 'art', 'photography', 'video', 'music', 'creative']
+        academic_subjects = ['mathematics', 'physics', 'chemistry', 'biology', 'history', 'literature']
+        
+        # Select best platforms for the subject
+        preferred_platforms = []
+        
+        if any(word in subject_lower for word in programming_subjects):
+            preferred_platforms = ['FreeCodeCamp', 'Codecademy', 'Udemy', 'Pluralsight', 'GitHub Learning Lab', 'YouTube', 'MDN Web Docs']
+        elif any(word in subject_lower for word in data_subjects):
+            preferred_platforms = ['Datacamp', 'Coursera', 'edX', 'Udacity', 'Brilliant', 'YouTube', 'MIT OpenCourseWare']
+        elif any(word in subject_lower for word in business_subjects):
+            preferred_platforms = ['LinkedIn Learning', 'Coursera', 'edX', 'Udemy', 'YouTube', 'Stanford Online']
+        elif any(word in subject_lower for word in creative_subjects):
+            preferred_platforms = ['Skillshare', 'YouTube', 'Udemy', 'LinkedIn Learning', 'TED-Ed']
+        elif any(word in subject_lower for word in academic_subjects):
+            preferred_platforms = ['Khan Academy', 'MIT OpenCourseWare', 'Stanford Online', 'edX', 'Coursera', 'Crash Course (YouTube)', 'TED-Ed']
+        else:
+            # General subjects - use a balanced mix
+            preferred_platforms = ['Coursera', 'edX', 'YouTube', 'Khan Academy', 'Udemy', 'Brilliant', 'TED-Ed']
+        
+        # Filter platforms based on preferences and ensure variety
+        selected_platforms = []
+        for platform_name in preferred_platforms:
+            for platform in platforms:
+                if platform['name'] == platform_name:
+                    selected_platforms.append(platform)
+                    break
+            if len(selected_platforms) >= count:
+                break
+        
+        # If we don't have enough, add remaining platforms
+        if len(selected_platforms) < count:
+            remaining_platforms = [p for p in platforms if p not in selected_platforms]
+            selected_platforms.extend(remaining_platforms[:count - len(selected_platforms)])
+        
+        # Generate resources with better titles and descriptions
+        encoded_subject = subject.replace(" ", "+").replace("&", "and")
+        
+        for i, platform in enumerate(selected_platforms[:count]):
+            # Create more descriptive titles based on platform type
+            if platform['type'] == 'interactive':
+                title = f"Interactive {subject} Tutorial - {platform['name']}"
+                description = f"Hands-on interactive learning experience for {subject} on {platform['name']}"
+            elif platform['type'] == 'video' or platform['type'] == 'video_series':
+                title = f"{subject} Video Course - {platform['name']}"
+                description = f"Comprehensive video tutorials and lectures on {subject}"
+            elif platform['type'] == 'academic_course':
+                title = f"Academic {subject} Course - {platform['name']}"
+                description = f"University-level {subject} course materials and lectures"
+            elif platform['type'] == 'nanodegree':
+                title = f"{subject} Nanodegree Program - {platform['name']}"
+                description = f"Industry-focused {subject} program with real-world projects"
+            else:
+                title = f"{subject} Course - {platform['name']}"
+                description = f"Comprehensive {subject} learning resources and courses"
+            
             resources.append({
                 "id": f"fallback_{i+1}",
-                "title": f"{subject} - {platform['name']} Course",
+                "title": title,
                 "subject": subject,
                 "resource_type": platform["type"],
                 "difficulty": difficulty,
                 "url": platform["url_template"].format(encoded_subject),
-                "description": f"Comprehensive {subject} learning resources on {platform['name']}",
-                "similarity_score": 0.7,  # Lower score for generated resources
+                "description": description,
+                "similarity_score": 0.75 - (i * 0.05),  # Slightly decrease score for lower priority
                 "source": platform["name"],
-                "tags": [subject.lower(), "learning", difficulty]
+                "tags": [subject.lower(), "learning", difficulty, platform["type"]]
             })
         
         return resources
@@ -682,9 +934,9 @@ class CoordinatorAgent:
                 user_id, subject, available_hours_per_day, total_days, knowledge_level
             )
             
-            # 2. Find best resources
+            # 2. Find best resources with learning style preference
             resources = self.resource_agent.find_best_resources(
-                subject, knowledge_level, limit=5
+                subject, knowledge_level, limit=5, learning_style=learning_style
             )
             study_plan.resources = resources
             

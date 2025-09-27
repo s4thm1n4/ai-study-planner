@@ -7,15 +7,25 @@ import asyncio
 from jose import jwt
 from jose.exceptions import JWTError
 import os
+import sys
 from datetime import datetime, timedelta
 
-# ✅ Import agents robustly for both layouts
+# Add current directory to Python path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+# ✅ Import from simple_agents (updated module structure)
 try:
-    from .agents import generate_schedule, find_resource
-    from .simple_agents import coordinator
+    # Try relative import first (when running as module)
+    from .simple_agents import generate_schedule, find_resource, coordinator
 except ImportError:
-    from agents import generate_schedule, find_resource
-    from simple_agents import coordinator
+    try:
+        # Try absolute import from backend directory
+        from backend.simple_agents import generate_schedule, find_resource, coordinator
+    except ImportError:
+        # Fallback for direct execution from backend directory
+        from simple_agents import generate_schedule, find_resource, coordinator
 app = FastAPI(title="AI Study Planner - Multi-Agent System", version="2.0.0")
 
 # JWT Configuration
