@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Planner - Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #f8fafc;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+            text-decoration: none;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .user-nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            color: #6366f1;
+            font-weight: 500;
+        }
+
+        .user-info i {
+            color: #10b981;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #6366f1;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 6rem;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 1.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab.active {
+            background: white;
+            color: #6366f1;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .tab:hover:not(.active) {
+            background: #f1f5f9;
+            color: #4b5563;
+        }
+
+        .tab i {
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 3rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .tab-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .tab-header p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-group select:focus,
+        .input-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Section */
+        .results {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #10b981;
+        }
+
+        .results h3 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .schedule-item,
+        .resource-item {
+            background: #f8fafc;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+            border-left: 4px solid #6366f1;
+            transition: all 0.3s ease;
+        }
+
+        .schedule-item:hover,
+        .resource-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .schedule-item h4 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-item a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .resource-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Loading States */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error States */
+        .error-message {
+            background: #fee;
+            border: 2px solid #fecaca;
+            border-left: 4px solid #ef4444;
+            color: #dc2626;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .error-message h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Login Required State */
+        .login-required {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-required h2 {
+            font-size: 2rem;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .login-required p {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-required a {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .login-required a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .user-nav {
+                gap: 0.5rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-content {
+                padding: 2rem 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-section {
+                padding: 2rem 1rem;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Motivation Section Specific */
+        .motivation-result {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #bae6fd;
+            border-left: 4px solid #0ea5e9;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+
+        .quote-section {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #6366f1;
+        }
+
+        .quote-text {
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-author {
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        .tip-section {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid #10b981;
+        }
+
+        .tip-section h4 {
+            color: #059669;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-brain"></i>
+                AI Study Planner
+            </a>
+            <div class="user-nav">
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </div>
+                <div class="user-info" id="userDisplay">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Loading...</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Login Required State -->
+            <div id="loginRequired" class="login-required" style="display: none;">
+                <h2>🔒 Please Log In</h2>
+                <p>You need to be logged in to access the AI Study Planner dashboard.</p>
+                <a href="secure-auth.html">
+                    <i class="fas fa-sign-in-alt"></i> Login / Register
+                </a>
+            </div>
+
+            <!-- Main Dashboard -->
+            <div id="mainContent" style="display: none;">
+                <!-- Welcome Section -->
+                <section class="welcome-section">
+                    <div class="welcome-content">
+                        <h1>🎓 Welcome to Your Study Dashboard</h1>
+                        <p>Access advanced AI-powered study planning, resource discovery, and motivational coaching tailored just for you.</p>
+                    </div>
+                </section>
+
+                <!-- Tabs Container -->
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab('advanced')">
+                            <i class="fas fa-rocket"></i> Advanced Planner
+                        </button>
+                        <button class="tab" onclick="switchTab('resources')">
+                            <i class="fas fa-search"></i> Find Resources
+                        </button>
+                        <button class="tab" onclick="switchTab('motivation')">
+                            <i class="fas fa-heart"></i> Get Motivated
+                        </button>
+                        <button class="tab" onclick="switchTab('progress')">
+                            <i class="fas fa-chart-line"></i> My Progress
+                        </button>
+                    </div>
+
+                    <!-- Advanced Planner Tab -->
+                    <div id="advanced-tab" class="tab-content active">
+                        <div class="tab-header">
+                            <h2>🚀 Advanced Study Planner</h2>
+                            <p>Create detailed, personalized study schedules with our multi-agent AI system tailored to your learning goals.</p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="advancedSubject">
+                                    <i class="fas fa-book"></i> Subject
+                                </label>
+                                <select id="advancedSubject">
+                                    <option value="">Loading subjects...</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="dailyHours">
+                                    <i class="fas fa-clock"></i> Daily Study Hours
+                                </label>
+                                <select id="dailyHours">
+                                    <option value="1">1 hour</option>
+                                    <option value="2" selected>2 hours</option>
+                                    <option value="3">3 hours</option>
+                                    <option value="4">4 hours</option>
+                                    <option value="5">5+ hours</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="totalDays">
+                                    <i class="fas fa-calendar-alt"></i> Study Duration
+                                </label>
+                                <select id="totalDays">
+                                    <option value="7" selected>1 week</option>
+                                    <option value="14">2 weeks</option>
+                                    <option value="30">1 month</option>
+                                    <option value="60">2 months</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="knowledgeLevel">
+                                    <i class="fas fa-graduation-cap"></i> Knowledge Level
+                                </label>
+                                <select id="knowledgeLevel">
+                                    <option value="beginner" selected>Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="generate-btn" onclick="generateAdvancedPlan()">
+                            <i class="fas fa-magic"></i> Generate Personalized Study Plan
+                        </button>
+
+                        <div class="loading" id="advanced-loading">
+                            <div class="spinner"></div>
+                            <p>Our AI agents are creating your personalized study plan...</p>
+                        </div>
+
+                        <div id="advanced-results"></div>
+                    </div>
+
+                    <!-- Resources Tab -->
+                    <div id="resources-tab" class="tab-content">
+                        <div class="tab-header">
+                            <h2>📚 Resource Finder</h2>
+                            <p>Discover the best learning resources curated by our AI-powered information retrieval system.</p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="resourceSubject">
+                                    <i class="fas fa-book-open"></i> Subject
+                                </label>
+                                <select id="resourceSubject">
+                                    <option value="">Select a subject...</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="resourceType">
+                                    <i class="fas fa-filter"></i> Resource Type
+                                </label>
+                                <select id="resourceType">
+                                    <option value="">All Types</option>
+                                    <option value="course">Online Courses</option>
+                                    <option value="tutorial">Tutorials</option>
+                                    <option value="book">Books</option>
+                                    <option value="video">Videos</option>
+                                    <option value="article">Articles</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="generate-btn" onclick="findResources()">
+                            <i class="fas fa-search"></i> Find Best Resources
+                        </button>
+
+                        <div class="loading" id="resources-loading">
+                            <div class="spinner"></div>
+                            <p>Searching through our curated database...</p>
+                        </div>
+
+                        <div id="resources-results"></div>
+                    </div>
+
+                    <!-- Motivation Tab -->
+                    <div id="motivation-tab" class="tab-content">
+                        <div class="tab-header">
+                            <h2>💪 Motivation Coach</h2>
+                            <p>Get personalized motivation, study tips, and encouragement from our AI coach.</p>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="currentMood">
+                                <i class="fas fa-comment"></i> How are you feeling about your studies?
+                            </label>
+                            <input type="text" id="currentMood" placeholder="e.g., I'm struggling with calculus, feeling overwhelmed, excited about learning..." style="min-height: 100px;">
+                        </div>
+                        
+                        <button class="generate-btn" onclick="getMotivation()">
+                            <i class="fas fa-heart"></i> Get Personalized Motivation
+                        </button>
+
+                        <div class="loading" id="motivation-loading">
+                            <div class="spinner"></div>
+                            <p>Analyzing your mood and crafting personalized motivation...</p>
+                        </div>
+
+                        <div id="motivation-results"></div>
+                    </div>
+
+                    <!-- Progress Tab -->
+                    <div id="progress-tab" class="tab-content">
+                        <div class="tab-header">
+                            <h2>📈 My Progress</h2>
+                            <p>Track your learning progress and see insights about your study patterns.</p>
+                        </div>
+
+                        <div style="text-align: center; padding: 3rem; color: #6b7280;">
+                            <i class="fas fa-chart-line" style="font-size: 4rem; margin-bottom: 1rem; color: #d1d5db;"></i>
+                            <h3>Progress Tracking Coming Soon</h3>
+                            <p>We're working on advanced progress analytics to help you track your learning journey.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="enhanced-app.js"></script>
+</body>
+</html>
