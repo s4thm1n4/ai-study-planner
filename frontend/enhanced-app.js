@@ -212,12 +212,42 @@ async function loadSubjects() {
     }
 }
 
+// Toggle custom duration input
+function toggleCustomDuration() {
+    const totalDaysSelect = document.getElementById('totalDays');
+    const customDaysInput = document.getElementById('customDays');
+    
+    if (totalDaysSelect.value === 'custom') {
+        customDaysInput.style.display = 'block';
+        customDaysInput.required = true;
+    } else {
+        customDaysInput.style.display = 'none';
+        customDaysInput.required = false;
+        customDaysInput.value = '';
+    }
+}
+
 // Advanced Plan Generation
 async function generateAdvancedPlan() {
     const subject = document.getElementById('advancedSubject')?.value?.trim();
     const dailyHours = parseInt(document.getElementById('dailyHours')?.value || '2');
-    const totalDays = parseInt(document.getElementById('totalDays')?.value || '7');
+    
+    // Handle custom duration
+    let totalDays;
+    const totalDaysSelect = document.getElementById('totalDays');
+    if (totalDaysSelect.value === 'custom') {
+        const customDays = parseInt(document.getElementById('customDays')?.value);
+        if (!customDays || customDays < 1) {
+            showError('advanced-results', 'Please enter a valid number of days (1-365).');
+            return;
+        }
+        totalDays = customDays;
+    } else {
+        totalDays = parseInt(totalDaysSelect.value || '7');
+    }
+    
     const knowledgeLevel = document.getElementById('knowledgeLevel')?.value || 'beginner';
+    const learningStyle = document.getElementById('learningStyle')?.value || 'mixed';
     
     if (!subject) {
         showError('advanced-results', 'Please enter a subject you want to learn!');
@@ -234,12 +264,11 @@ async function generateAdvancedPlan() {
     const generateBtn = document.querySelector('#advanced-tab .generate-btn');
     
     try {
-        // Show loading
-        if (loadingDiv) loadingDiv.classList.add('show');
-        if (resultsDiv) resultsDiv.innerHTML = '';
+        // Show enhanced loading state
+        showEnhancedLoading(loadingDiv, resultsDiv, 'Generating your personalized study plan...');
         if (generateBtn) generateBtn.disabled = true;
         
-        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel });
+        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle });
         
         const response = await makeAuthenticatedRequest('/api/generate-advanced-plan', {
             method: 'POST',
@@ -247,7 +276,8 @@ async function generateAdvancedPlan() {
                 subject: subject,
                 available_hours_per_day: dailyHours,
                 total_days: totalDays,
-                knowledge_level: knowledgeLevel
+                knowledge_level: knowledgeLevel,
+                learning_style: learningStyle
             })
         });
         
@@ -259,7 +289,7 @@ async function generateAdvancedPlan() {
         const data = await response.json();
         console.log('Advanced plan generated:', data);
         
-        displayAdvancedResults(data);
+        displayAdvancedResults(data, learningStyle);
         
     } catch (error) {
         console.error('Error generating advanced plan:', error);
@@ -270,7 +300,7 @@ async function generateAdvancedPlan() {
     }
 }
 
-function displayAdvancedResults(data) {
+function displayAdvancedResults(data, learningStyle = 'mixed') {
     const resultsDiv = document.getElementById('advanced-results');
     if (!resultsDiv) {
         console.error('Advanced results div not found');
@@ -285,68 +315,165 @@ function displayAdvancedResults(data) {
     
     const plan = data.study_plan;
     
+    // Generate schedule cards
     let scheduleHtml = '';
     if (plan.schedule && Array.isArray(plan.schedule)) {
         scheduleHtml = plan.schedule.map(day => {
-            const topicsText = day.topics && day.topics.length > 0 
-                ? day.topics.map(topic => `${topic.topic} (${topic.hours}h)`).join(', ')
-                : 'Study session';
+            const topicsHtml = day.topics && day.topics.length > 0 
+                ? day.topics.map(topic => `<span class="topic-tag">${topic.topic} (${topic.hours}h)</span>`).join('')
+                : '<span class="topic-tag">Study session</span>';
             
             return `
                 <div class="schedule-item">
-                    <h4>📅 Day ${day.day} - ${day.date}</h4>
-                    <p><strong>Topics:</strong> ${topicsText}</p>
-                    <p><strong>Total Hours:</strong> ${day.hours}h</p>
-                    ${day.goals && day.goals.length > 0 ? `<p><strong>Goals:</strong> ${day.goals.join(', ')}</p>` : ''}
+                    <div class="schedule-day">
+                        <div class="day-number">${day.day}</div>
+                        <div class="day-info">
+                            <h4>${day.date}</h4>
+                            <p class="day-date">Day ${day.day}</p>
+                        </div>
+                    </div>
+                    <div class="schedule-topics">
+                        ${topicsHtml}
+                    </div>
+                    <div class="schedule-hours">
+                        <i class="fas fa-clock"></i>
+                        <span>${day.hours} hours planned</span>
+                    </div>
+                    ${day.goals && day.goals.length > 0 ? `
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                            <strong style="color: #6b7280; font-size: 0.875rem;">Goals:</strong>
+                            <p style="margin: 0.5rem 0 0 0; color: #374151;">${day.goals.join(' • ')}</p>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }).join('');
     }
     
+    // Generate resource cards
     let resourcesHtml = '';
     if (plan.resources && Array.isArray(plan.resources)) {
-        resourcesHtml = plan.resources.map(resource => `
-            <div class="resource-item">
-                <h4>📚 ${resource.title || resource.topic || 'Resource'}</h4>
-                <p><strong>Type:</strong> ${resource.resource_type || 'General'}</p>
-                <p><strong>Difficulty:</strong> ${resource.difficulty || 'N/A'}</p>
-                ${resource.description ? `<p>${resource.description}</p>` : ''}
-                ${resource.url ? `<p><a href="${resource.url}" target="_blank" rel="noopener noreferrer">View Resource →</a></p>` : ''}
-            </div>
-        `).join('');
+        resourcesHtml = plan.resources.map(resource => {
+            const relevanceScore = resource.similarity_score ? Math.round(resource.similarity_score * 100) : 0;
+            const isLearningStyleOptimized = relevanceScore > 85;
+            
+            return `
+                <div class="resource-item">
+                    <div class="resource-header">
+                        <h4 class="resource-title">${resource.title || resource.topic || 'Educational Resource'}</h4>
+                        ${isLearningStyleOptimized ? '<span class="resource-optimized">🎯 Optimized</span>' : ''}
+                    </div>
+                    <div class="resource-meta">
+                        <span class="resource-badge type">
+                            <i class="fas ${getResourceTypeIcon(resource.resource_type)}"></i>
+                            ${resource.resource_type || 'General'}
+                        </span>
+                        <span class="resource-badge difficulty">
+                            <i class="fas ${getDifficultyIcon(resource.difficulty)}"></i>
+                            ${resource.difficulty || 'N/A'}
+                        </span>
+                    </div>
+                    ${resource.description ? `<p class="resource-description">${resource.description}</p>` : ''}
+                    <div class="resource-actions">
+                        ${resource.url ? `
+                            <a href="${resource.url}" target="_blank" rel="noopener noreferrer" class="resource-link">
+                                <i class="fas fa-external-link-alt"></i>
+                                Access Resource
+                            </a>
+                        ` : '<div></div>'}
+                        ${relevanceScore > 0 ? `
+                            <div class="resource-relevance">
+                                <i class="fas fa-bullseye"></i>
+                                ${relevanceScore}% match
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
+    
+    // Calculate total study days
+    const totalDays = plan.schedule ? plan.schedule.length : 0;
+    const learningStyleDisplay = getLearningStyleDisplay(learningStyle);
     
     resultsDiv.innerHTML = `
         <div class="results">
-            <h3>🎯 Your Personalized Study Plan</h3>
-            <div style="margin-bottom: 2rem;">
-                <p><strong>Subject:</strong> ${plan.subject}</p>
-                <p><strong>Total Hours:</strong> ${plan.total_hours}h</p>
-                <p><strong>Daily Hours:</strong> ${plan.daily_hours}h</p>
-                <p><strong>Difficulty:</strong> ${plan.difficulty}</p>
+            <div class="results-header">
+                <h3>🎯 Your Personalized Study Plan</h3>
             </div>
-            
-            ${scheduleHtml ? `
-                <div style="margin-bottom: 2rem;">
-                    <h4>📅 Study Schedule</h4>
-                    ${scheduleHtml}
+            <div class="results-content">
+                <div class="plan-overview">
+                    <div class="plan-stat">
+                        <div class="plan-stat-value">${plan.subject}</div>
+                        <div class="plan-stat-label">Subject</div>
+                    </div>
+                    <div class="plan-stat">
+                        <div class="plan-stat-value">${plan.total_hours}h</div>
+                        <div class="plan-stat-label">Total Hours</div>
+                    </div>
+                    <div class="plan-stat">
+                        <div class="plan-stat-value">${plan.daily_hours}h</div>
+                        <div class="plan-stat-label">Daily Hours</div>
+                    </div>
+                    <div class="plan-stat">
+                        <div class="plan-stat-value">${totalDays}</div>
+                        <div class="plan-stat-label">Study Days</div>
+                    </div>
+                    <div class="plan-stat">
+                        <div class="plan-stat-value">${plan.difficulty}</div>
+                        <div class="plan-stat-label">Difficulty</div>
+                    </div>
+                    ${learningStyle && learningStyle !== 'mixed' ? `
+                        <div class="plan-stat">
+                            <div class="plan-stat-value">🧠</div>
+                            <div class="plan-stat-label">${learningStyleDisplay}</div>
+                        </div>
+                    ` : ''}
                 </div>
-            ` : ''}
-            
-            ${resourcesHtml ? `
-                <div>
-                    <h4>📚 Recommended Resources</h4>
-                    ${resourcesHtml}
-                </div>
-            ` : ''}
-            
-            ${plan.motivation ? `
-                <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 0.75rem;">
-                    <h4>💪 Motivational Message</h4>
-                    <p><em>"${plan.motivation.quote.quote}"</em> - ${plan.motivation.quote.author}</p>
-                    <p><strong>Tip:</strong> ${plan.motivation.tip.tip}</p>
-                </div>
-            ` : ''}
+                
+                ${scheduleHtml ? `
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3 class="section-title">Study Schedule</h3>
+                    </div>
+                    <div class="schedule-grid">
+                        ${scheduleHtml}
+                    </div>
+                ` : ''}
+                
+                ${resourcesHtml ? `
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3 class="section-title">Recommended Resources</h3>
+                    </div>
+                    <div class="resources-grid">
+                        ${resourcesHtml}
+                    </div>
+                ` : ''}
+                
+                ${plan.motivation ? `
+                    <div class="motivation-card">
+                        <div class="motivation-content">
+                            <div class="section-header" style="border-bottom: 2px solid rgba(255,255,255,0.2); color: white;">
+                                <div class="section-icon" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <h3 class="section-title" style="color: white;">Stay Motivated</h3>
+                            </div>
+                            <div class="motivation-quote">"${plan.motivation.quote.quote}"</div>
+                            <div class="motivation-author">— ${plan.motivation.quote.author}</div>
+                            <div class="motivation-tip">
+                                <strong>💡 Pro Tip:</strong> ${plan.motivation.tip.tip}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
         </div>
     `;
 }
@@ -371,9 +498,8 @@ async function findResources() {
     const generateBtn = document.querySelector('#resources-tab .generate-btn');
     
     try {
-        // Show loading
-        if (loadingDiv) loadingDiv.classList.add('show');
-        if (resultsDiv) resultsDiv.innerHTML = '';
+        // Show enhanced loading state
+        showEnhancedLoading(loadingDiv, resultsDiv, 'Searching for the best resources...');
         if (generateBtn) generateBtn.disabled = true;
         
         console.log('Finding resources for:', { subject, resourceType });
@@ -413,30 +539,127 @@ function displayResourceResults(resources) {
     if (!resources || resources.length === 0) {
         resultsDiv.innerHTML = `
             <div class="results">
-                <h3>📚 No Resources Found</h3>
-                <p>We couldn't find any resources for your search. Try a different subject or resource type.</p>
+                <div class="results-header">
+                    <h3>📚 No Resources Found</h3>
+                </div>
+                <div class="results-content" style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;">🔍</div>
+                    <p style="color: #6b7280; font-size: 1.125rem; margin-bottom: 1rem;">We couldn't find any resources for your search.</p>
+                    <p style="color: #9ca3af;">Try a different subject or resource type.</p>
+                </div>
             </div>
         `;
         return;
     }
     
-    const resourcesHtml = resources.map(resource => `
-        <div class="resource-item">
-            <h4>📚 ${resource.title || 'Resource'}</h4>
-            <p><strong>Type:</strong> ${resource.resource_type || 'General'}</p>
-            <p><strong>Difficulty:</strong> ${resource.difficulty || 'N/A'}</p>
-            ${resource.description ? `<p>${resource.description}</p>` : ''}
-            ${resource.url ? `<p><a href="${resource.url}" target="_blank" rel="noopener noreferrer">View Resource →</a></p>` : ''}
-            ${resource.similarity_score ? `<p><small>Relevance: ${Math.round(resource.similarity_score * 100)}%</small></p>` : ''}
-        </div>
-    `).join('');
+    const resourcesHtml = resources.map(resource => {
+        const relevanceScore = resource.similarity_score ? Math.round(resource.similarity_score * 100) : 0;
+        const isHighRelevance = relevanceScore > 75;
+        
+        return `
+            <div class="resource-item">
+                <div class="resource-header">
+                    <h4 class="resource-title">${resource.title || 'Educational Resource'}</h4>
+                    ${isHighRelevance ? '<span class="resource-optimized">⭐ Top Match</span>' : ''}
+                </div>
+                <div class="resource-meta">
+                    <span class="resource-badge type">
+                        <i class="fas ${getResourceTypeIcon(resource.resource_type)}"></i>
+                        ${resource.resource_type || 'General'}
+                    </span>
+                    <span class="resource-badge difficulty">
+                        <i class="fas ${getDifficultyIcon(resource.difficulty)}"></i>
+                        ${resource.difficulty || 'N/A'}
+                    </span>
+                </div>
+                ${resource.description ? `<p class="resource-description">${resource.description}</p>` : ''}
+                <div class="resource-actions">
+                    ${resource.url ? `
+                        <a href="${resource.url}" target="_blank" rel="noopener noreferrer" class="resource-link">
+                            <i class="fas fa-external-link-alt"></i>
+                            Access Resource
+                        </a>
+                    ` : '<div></div>'}
+                    ${relevanceScore > 0 ? `
+                        <div class="resource-relevance">
+                            <i class="fas fa-bullseye"></i>
+                            ${relevanceScore}% match
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
     
     resultsDiv.innerHTML = `
         <div class="results">
-            <h3>📚 Found ${resources.length} Resources</h3>
-            ${resourcesHtml}
+            <div class="results-header">
+                <h3>📚 Found ${resources.length} Resource${resources.length !== 1 ? 's' : ''}</h3>
+            </div>
+            <div class="results-content">
+                <div class="resources-grid">
+                    ${resourcesHtml}
+                </div>
+            </div>
         </div>
     `;
+}
+
+// Enhanced loading state function
+function showEnhancedLoading(loadingDiv, resultsDiv, message = 'Loading...') {
+    if (loadingDiv) loadingDiv.classList.add('show');
+    if (resultsDiv) {
+        resultsDiv.innerHTML = `
+            <div class="results">
+                <div class="results-content">
+                    <div class="loading-card">
+                        <div class="loading-spinner"></div>
+                        <h3 style="margin: 0 0 0.5rem 0; color: #1f2937;">${message}</h3>
+                        <p style="margin: 0; color: #6b7280;">This may take a few moments...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Helper functions for UI enhancements
+function getResourceTypeIcon(type) {
+    const icons = {
+        'video': 'fa-play-circle',
+        'article': 'fa-newspaper',
+        'book': 'fa-book',
+        'course': 'fa-graduation-cap',
+        'tutorial': 'fa-chalkboard-teacher',
+        'documentation': 'fa-file-alt',
+        'practice': 'fa-dumbbell',
+        'interactive': 'fa-mouse-pointer',
+        'podcast': 'fa-podcast',
+        'webinar': 'fa-video',
+        'general': 'fa-bookmark'
+    };
+    return icons[type?.toLowerCase()] || icons.general;
+}
+
+function getDifficultyIcon(difficulty) {
+    const icons = {
+        'beginner': 'fa-seedling',
+        'intermediate': 'fa-chart-line',
+        'advanced': 'fa-mountain',
+        'expert': 'fa-crown'
+    };
+    return icons[difficulty?.toLowerCase()] || 'fa-question-circle';
+}
+
+function getLearningStyleDisplay(style) {
+    const styles = {
+        'visual': 'Visual Learner',
+        'auditory': 'Auditory Learner', 
+        'kinesthetic': 'Kinesthetic Learner',
+        'reading': 'Reading/Writing Learner',
+        'mixed': 'Mixed Learning Style'
+    };
+    return styles[style] || style;
 }
 
 // Get Motivation
@@ -453,9 +676,8 @@ async function getMotivation() {
     const generateBtn = document.querySelector('#motivation-tab .generate-btn');
     
     try {
-        // Show loading
-        if (loadingDiv) loadingDiv.classList.add('show');
-        if (resultsDiv) resultsDiv.innerHTML = '';
+        // Show enhanced loading state
+        showEnhancedLoading(loadingDiv, resultsDiv, 'Getting your daily motivation boost...');
         if (generateBtn) generateBtn.disabled = true;
         
         console.log('Getting motivation for mood:', mood);
@@ -495,34 +717,52 @@ function displayMotivationResults(data) {
     
     resultsDiv.innerHTML = `
         <div class="results">
-            <h3>💪 Personalized Motivation</h3>
-            
-            ${sentiment.mood ? `
-                <div style="margin-bottom: 2rem; padding: 1rem; background: ${getSentimentColor(sentiment.mood)}; border-radius: 0.5rem;">
-                    <h4>🎭 Your Current Mood: ${sentiment.mood.charAt(0).toUpperCase() + sentiment.mood.slice(1)}</h4>
-                </div>
-            ` : ''}
-            
-            ${motivation.quote ? `
-                <div class="quote-section">
-                    <div class="quote-text">"${motivation.quote.quote}"</div>
-                    <div class="quote-author">— ${motivation.quote.author}</div>
-                </div>
-            ` : ''}
-            
-            ${motivation.tip ? `
-                <div class="tip-section">
-                    <h4>💡 Study Tip</h4>
-                    <p>${motivation.tip.tip}</p>
-                </div>
-            ` : ''}
-            
-            ${motivation.encouragement ? `
-                <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 0.75rem; border-left: 4px solid #0ea5e9;">
-                    <h4>🌟 Personal Message</h4>
-                    <p>${motivation.encouragement}</p>
-                </div>
-            ` : ''}
+            <div class="results-header">
+                <h3>💪 Your Daily Motivation</h3>
+            </div>
+            <div class="results-content">
+                ${sentiment.mood ? `
+                    <div class="plan-overview" style="margin-bottom: 2rem;">
+                        <div class="plan-stat" style="grid-column: 1 / -1; background: ${getSentimentColor(sentiment.mood)};">
+                            <div class="plan-stat-value">🎭 ${sentiment.mood.charAt(0).toUpperCase() + sentiment.mood.slice(1)}</div>
+                            <div class="plan-stat-label" style="color: rgba(255,255,255,0.8);">Current Mood</div>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${motivation.quote ? `
+                    <div class="motivation-card" style="margin-bottom: 2rem;">
+                        <div class="motivation-content">
+                            <div class="section-header" style="border-bottom: 2px solid rgba(255,255,255,0.2); color: white;">
+                                <div class="section-icon" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-quote-left"></i>
+                                </div>
+                                <h3 class="section-title" style="color: white;">Inspirational Quote</h3>
+                            </div>
+                            <div class="motivation-quote">"${motivation.quote.quote}"</div>
+                            <div class="motivation-author">— ${motivation.quote.author}</div>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${motivation.tip ? `
+                    <div class="resource-item" style="border-left-color: #10b981;">
+                        <div class="resource-header">
+                            <h4 class="resource-title">💡 Study Tip</h4>
+                        </div>
+                        <p class="resource-description">${motivation.tip.tip}</p>
+                    </div>
+                ` : ''}
+                
+                ${motivation.encouragement ? `
+                    <div class="resource-item" style="border-left-color: #f59e0b; margin-top: 1.5rem;">
+                        <div class="resource-header">
+                            <h4 class="resource-title">🌟 Personal Message</h4>
+                        </div>
+                        <p class="resource-description">${motivation.encouragement}</p>
+                    </div>
+                ` : ''}
+            </div>
         </div>
     `;
 }
@@ -532,6 +772,16 @@ function getSentimentColor(mood) {
         case 'positive': return 'rgba(16, 185, 129, 0.2)';
         case 'negative': return 'rgba(239, 68, 68, 0.2)';
         default: return 'rgba(99, 102, 241, 0.2)';
+    }
+}
+
+function getLearningStyleDisplay(style) {
+    switch (style) {
+        case 'visual': return 'Visual Learning (Videos, Diagrams)';
+        case 'auditory': return 'Auditory Learning (Audio, Lectures)';
+        case 'reading': return 'Reading/Writing Learning (Books, Articles)';
+        case 'kinesthetic': return 'Hands-on Learning (Interactive)';
+        default: return 'Mixed Learning Style';
     }
 }
 

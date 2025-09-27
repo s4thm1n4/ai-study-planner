@@ -247,25 +247,49 @@ class ScheduleCreatorAgent:
             with open('datasets/subjects_database.json', 'r') as f:
                 data = json.load(f)
                 self.subjects_db = {subject['name']: subject for subject in data['subjects']}
-        except:
+                
+            # Also create a searchable index by keywords
+            self.subjects_by_keywords = {}
+            for name, subject in self.subjects_db.items():
+                # Index by keywords
+                for keyword in subject.get('keywords', []):
+                    if keyword not in self.subjects_by_keywords:
+                        self.subjects_by_keywords[keyword] = []
+                    self.subjects_by_keywords[keyword].append(name)
+                
+                # Index by category
+                category = subject.get('category', '')
+                if category and category not in self.subjects_by_keywords:
+                    self.subjects_by_keywords[category] = []
+                if category:
+                    self.subjects_by_keywords[category].append(name)
+        except Exception as e:
+            print(f"Error loading subjects database: {e}")
             # Fallback subjects database
             self.subjects_db = {
                 "Machine Learning": {
                     "estimated_hours": 30,
                     "difficulty": "intermediate",
+                    "category": "Computer Science",
+                    "keywords": ["ML", "algorithms", "data science", "prediction"],
                     "topics": ["Introduction to ML", "Supervised Learning", "Unsupervised Learning", "Model Evaluation", "Deep Learning Basics"]
                 },
                 "Python Programming": {
                     "estimated_hours": 25,
                     "difficulty": "beginner",
+                    "category": "Programming",
+                    "keywords": ["python", "coding", "programming", "scripting"],
                     "topics": ["Python Basics", "Data Structures", "Functions", "Object-Oriented Programming", "Libraries"]
                 },
                 "Data Science": {
                     "estimated_hours": 35,
                     "difficulty": "intermediate",
+                    "category": "Computer Science",
+                    "keywords": ["data analysis", "statistics", "visualization", "insights"],
                     "topics": ["Data Analysis", "Statistics", "Data Visualization", "Machine Learning", "Big Data"]
                 }
             }
+            self.subjects_by_keywords = {}
     
     def create_personalized_schedule(self, user_id: str, subject: str, 
                                    available_hours_per_day: int, 
@@ -276,7 +300,11 @@ class ScheduleCreatorAgent:
         # Try to get subject information from database first
         subject_info = self.subjects_db.get(subject)
         
-        # If subject not in database, generate dynamic content using AI
+        # If not found, try fuzzy matching with keywords
+        if not subject_info:
+            subject_info = self._find_similar_subject(subject)
+        
+        # If still not found and AI is available, generate dynamic content
         if not subject_info and GENAI_AVAILABLE:
             subject_info = self._generate_subject_info_with_ai(subject, knowledge_level, total_days)
         
@@ -284,7 +312,7 @@ class ScheduleCreatorAgent:
         if not subject_info:
             subject_info = {
                 "estimated_hours": max(10, available_hours_per_day * total_days),
-                "difficulty": "intermediate",
+                "difficulty": knowledge_level,  # Use actual knowledge level
                 "topics": self._generate_dynamic_topics(subject, total_days)
             }
         
@@ -313,7 +341,7 @@ class ScheduleCreatorAgent:
             subject=subject,
             total_hours=final_hours,
             daily_hours=available_hours_per_day,
-            difficulty=subject_info.get("difficulty", "intermediate"),
+            difficulty=knowledge_level,  # Use user's selected knowledge level, not subject default
             start_date=datetime.now().isoformat(),
             schedule=schedule,
             resources=[]
@@ -451,6 +479,37 @@ class ScheduleCreatorAgent:
         topics = base_topics[:num_topics]
         
         return topics
+    
+    def _find_similar_subject(self, subject: str) -> Dict:
+        """Find similar subjects using keyword matching and fuzzy search"""
+        subject_lower = subject.lower()
+        best_match = None
+        best_score = 0
+        
+        # Check direct keyword matches first
+        for keyword, subject_names in getattr(self, 'subjects_by_keywords', {}).items():
+            if subject_lower in keyword.lower() or keyword.lower() in subject_lower:
+                for subject_name in subject_names:
+                    subject_data = self.subjects_db.get(subject_name)
+                    if subject_data:
+                        score = len(keyword) / len(subject_lower)  # Longer matches get higher scores
+                        if score > best_score:
+                            best_score = score
+                            best_match = subject_data.copy()
+                            best_match['matched_via'] = f'keyword: {keyword}'
+        
+        # Check partial matches in subject names
+        for subject_name, subject_data in self.subjects_db.items():
+            # Check if search term is in subject name or vice versa
+            if (subject_lower in subject_name.lower() or 
+                any(word in subject_name.lower() for word in subject_lower.split())):
+                score = 0.8  # High score for name matches
+                if score > best_score:
+                    best_score = score
+                    best_match = subject_data.copy()
+                    best_match['matched_via'] = f'name similarity: {subject_name}'
+        
+        return best_match if best_score > 0.3 else None  # Only return if reasonably good match
 
 class ResourceFinderAgent:
     """Resource finder with basic search capabilities"""
@@ -493,26 +552,62 @@ class ResourceFinderAgent:
             ]
     
     def find_best_resources(self, subject: str, difficulty: str = "beginner", 
-                          resource_type: str = None, limit: int = 3) -> List[Dict]:
+                          resource_type: str = None, limit: int = 3, learning_style: str = "mixed") -> List[Dict]:
         """Find best resources using simple matching and generate fallbacks"""
         best_resources = []
         
         # First, try to find resources in the database
         if self.resources_db:
             for resource in self.resources_db:
-                # Simple matching based on subject
-                if (subject.lower() in resource.get('subject', '').lower() or
-                    subject.lower() in resource.get('title', '').lower() or
-                    any(subject.lower() in tag.lower() for tag in resource.get('tags', []))):
-                    
+                score = 0
+                subject_lower = subject.lower()
+                
+                # Enhanced matching with scoring
+                # Exact subject match gets highest score
+                if subject_lower == resource.get('subject', '').lower():
+                    score = 1.0
+                # Subject contains the search term
+                elif subject_lower in resource.get('subject', '').lower():
+                    score = 0.9
+                # Title contains the search term
+                elif subject_lower in resource.get('title', '').lower():
+                    score = 0.8
+                # Keywords match
+                elif any(subject_lower in keyword.lower() for keyword in resource.get('keywords', [])):
+                    score = 0.85
+                # Tags match
+                elif any(subject_lower in tag.lower() for tag in resource.get('tags', [])):
+                    score = 0.75
+                # Category match
+                elif subject_lower in resource.get('category', '').lower():
+                    score = 0.7
+                
+                # If we found a match
+                if score > 0:
                     # Filter by resource type if specified
                     if resource_type is None or resource.get('resource_type') == resource_type:
-                        # Add similarity score for sorting
-                        resource['similarity_score'] = 0.9  # High score for database matches
-                        best_resources.append(resource)
-                        
-                        if len(best_resources) >= limit:
-                            break
+                        # Filter by difficulty if specified
+                        if difficulty == "beginner" or resource.get('difficulty') == difficulty:
+                            resource_copy = resource.copy()
+                            
+                            # Boost score based on learning style preference
+                            if learning_style != "mixed":
+                                resource_type_val = resource.get('resource_type', '').lower()
+                                if learning_style == "visual" and resource_type_val in ['video_course', 'video_series', 'interactive_tutorial']:
+                                    score += 0.15
+                                elif learning_style == "auditory" and resource_type_val in ['video_course', 'podcast']:
+                                    score += 0.15
+                                elif learning_style == "reading" and resource_type_val in ['book', 'guide', 'tutorial', 'academic_paper']:
+                                    score += 0.15
+                                elif learning_style == "kinesthetic" and resource_type_val in ['interactive_course', 'interactive_tutorial', 'mobile_app']:
+                                    score += 0.15
+                            
+                            resource_copy['similarity_score'] = min(score, 1.0)  # Cap at 1.0
+                            best_resources.append(resource_copy)
+            
+            # Sort by similarity score (highest first)
+            best_resources.sort(key=lambda x: x.get('similarity_score', 0), reverse=True)
+            best_resources = best_resources[:limit]
         
         # If we don't have enough resources, generate fallback resources
         if len(best_resources) < limit:
@@ -682,9 +777,9 @@ class CoordinatorAgent:
                 user_id, subject, available_hours_per_day, total_days, knowledge_level
             )
             
-            # 2. Find best resources
+            # 2. Find best resources with learning style preference
             resources = self.resource_agent.find_best_resources(
-                subject, knowledge_level, limit=5
+                subject, knowledge_level, limit=5, learning_style=learning_style
             )
             study_plan.resources = resources
             
