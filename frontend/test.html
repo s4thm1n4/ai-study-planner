@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Study Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        input {
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Study Planner - Test</h1>
+        <p>Test the fixed API endpoints</p>
+        
+        <div>
+            <h2>Simple Study Plan</h2>
+            <input type="text" id="simple-goal" placeholder="e.g., Machine Learning, Python Programming" />
+            <button onclick="testSimplePlan()">Generate Simple Plan</button>
+            <div id="simple-results"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+
+        async function testSimplePlan() {
+            const goal = document.getElementById('simple-goal').value.trim();
+            const resultsDiv = document.getElementById('simple-results');
+            
+            if (!goal) {
+                resultsDiv.innerHTML = '<div class="results error">Please enter a learning goal!</div>';
+                return;
+            }
+            
+            // Show loading
+            resultsDiv.innerHTML = '<div class="loading">🔄 Creating your study plan...</div>';
+            
+            try {
+                console.log('Sending request to:', `${API_BASE_URL}/api/generate-plan`);
+                console.log('Request body:', { goal: goal });
+                
+                const response = await fetch(`${API_BASE_URL}/api/generate-plan`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ goal: goal }),
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Check if we have the expected data structure
+                if (!data.schedule || !data.first_resource) {
+                    throw new Error('Invalid response format from server');
+                }
+                
+                // Format the output
+                let outputHTML = `
+                    <div class="results">
+                        <h3>✅ Study Plan Generated Successfully!</h3>
+                        <h4>📅 Your Study Schedule:</h4>
+                        <ul>
+                            ${data.schedule.map((topic, index) => `<li><strong>Day ${index + 1}:</strong> ${topic}</li>`).join('')}
+                        </ul>
+                        <h4>📚 First Resource:</h4>
+                        <p><strong>Topic:</strong> ${data.first_resource.topic}</p>
+                        <p><strong>Link:</strong> <a href="${data.first_resource.link}" target="_blank">${data.first_resource.link}</a></p>
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = outputHTML;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = `
+                    <div class="results error">
+                        <strong>❌ Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

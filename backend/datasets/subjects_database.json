@@ -1,0 +1,108 @@
+{
+  "subjects": [
+    {
+      "name": "Data Mining",
+      "estimated_hours": 25,
+      "difficulty": "intermediate",
+      "prerequisites": ["Statistics", "Python Programming"],
+      "topics": [
+        "Data Preprocessing",
+        "Association Rules",
+        "Classification Algorithms",
+        "Clustering Techniques",
+        "Evaluation Metrics"
+      ]
+    },
+    {
+      "name": "Artificial Intelligence",
+      "estimated_hours": 35,
+      "difficulty": "advanced",
+      "prerequisites": ["Programming Fundamentals", "Mathematics"],
+      "topics": [
+        "Search Algorithms",
+        "Knowledge Representation",
+        "Machine Learning Basics",
+        "Neural Networks",
+        "Natural Language Processing"
+      ]
+    },
+    {
+      "name": "Machine Learning",
+      "estimated_hours": 30,
+      "difficulty": "intermediate",
+      "prerequisites": ["Statistics", "Linear Algebra", "Python"],
+      "topics": [
+        "Supervised Learning",
+        "Unsupervised Learning",
+        "Feature Engineering",
+        "Model Evaluation",
+        "Deep Learning Fundamentals"
+      ]
+    },
+    {
+      "name": "Information Retrieval",
+      "estimated_hours": 20,
+      "difficulty": "intermediate",
+      "prerequisites": ["Data Structures", "Programming"],
+      "topics": [
+        "Indexing and Search",
+        "Text Processing",
+        "Vector Space Model",
+        "Evaluation Metrics",
+        "Web Search Engines"
+      ]
+    },
+    {
+      "name": "Natural Language Processing",
+      "estimated_hours": 28,
+      "difficulty": "advanced",
+      "prerequisites": ["Machine Learning", "Linguistics Basics"],
+      "topics": [
+        "Text Preprocessing",
+        "Language Models",
+        "Named Entity Recognition",
+        "Sentiment Analysis",
+        "Machine Translation"
+      ]
+    },
+    {
+      "name": "Database Systems",
+      "estimated_hours": 22,
+      "difficulty": "beginner",
+      "prerequisites": [],
+      "topics": [
+        "SQL Fundamentals",
+        "Database Design",
+        "Normalization",
+        "Indexing",
+        "Query Optimization"
+      ]
+    },
+    {
+      "name": "Software Engineering",
+      "estimated_hours": 24,
+      "difficulty": "beginner",
+      "prerequisites": ["Programming Fundamentals"],
+      "topics": [
+        "SDLC Methodologies",
+        "Requirements Analysis",
+        "Design Patterns",
+        "Testing Strategies",
+        "Project Management"
+      ]
+    },
+    {
+      "name": "Computer Networks",
+      "estimated_hours": 26,
+      "difficulty": "intermediate",
+      "prerequisites": ["Operating Systems"],
+      "topics": [
+        "OSI Model",
+        "TCP/IP Protocol Suite",
+        "Routing Algorithms",
+        "Network Security",
+        "Wireless Networks"
+      ]
+    }
+  ]
+}

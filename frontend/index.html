@@ -3,22 +3,814 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Study Planner</title>
+    <title>AI Study Planner - Intelligent Multi-Agent Learning System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-        input { width: 70%; padding: 8px; }
-        button { padding: 8px; }
-        #results { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+            text-decoration: none;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-outline {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #6366f1;
+            color: #6366f1;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1.5rem;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #5046e5;
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8rem 0 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .hero-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .hero-feature i {
+            font-size: 1.2rem;
+            color: #fbbf24;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 3rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: #f8fafc;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .features-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .features-header p {
+            font-size: 1.2rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 6rem 0;
+            background: white;
+        }
+
+        .services-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .services-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .services-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .agent-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .agent-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        .agent-card.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .agent-number {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .agent-card:not(.primary) .agent-number {
+            background: #6366f1;
+            color: white;
+        }
+
+        .agent-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Try Now Section */
+        .try-now {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+        }
+
+        .try-now-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .try-now h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .try-now-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+        }
+
+        .simple-planner-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        }
+
+        .generate-btn {
+            width: 100%;
+            background: #fbbf24;
+            color: #1f2937;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .unlock-more {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 0.5rem;
+        }
+
+        .unlock-more p {
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            color: #9ca3af;
+            padding: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-features {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .auth-buttons {
+                gap: 0.5rem;
+            }
+
+            .btn-outline,
+            .btn-primary {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fbbf24;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+
+        .schedule-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fbbf24;
+        }
+
+        .resource-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+        }
+
+        .resource-card a {
+            color: #fbbf24;
+            text-decoration: none;
+        }
+
+        .resource-card a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <h1>AI Study Planner Demo</h1>
-    <input id="goal-input" type="text" placeholder="What do you want to learn?">
-    <button id="generate-btn">Generate Plan</button>
-
-    <div id="results">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-brain"></i>
+                AI Study Planner
+            </a>
+            <div class="auth-buttons">
+                <a href="secure-auth.html" class="btn-outline">Login</a>
+                <a href="secure-auth.html" class="btn-primary">Get Started</a>
+            </div>
         </div>
+    </nav>
 
-    <script src="app.js"></script>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1>🎓 Intelligent Study Planning</h1>
+            <p class="hero-subtitle">
+                Harness the power of multi-agent AI to create personalized study plans, find curated resources, and stay motivated throughout your learning journey.
+            </p>
+            
+            <div class="hero-features">
+                <div class="hero-feature">
+                    <i class="fas fa-robot"></i>
+                    <span>4 AI Agents</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure & Private</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progress Tracking</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Mobile Friendly</span>
+                </div>
+            </div>
+
+            <a href="#try-now" class="cta-button">
+                <i class="fas fa-play"></i>
+                Try Free Demo
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <div class="features-header">
+                <h2>🚀 Powered by Advanced AI</h2>
+                <p>Our multi-agent system combines cutting-edge AI technology with educational best practices to deliver personalized learning experiences.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3>Smart Scheduling</h3>
+                    <p>AI-powered schedule optimization that adapts to your available time, learning pace, and knowledge level for maximum efficiency.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Intelligent Resource Discovery</h3>
+                    <p>Advanced information retrieval system finds the best educational resources tailored to your learning style and difficulty level.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Motivation Coaching</h3>
+                    <p>Sentiment analysis and personalized motivation to keep you engaged and motivated throughout your learning journey.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Secure & Private</h3>
+                    <p>Enterprise-grade security with JWT authentication ensures your learning data and progress remain completely private.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Progress Analytics</h3>
+                    <p>Detailed insights into your learning progress with recommendations for improvement and goal achievement.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Cross-Platform</h3>
+                    <p>Access your study plans anywhere, anytime. Fully responsive design works seamlessly across all devices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services">
+        <div class="services-container">
+            <div class="services-header">
+                <h2>🤖 Multi-Agent Architecture</h2>
+                <p>Four specialized AI agents work together to provide you with the ultimate study planning experience.</p>
+            </div>
+
+            <div class="agent-cards">
+                <div class="agent-card primary">
+                    <div class="agent-number">1</div>
+                    <h3>📅 Schedule Creator Agent</h3>
+                    <p>Creates personalized study schedules based on your goals, available time, and learning preferences using advanced AI algorithms.</p>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-number">2</div>
+                    <h3>📚 Resource Finder Agent</h3>
+                    <p>Uses information retrieval and machine learning to discover the most relevant educational resources from curated databases.</p>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-number">3</div>
+                    <h3>💪 Motivation Coach Agent</h3>
+                    <p>Analyzes your sentiment and progress to provide personalized motivation, tips, and encouragement when you need it most.</p>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-number">4</div>
+                    <h3>🔒 Security Coordinator Agent</h3>
+                    <p>Manages authentication, data security, and coordinates between all agents to ensure seamless and secure operation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Try Now Section -->
+    <section class="try-now" id="try-now">
+        <div class="try-now-container">
+            <h2>✨ Try Our Simple Planner</h2>
+            <p class="try-now-subtitle">Get a taste of our AI-powered study planning. Enter any subject and receive an instant 3-day study plan!</p>
+
+            <div class="simple-planner-form">
+                <div class="input-group">
+                    <label for="demo-goal">What would you like to learn?</label>
+                    <input type="text" id="demo-goal" placeholder="e.g., Machine Learning, Python Programming, Data Science">
+                </div>
+                <button class="generate-btn" onclick="generateDemoStudyPlan()">
+                    <i class="fas fa-magic"></i> Generate Study Plan
+                </button>
+
+                <div class="loading" id="demo-loading">
+                    <div class="spinner"></div>
+                    <p>Our AI agents are creating your personalized study plan...</p>
+                </div>
+
+                <div id="demo-results"></div>
+            </div>
+
+            <div class="unlock-more">
+                <p><strong>🚀 Want more advanced features?</strong></p>
+                <p>Register for free to unlock personalized schedules, detailed resource recommendations, progress tracking, and motivational coaching!</p>
+                <a href="secure-auth.html" class="btn-primary" style="display: inline-block; margin-top: 1rem;">
+                    Create Free Account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2024 AI Study Planner. Powered by Multi-Agent Architecture & Advanced AI.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Built with FastAPI, JWT Authentication, and Intelligent Agents</p>
+        </div>
+    </footer>
+
+    <script>
+        // Demo study plan generator (simplified version for homepage)
+        async function generateDemoStudyPlan() {
+            const goalInput = document.getElementById('demo-goal');
+            const goal = goalInput.value.trim();
+            
+            if (!goal) {
+                alert('Please enter a subject to study!');
+                return;
+            }
+
+            const loadingDiv = document.getElementById('demo-loading');
+            const resultsDiv = document.getElementById('demo-results');
+            const generateBtn = document.querySelector('.generate-btn');
+
+            try {
+                // Show loading
+                loadingDiv.style.display = 'block';
+                resultsDiv.innerHTML = '';
+                generateBtn.disabled = true;
+
+                // Simulate API call (you can replace this with actual API call later)
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Demo results
+                const demoSchedule = [
+                    `Day 1: Introduction to ${goal} - Learn fundamental concepts and basic terminology (2 hours)`,
+                    `Day 2: Core ${goal} concepts - Practice exercises and hands-on activities (2 hours)`,
+                    `Day 3: Advanced ${goal} topics - Projects, review, and practical applications (2 hours)`
+                ];
+
+                const demoResource = {
+                    topic: `Best ${goal} Course`,
+                    link: `https://www.coursera.org/search?query=${encodeURIComponent(goal)}`
+                };
+
+                displayDemoResults(demoSchedule, demoResource);
+
+            } catch (error) {
+                console.error('Error generating demo plan:', error);
+                resultsDiv.innerHTML = `
+                    <div style="color: #fbbf24; text-align: center;">
+                        <p><strong>Demo Preview</strong></p>
+                        <p>This is a preview of what our AI can generate for you!</p>
+                    </div>
+                `;
+            } finally {
+                loadingDiv.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+
+        function displayDemoResults(schedule, resource) {
+            const resultsDiv = document.getElementById('demo-results');
+            
+            let scheduleHtml = schedule.map(item => `
+                <div class="schedule-item">
+                    <h4>📅 ${item}</h4>
+                </div>
+            `).join('');
+
+            const resourceHtml = `
+                <div class="resource-card">
+                    <h4>📚 Recommended Resource</h4>
+                    <p><a href="${resource.link}" target="_blank" rel="noopener noreferrer">${resource.topic}</a></p>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = `
+                <div class="results">
+                    <h3>🎯 Your 3-Day Study Plan</h3>
+                    ${scheduleHtml}
+                    ${resourceHtml}
+                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(99, 102, 241, 0.2); border-radius: 0.5rem; border-left: 4px solid #6366f1;">
+                        <p><strong>✨ This is just the beginning!</strong></p>
+                        <p>Register to unlock advanced features like personalized schedules, progress tracking, and AI-powered motivation coaching.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Smooth scrolling for CTA button
+        document.querySelector('.cta-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector('#try-now').scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+
+        // Enter key support for demo input
+        document.getElementById('demo-goal').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateDemoStudyPlan();
+            }
+        });
+    </script>
 </body>
 </html>
