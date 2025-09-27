@@ -55,6 +55,7 @@ class AdvancedStudyRequest(BaseModel):
     total_days: int
     learning_style: Optional[str] = "mixed"
     knowledge_level: Optional[str] = "beginner"
+    user_mood: Optional[str] = "neutral"
 
 class ResourceRequest(BaseModel):
     subject: str
@@ -222,7 +223,8 @@ async def generate_advanced_plan(
             available_hours_per_day=request.available_hours_per_day,
             total_days=request.total_days,
             learning_style=request.learning_style or "mixed",
-            knowledge_level=request.knowledge_level or "beginner"
+            knowledge_level=request.knowledge_level or "beginner",
+            user_mood=request.user_mood or "neutral"
         )
         
         print(f"[DEBUG] Plan generation result: {result}")
