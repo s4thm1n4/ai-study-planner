@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional
 import asyncio
 from dataclasses import dataclass
 import hashlib
+from intelligent_topics import IntelligentTopicGenerator
 
 # Try to import optional libraries, fall back to basic functionality if not available
 try:
@@ -240,6 +241,8 @@ class ScheduleCreatorAgent:
             genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
             self.model = genai.GenerativeModel('gemini-pro')
         self.load_subjects_database()
+        # Initialize the intelligent topic generator
+        self.topic_generator = IntelligentTopicGenerator()
     
     def load_subjects_database(self):
         """Load subjects database with estimated hours and topics"""
@@ -458,27 +461,45 @@ class ScheduleCreatorAgent:
         }
     
     def _generate_dynamic_topics(self, subject: str, total_days: int) -> List[str]:
-        """Generate dynamic topics based on subject when AI is not available"""
-        # Create intelligent topic progression based on common learning patterns
-        topics = []
+        """
+        AI-powered topic generation that intelligently creates appropriate 
+        learning topics for any subject without hardcoding.
+        """
+        # Use the intelligent topic generator
+        num_topics = max(3, min(total_days, 8))  # Generate between 3-8 topics based on days
         
-        # Basic structure for any subject
-        base_topics = [
-            f"Introduction to {subject}",
-            f"Fundamental Concepts of {subject}",
-            f"Core Principles in {subject}",
-            f"Practical Applications of {subject}",
-            f"Advanced Topics in {subject}",
-            f"Best Practices and Techniques",
-            f"Real-world Examples and Case Studies",
-            f"Review and Practice"
-        ]
-        
-        # Adjust number of topics based on available days
-        num_topics = min(len(base_topics), max(3, total_days))
-        topics = base_topics[:num_topics]
-        
-        return topics
+        try:
+            # Generate contextually appropriate topics using AI
+            topics = self.topic_generator.generate_contextual_topics(subject, num_topics)
+            
+            # Ensure we have the right number of topics
+            if len(topics) < num_topics:
+                # Fill any gaps with basic topics
+                basic_topics = [
+                    f"Fundamentals of {subject}",
+                    f"Practical {subject} Applications", 
+                    f"Advanced {subject} Concepts",
+                    f"{subject} Best Practices",
+                    f"Professional {subject} Skills"
+                ]
+                
+                for topic in basic_topics:
+                    if len(topics) < num_topics and topic not in topics:
+                        topics.append(topic)
+            
+            return topics[:num_topics]
+            
+        except Exception as e:
+            # Fallback to simple generic topics if AI generation fails
+            print(f"AI topic generation failed: {e}. Using fallback.")
+            return [
+                f"Introduction to {subject}",
+                f"{subject} Fundamentals",
+                f"Practical {subject} Skills", 
+                f"Advanced {subject} Techniques",
+                f"{subject} Applications",
+                f"Professional {subject} Development"
+            ][:num_topics]
     
     def _find_similar_subject(self, subject: str) -> Dict:
         """Find similar subjects using keyword matching and fuzzy search"""
@@ -620,22 +641,12 @@ class ResourceFinderAgent:
         """Generate fallback resources for any subject"""
         resources = []
         
-        # Common educational platforms with search URLs
+        # Comprehensive educational platforms with diverse learning formats
         platforms = [
             {
                 "name": "Coursera",
                 "url_template": "https://www.coursera.org/search?query={}",
                 "type": "online_course"
-            },
-            {
-                "name": "YouTube",
-                "url_template": "https://www.youtube.com/results?search_query={}+tutorial",
-                "type": "video"
-            },
-            {
-                "name": "Khan Academy",
-                "url_template": "https://www.khanacademy.org/search?page_search_query={}",
-                "type": "interactive"
             },
             {
                 "name": "edX",
@@ -646,22 +657,168 @@ class ResourceFinderAgent:
                 "name": "Udemy",
                 "url_template": "https://www.udemy.com/courses/search/?q={}",
                 "type": "online_course"
+            },
+            {
+                "name": "Khan Academy",
+                "url_template": "https://www.khanacademy.org/search?page_search_query={}",
+                "type": "interactive"
+            },
+            {
+                "name": "YouTube",
+                "url_template": "https://www.youtube.com/results?search_query={}+tutorial",
+                "type": "video"
+            },
+            {
+                "name": "Pluralsight",
+                "url_template": "https://www.pluralsight.com/search?q={}",
+                "type": "online_course"
+            },
+            {
+                "name": "LinkedIn Learning",
+                "url_template": "https://www.linkedin.com/learning/search?keywords={}",
+                "type": "online_course"
+            },
+            {
+                "name": "Skillshare",
+                "url_template": "https://www.skillshare.com/search?query={}",
+                "type": "creative_course"
+            },
+            {
+                "name": "FreeCodeCamp",
+                "url_template": "https://www.freecodecamp.org/learn",
+                "type": "interactive"
+            },
+            {
+                "name": "Codecademy",
+                "url_template": "https://www.codecademy.com/search?query={}",
+                "type": "interactive"
+            },
+            {
+                "name": "MIT OpenCourseWare",
+                "url_template": "https://ocw.mit.edu/search/?q={}",
+                "type": "academic_course"
+            },
+            {
+                "name": "Stanford Online",
+                "url_template": "https://online.stanford.edu/search-catalog?keywords={}",
+                "type": "academic_course"
+            },
+            {
+                "name": "Udacity",
+                "url_template": "https://www.udacity.com/catalog?query={}",
+                "type": "nanodegree"
+            },
+            {
+                "name": "Brilliant",
+                "url_template": "https://brilliant.org/search/?q={}",
+                "type": "interactive"
+            },
+            {
+                "name": "Datacamp",
+                "url_template": "https://www.datacamp.com/search?q={}",
+                "type": "data_science_course"
+            },
+            {
+                "name": "GitHub Learning Lab",
+                "url_template": "https://lab.github.com/",
+                "type": "hands_on"
+            },
+            {
+                "name": "W3Schools",
+                "url_template": "https://www.w3schools.com/",
+                "type": "tutorial"
+            },
+            {
+                "name": "MDN Web Docs",
+                "url_template": "https://developer.mozilla.org/en-US/search?q={}",
+                "type": "documentation"
+            },
+            {
+                "name": "Crash Course (YouTube)",
+                "url_template": "https://www.youtube.com/results?search_query=crash+course+{}",
+                "type": "video_series"
+            },
+            {
+                "name": "TED-Ed",
+                "url_template": "https://ed.ted.com/search?qs={}",
+                "type": "educational_video"
             }
         ]
         
-        for i, platform in enumerate(platforms[:count]):
-            encoded_subject = subject.replace(" ", "+")
+        # Intelligently select platforms based on subject type
+        subject_lower = subject.lower()
+        
+        # Define subject-specific platform preferences
+        programming_subjects = ['programming', 'coding', 'javascript', 'python', 'java', 'web development', 'software']
+        data_subjects = ['data science', 'machine learning', 'statistics', 'analytics', 'ai', 'artificial intelligence']
+        business_subjects = ['business', 'marketing', 'finance', 'management', 'entrepreneurship']
+        creative_subjects = ['design', 'art', 'photography', 'video', 'music', 'creative']
+        academic_subjects = ['mathematics', 'physics', 'chemistry', 'biology', 'history', 'literature']
+        
+        # Select best platforms for the subject
+        preferred_platforms = []
+        
+        if any(word in subject_lower for word in programming_subjects):
+            preferred_platforms = ['FreeCodeCamp', 'Codecademy', 'Udemy', 'Pluralsight', 'GitHub Learning Lab', 'YouTube', 'MDN Web Docs']
+        elif any(word in subject_lower for word in data_subjects):
+            preferred_platforms = ['Datacamp', 'Coursera', 'edX', 'Udacity', 'Brilliant', 'YouTube', 'MIT OpenCourseWare']
+        elif any(word in subject_lower for word in business_subjects):
+            preferred_platforms = ['LinkedIn Learning', 'Coursera', 'edX', 'Udemy', 'YouTube', 'Stanford Online']
+        elif any(word in subject_lower for word in creative_subjects):
+            preferred_platforms = ['Skillshare', 'YouTube', 'Udemy', 'LinkedIn Learning', 'TED-Ed']
+        elif any(word in subject_lower for word in academic_subjects):
+            preferred_platforms = ['Khan Academy', 'MIT OpenCourseWare', 'Stanford Online', 'edX', 'Coursera', 'Crash Course (YouTube)', 'TED-Ed']
+        else:
+            # General subjects - use a balanced mix
+            preferred_platforms = ['Coursera', 'edX', 'YouTube', 'Khan Academy', 'Udemy', 'Brilliant', 'TED-Ed']
+        
+        # Filter platforms based on preferences and ensure variety
+        selected_platforms = []
+        for platform_name in preferred_platforms:
+            for platform in platforms:
+                if platform['name'] == platform_name:
+                    selected_platforms.append(platform)
+                    break
+            if len(selected_platforms) >= count:
+                break
+        
+        # If we don't have enough, add remaining platforms
+        if len(selected_platforms) < count:
+            remaining_platforms = [p for p in platforms if p not in selected_platforms]
+            selected_platforms.extend(remaining_platforms[:count - len(selected_platforms)])
+        
+        # Generate resources with better titles and descriptions
+        encoded_subject = subject.replace(" ", "+").replace("&", "and")
+        
+        for i, platform in enumerate(selected_platforms[:count]):
+            # Create more descriptive titles based on platform type
+            if platform['type'] == 'interactive':
+                title = f"Interactive {subject} Tutorial - {platform['name']}"
+                description = f"Hands-on interactive learning experience for {subject} on {platform['name']}"
+            elif platform['type'] == 'video' or platform['type'] == 'video_series':
+                title = f"{subject} Video Course - {platform['name']}"
+                description = f"Comprehensive video tutorials and lectures on {subject}"
+            elif platform['type'] == 'academic_course':
+                title = f"Academic {subject} Course - {platform['name']}"
+                description = f"University-level {subject} course materials and lectures"
+            elif platform['type'] == 'nanodegree':
+                title = f"{subject} Nanodegree Program - {platform['name']}"
+                description = f"Industry-focused {subject} program with real-world projects"
+            else:
+                title = f"{subject} Course - {platform['name']}"
+                description = f"Comprehensive {subject} learning resources and courses"
+            
             resources.append({
                 "id": f"fallback_{i+1}",
-                "title": f"{subject} - {platform['name']} Course",
+                "title": title,
                 "subject": subject,
                 "resource_type": platform["type"],
                 "difficulty": difficulty,
                 "url": platform["url_template"].format(encoded_subject),
-                "description": f"Comprehensive {subject} learning resources on {platform['name']}",
-                "similarity_score": 0.7,  # Lower score for generated resources
+                "description": description,
+                "similarity_score": 0.75 - (i * 0.05),  # Slightly decrease score for lower priority
                 "source": platform["name"],
-                "tags": [subject.lower(), "learning", difficulty]
+                "tags": [subject.lower(), "learning", difficulty, platform["type"]]
             })
         
         return resources

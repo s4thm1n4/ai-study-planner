@@ -262,20 +262,6 @@
       "category": "long_term_thinking",
       "mood_target": "impatient"
     }
-  ]
-    },
-    {
-      "id": 3,
-      "tip": "Teach someone else what you've learned - it reinforces your understanding.",
-      "category": "retention",
-      "difficulty": "beginner"
-    },
-    {
-      "id": 4,
-      "tip": "Use spaced repetition to review material at increasing intervals.",
-      "category": "memory",
-      "difficulty": "advanced"
-    }
   ],
   "progress_messages": [
     {
