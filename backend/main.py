@@ -4,14 +4,18 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional, Annotated
 import asyncio
-import jwt
+from jose import jwt
+from jose.exceptions import JWTError
 import os
 from datetime import datetime, timedelta
 
-# Import both legacy and simplified multi-agent functions
-from agents import generate_schedule, find_resource
-from simple_agents import coordinator
-
+# ✅ Import agents robustly for both layouts
+try:
+    from .agents import generate_schedule, find_resource
+    from .simple_agents import coordinator
+except ImportError:
+    from agents import generate_schedule, find_resource
+    from simple_agents import coordinator
 app = FastAPI(title="AI Study Planner - Multi-Agent System", version="2.0.0")
 
 # JWT Configuration
