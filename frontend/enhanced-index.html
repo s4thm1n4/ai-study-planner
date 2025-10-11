@@ -1438,6 +1438,9 @@
             margin-bottom: 0.5rem;
         }
     </style>
+    
+    <!-- User Assessment Styles -->
+    <link rel="stylesheet" href="user-assessment.css">
 </head>
 <body>
     <!-- Navigation -->
@@ -1513,102 +1516,9 @@
                             <p>Create detailed, personalized study schedules with our multi-agent AI system tailored to your learning goals.</p>
                         </div>
 
-                        <div class="form-grid">
-                            <div class="input-group">
-                                <label for="advancedSubject">
-                                    <i class="fas fa-book"></i> Subject
-                                </label>
-                                <input type="text" id="advancedSubject" placeholder="Enter any subject you want to learn..." list="advancedSubjectList">
-                                <datalist id="advancedSubjectList">
-                                    <!-- Suggestions will be loaded here -->
-                                </datalist>
-                                <small class="input-help">Start typing or select from popular suggestions</small>
-                            </div>
-                            <div class="input-group">
-                                <label for="dailyHours">
-                                    <i class="fas fa-clock"></i> Daily Study Hours
-                                </label>
-                                <select id="dailyHours">
-                                    <option value="1">1 hour</option>
-                                    <option value="2" selected>2 hours</option>
-                                    <option value="3">3 hours</option>
-                                    <option value="4">4 hours</option>
-                                    <option value="5">5+ hours</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label for="totalDays">
-                                    <i class="fas fa-calendar-alt"></i> Study Duration
-                                </label>
-                                <select id="totalDays" onchange="toggleCustomDuration()">
-                                    <option value="3">3 days</option>
-                                    <option value="7" selected>1 week</option>
-                                    <option value="14">2 weeks</option>
-                                    <option value="30">1 month</option>
-                                    <option value="60">2 months</option>
-                                    <option value="custom">Custom duration</option>
-                                </select>
-                                <input type="number" id="customDays" placeholder="Enter number of days" min="1" max="365" style="display:none; margin-top: 0.5rem;">
-                            </div>
-                            <div class="input-group">
-                                <label for="knowledgeLevel">
-                                    <i class="fas fa-graduation-cap"></i> Knowledge Level
-                                </label>
-                                <select id="knowledgeLevel">
-                                    <option value="beginner" selected>Beginner</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label for="learningStyle">
-                                    <i class="fas fa-brain"></i> Learning Style (Optional)
-                                </label>
-                                <select id="learningStyle">
-                                    <option value="mixed" selected>Mixed (All types)</option>
-                                    <option value="visual">Visual Learner (Videos, Images, Diagrams)</option>
-                                    <option value="auditory">Auditory Learner (Podcasts, Lectures)</option>
-                                    <option value="reading">Reading/Writing (Books, Articles, Notes)</option>
-                                    <option value="kinesthetic">Kinesthetic (Hands-on, Interactive)</option>
-                                </select>
-                                <small class="input-help">Choose your preferred learning style for better resource recommendations</small>
-                            </div>
-                            
-                            <div class="input-group">
-                                <label>
-                                    <i class="fas fa-smile"></i> How are you feeling today? (Optional)
-                                </label>
-                                <div class="mood-selector">
-                                    <button type="button" class="mood-btn" data-mood="excited" title="Excited & Motivated">
-                                        <span class="mood-emoji">🚀</span>
-                                        <span class="mood-label">Excited</span>
-                                    </button>
-                                    <button type="button" class="mood-btn" data-mood="focused" title="Focused & Ready">
-                                        <span class="mood-emoji">🎯</span>
-                                        <span class="mood-label">Focused</span>
-                                    </button>
-                                    <button type="button" class="mood-btn" data-mood="neutral" title="Neutral & Calm">
-                                        <span class="mood-emoji">😌</span>
-                                        <span class="mood-label">Neutral</span>
-                                    </button>
-                                    <button type="button" class="mood-btn" data-mood="stressed" title="Stressed & Overwhelmed">
-                                        <span class="mood-emoji">😰</span>
-                                        <span class="mood-label">Stressed</span>
-                                    </button>
-                                    <button type="button" class="mood-btn" data-mood="tired" title="Tired & Low Energy">
-                                        <span class="mood-emoji">😴</span>
-                                        <span class="mood-label">Tired</span>
-                                    </button>
-                                </div>
-                                <small class="input-help">Your mood helps us personalize the motivational message</small>
-                                <input type="hidden" id="selectedMood" value="">
-                            </div>
-                        </div>
+                        <!-- User Assessment Section -->
+                        <div id="user-assessment-container"></div>
                         
-                        <button class="generate-btn" onclick="generateAdvancedPlan()">
-                            <i class="fas fa-magic"></i> Generate Personalized Study Plan
-                        </button>
-
                         <div class="loading" id="advanced-loading">
                             <div class="spinner"></div>
                             <p>Our AI agents are creating your personalized study plan...</p>
@@ -1803,6 +1713,8 @@
         </div>
     </footer>
 
+    <!-- User Assessment JavaScript -->
+    <script src="user-assessment.js"></script>
     <script src="enhanced-app.js"></script>
 </body>
 </html>

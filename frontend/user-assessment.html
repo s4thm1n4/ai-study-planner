@@ -1,0 +1,331 @@
+<!-- User Assessment Section -->
+<div id="user-assessment" class="user-assessment-section">
+    <div class="assessment-header">
+        <h3>📋 Tell Us About Yourself</h3>
+        <p>Help us create the perfect study plan by sharing a bit about your background and goals.</p>
+    </div>
+
+    <!-- Step Progress Indicator -->
+    <div class="step-progress">
+        <div class="step active" data-step="1">
+            <div class="step-number">1</div>
+            <div class="step-label">Background</div>
+        </div>
+        <div class="step" data-step="2">
+            <div class="step-number">2</div>
+            <div class="step-label">Current Level</div>
+        </div>
+        <div class="step" data-step="3">
+            <div class="step-number">3</div>
+            <div class="step-label">Goals</div>
+        </div>
+        <div class="step" data-step="4">
+            <div class="step-number">4</div>
+            <div class="step-label">Plan Details</div>
+        </div>
+    </div>
+
+    <!-- Step 1: Educational Background -->
+    <div class="assessment-step active" id="step-1">
+        <div class="step-content">
+            <h4>📚 Educational Background</h4>
+            
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="educationLevel">
+                        <i class="fas fa-school"></i> What's your current educational level?
+                    </label>
+                    <select id="educationLevel" onchange="updateGradeOptions()">
+                        <option value="">Select your level</option>
+                        <option value="elementary">Elementary School</option>
+                        <option value="middle">Middle School</option>
+                        <option value="high">High School</option>
+                        <option value="undergraduate">University - Undergraduate</option>
+                        <option value="graduate">University - Graduate</option>
+                        <option value="professional">Working Professional</option>
+                        <option value="lifelong">Lifelong Learner / Self-Study</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="gradeGroup" style="display: none;">
+                    <label for="grade">
+                        <i class="fas fa-graduation-cap"></i> Grade/Year
+                    </label>
+                    <select id="grade">
+                        <!-- Options will be populated based on education level -->
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="studyPurpose">
+                        <i class="fas fa-target"></i> Why are you studying this subject?
+                    </label>
+                    <select id="studyPurpose">
+                        <option value="">Select your purpose</option>
+                        <option value="exam">Preparing for an exam</option>
+                        <option value="assignment">Working on an assignment/project</option>
+                        <option value="course">Following a course curriculum</option>
+                        <option value="career">Career development</option>
+                        <option value="personal">Personal interest/hobby</option>
+                        <option value="skill">Skill improvement</option>
+                        <option value="certification">Professional certification</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="examDetailsGroup" style="display: none;">
+                    <label for="examDetails">
+                        <i class="fas fa-clipboard-check"></i> Exam Details (Optional)
+                    </label>
+                    <input type="text" id="examDetails" placeholder="e.g., SAT, Final Exam, Certification Test">
+                    <small class="input-help">This helps us focus on exam-specific preparation</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="step-navigation">
+            <button class="nav-btn next-btn" onclick="nextStep()">Next Step <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Step 2: Current Knowledge Level -->
+    <div class="assessment-step" id="step-2">
+        <div class="step-content">
+            <h4>🎯 Current Knowledge Assessment</h4>
+            
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="currentKnowledge">
+                        <i class="fas fa-brain"></i> How would you rate your current knowledge?
+                    </label>
+                    <div class="knowledge-selector">
+                        <button type="button" class="knowledge-btn" data-level="complete-beginner">
+                            <div class="level-icon">🌱</div>
+                            <div class="level-title">Complete Beginner</div>
+                            <div class="level-desc">Never studied this before</div>
+                        </button>
+                        <button type="button" class="knowledge-btn" data-level="some-basics">
+                            <div class="level-icon">🌿</div>
+                            <div class="level-title">Know Some Basics</div>
+                            <div class="level-desc">Familiar with fundamental concepts</div>
+                        </button>
+                        <button type="button" class="knowledge-btn" data-level="intermediate">
+                            <div class="level-icon">🌳</div>
+                            <div class="level-title">Intermediate</div>
+                            <div class="level-desc">Comfortable with core concepts</div>
+                        </button>
+                        <button type="button" class="knowledge-btn" data-level="advanced">
+                            <div class="level-icon">🏔️</div>
+                            <div class="level-title">Advanced</div>
+                            <div class="level-desc">Strong foundation, need specialization</div>
+                        </button>
+                    </div>
+                    <input type="hidden" id="selectedKnowledgeLevel" value="">
+                </div>
+
+                <div class="input-group">
+                    <label for="previousExperience">
+                        <i class="fas fa-history"></i> What do you already know about this subject?
+                    </label>
+                    <textarea id="previousExperience" rows="4" placeholder="e.g., I've studied basic algebra and geometry in high school, comfortable with linear equations but struggle with quadratic functions..."></textarea>
+                    <small class="input-help">This helps us avoid repeating what you already know</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="strugglingAreas">
+                        <i class="fas fa-exclamation-triangle"></i> What areas do you find challenging?
+                    </label>
+                    <textarea id="strugglingAreas" rows="3" placeholder="e.g., I find calculus derivatives confusing, or I struggle with memorizing historical dates..."></textarea>
+                    <small class="input-help">We'll focus extra attention on these areas</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="step-navigation">
+            <button class="nav-btn prev-btn" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Previous</button>
+            <button class="nav-btn next-btn" onclick="nextStep()">Next Step <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Step 3: Learning Goals -->
+    <div class="assessment-step" id="step-3">
+        <div class="step-content">
+            <h4>🚀 Learning Goals & Expectations</h4>
+            
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="specificGoals">
+                        <i class="fas fa-bullseye"></i> What specifically do you want to learn?
+                    </label>
+                    <textarea id="specificGoals" rows="4" placeholder="e.g., Master calculus derivatives and integrals, understand machine learning algorithms, learn to write essays effectively..."></textarea>
+                    <small class="input-help">Be as specific as possible - this shapes your entire study plan</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="expectedOutcome">
+                        <i class="fas fa-flag-checkered"></i> What's your expected outcome?
+                    </label>
+                    <select id="expectedOutcome">
+                        <option value="">Select your goal</option>
+                        <option value="pass-exam">Pass an exam/test</option>
+                        <option value="complete-course">Complete a course successfully</option>
+                        <option value="practical-application">Apply knowledge practically</option>
+                        <option value="teach-others">Be able to teach/explain to others</option>
+                        <option value="professional-use">Use in professional work</option>
+                        <option value="personal-mastery">Personal mastery and understanding</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="learningChallenges">
+                        <i class="fas fa-mountain"></i> What challenges do you face while studying?
+                    </label>
+                    <div class="challenge-selector">
+                        <label class="challenge-option">
+                            <input type="checkbox" value="time-management"> Time management
+                        </label>
+                        <label class="challenge-option">
+                            <input type="checkbox" value="concentration"> Difficulty concentrating
+                        </label>
+                        <label class="challenge-option">
+                            <input type="checkbox" value="motivation"> Staying motivated
+                        </label>
+                        <label class="challenge-option">
+                            <input type="checkbox" value="understanding"> Understanding complex concepts
+                        </label>
+                        <label class="challenge-option">
+                            <input type="checkbox" value="memorization"> Memorizing information
+                        </label>
+                        <label class="challenge-option">
+                            <input type="checkbox" value="practice"> Finding practice opportunities
+                        </label>
+                        <label class="challenge-option">
+                            <input type="checkbox" value="resources"> Finding good resources
+                        </label>
+                        <label class="challenge-option">
+                            <input type="checkbox" value="confidence"> Building confidence
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="preferredDifficulty">
+                        <i class="fas fa-chart-line"></i> How challenging should the study plan be?
+                    </label>
+                    <div class="difficulty-slider">
+                        <input type="range" id="difficultyRange" min="1" max="5" value="3" oninput="updateDifficultyLabel()">
+                        <div class="slider-labels">
+                            <span>Easy Pace</span>
+                            <span>Moderate</span>
+                            <span>Challenging</span>
+                        </div>
+                        <div class="difficulty-description" id="difficultyDescription">Moderate pace - Balanced challenge</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="step-navigation">
+            <button class="nav-btn prev-btn" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Previous</button>
+            <button class="nav-btn next-btn" onclick="nextStep()">Next Step <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Step 4: Plan Details (Modified existing form) -->
+    <div class="assessment-step" id="step-4">
+        <div class="step-content">
+            <h4>⚙️ Study Plan Configuration</h4>
+            
+            <!-- Move the existing form content here -->
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="advancedSubject">
+                        <i class="fas fa-book"></i> Subject
+                    </label>
+                    <input type="text" id="advancedSubject" placeholder="Enter the subject you want to learn..." list="advancedSubjectList">
+                    <datalist id="advancedSubjectList">
+                        <!-- Suggestions will be loaded here -->
+                    </datalist>
+                </div>
+                
+                <!-- Rest of the existing form fields... -->
+                <div class="input-group">
+                    <label for="dailyHours">
+                        <i class="fas fa-clock"></i> Daily Study Hours
+                    </label>
+                    <select id="dailyHours">
+                        <option value="1">1 hour</option>
+                        <option value="2" selected>2 hours</option>
+                        <option value="3">3 hours</option>
+                        <option value="4">4 hours</option>
+                        <option value="5">5+ hours</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="totalDays">
+                        <i class="fas fa-calendar-alt"></i> Study Duration
+                    </label>
+                    <select id="totalDays" onchange="toggleCustomDuration()">
+                        <option value="3">3 days</option>
+                        <option value="7" selected>1 week</option>
+                        <option value="14">2 weeks</option>
+                        <option value="30">1 month</option>
+                        <option value="60">2 months</option>
+                        <option value="custom">Custom duration</option>
+                    </select>
+                    <input type="number" id="customDays" placeholder="Enter number of days" min="1" max="365" style="display:none; margin-top: 0.5rem;">
+                </div>
+                
+                <div class="input-group">
+                    <label for="learningStyle">
+                        <i class="fas fa-brain"></i> Learning Style
+                    </label>
+                    <select id="learningStyle">
+                        <option value="mixed" selected>Mixed (All types)</option>
+                        <option value="visual">Visual Learner</option>
+                        <option value="auditory">Auditory Learner</option>
+                        <option value="reading">Reading/Writing</option>
+                        <option value="kinesthetic">Kinesthetic</option>
+                    </select>
+                </div>
+                
+                <!-- Mood selector -->
+                <div class="input-group">
+                    <label>
+                        <i class="fas fa-smile"></i> Current Mood
+                    </label>
+                    <div class="mood-selector">
+                        <button type="button" class="mood-btn" data-mood="excited">
+                            <span class="mood-emoji">🚀</span>
+                            <span class="mood-label">Excited</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="focused">
+                            <span class="mood-emoji">🎯</span>
+                            <span class="mood-label">Focused</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="neutral">
+                            <span class="mood-emoji">😌</span>
+                            <span class="mood-label">Neutral</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="stressed">
+                            <span class="mood-emoji">😰</span>
+                            <span class="mood-label">Stressed</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="tired">
+                            <span class="mood-emoji">😴</span>
+                            <span class="mood-label">Tired</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="selectedMood" value="">
+                </div>
+            </div>
+        </div>
+        
+        <div class="step-navigation">
+            <button class="nav-btn prev-btn" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Previous</button>
+            <button class="generate-btn" onclick="generateAdvancedPlan()">
+                <i class="fas fa-magic"></i> Generate My Personalized Study Plan
+            </button>
+        </div>
+    </div>
+</div>

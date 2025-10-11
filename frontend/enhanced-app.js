@@ -8,7 +8,26 @@ let authToken = null;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing enhanced study planner...');
     initializeAuth();
+    loadUserAssessment();
 });
+
+// Load user assessment HTML into the container
+async function loadUserAssessment() {
+    try {
+        const response = await fetch('user-assessment.html');
+        const html = await response.text();
+        document.getElementById('user-assessment-container').innerHTML = html;
+        
+        // Initialize user assessment after loading
+        if (window.userAssessment && typeof window.userAssessment.initialize === 'function') {
+            window.userAssessment.initialize();
+        }
+    } catch (error) {
+        console.error('Error loading user assessment:', error);
+        // Fallback: Hide the container if loading fails
+        document.getElementById('user-assessment-container').style.display = 'none';
+    }
+}
 
 // Authentication functions
 function initializeAuth() {
@@ -229,29 +248,30 @@ function toggleCustomDuration() {
 
 // Advanced Plan Generation
 async function generateAdvancedPlan() {
-    const subject = document.getElementById('advancedSubject')?.value?.trim();
-    const dailyHours = parseInt(document.getElementById('dailyHours')?.value || '2');
-    
-    // Handle custom duration
-    let totalDays;
-    const totalDaysSelect = document.getElementById('totalDays');
-    if (totalDaysSelect.value === 'custom') {
-        const customDays = parseInt(document.getElementById('customDays')?.value);
-        if (!customDays || customDays < 1) {
-            showError('advanced-results', 'Please enter a valid number of days (1-365).');
-            return;
-        }
-        totalDays = customDays;
-    } else {
-        totalDays = parseInt(totalDaysSelect.value || '7');
+    // Ensure assessment data is saved (especially step 4)
+    if (window.userAssessment && typeof window.userAssessment.saveCurrentStep === 'function') {
+        window.userAssessment.saveCurrentStep();
     }
     
-    const knowledgeLevel = document.getElementById('knowledgeLevel')?.value || 'beginner';
-    const learningStyle = document.getElementById('learningStyle')?.value || 'mixed';
-    const selectedMood = document.getElementById('selectedMood')?.value || 'neutral';
+    // Get user assessment data
+    let userAssessmentData = {};
+    if (window.userAssessment && typeof window.userAssessment.getData === 'function') {
+        userAssessmentData = window.userAssessment.getData();
+    } else {
+        showError('advanced-results', 'Please complete the user assessment first!');
+        return;
+    }
+    
+    // Extract data from assessment
+    const subject = userAssessmentData.subjectOfInterest;
+    const dailyHours = parseInt(userAssessmentData.dailyStudyHours || '2');
+    const totalDays = parseInt(userAssessmentData.studyDuration || '7');
+    const knowledgeLevel = userAssessmentData.knowledgeLevel || 'beginner';
+    const learningStyle = userAssessmentData.learningStyle || 'mixed';
+    const selectedMood = userAssessmentData.currentMood || 'neutral';
     
     if (!subject) {
-        showError('advanced-results', 'Please enter a subject you want to learn!');
+        showError('advanced-results', 'Please specify a subject you want to learn in the assessment!');
         return;
     }
     
@@ -269,7 +289,7 @@ async function generateAdvancedPlan() {
         showEnhancedLoading(loadingDiv, resultsDiv, 'Generating your personalized study plan...');
         if (generateBtn) generateBtn.disabled = true;
         
-        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle, selectedMood });
+        console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle, selectedMood, userAssessmentData });
         
         const response = await makeAuthenticatedRequest('/api/generate-advanced-plan', {
             method: 'POST',
@@ -279,7 +299,21 @@ async function generateAdvancedPlan() {
                 total_days: totalDays,
                 knowledge_level: knowledgeLevel,
                 user_mood: selectedMood,
-                learning_style: learningStyle
+                learning_style: learningStyle,
+                
+                // Include user assessment data
+                user_profile: {
+                    education_level: userAssessmentData.educationLevel,
+                    grade: userAssessmentData.grade,
+                    study_purpose: userAssessmentData.studyPurpose,
+                    exam_details: userAssessmentData.examDetails,
+                    previous_experience: userAssessmentData.previousExperience,
+                    struggling_areas: userAssessmentData.strugglingAreas,
+                    specific_goals: userAssessmentData.specificGoals,
+                    expected_outcome: userAssessmentData.expectedOutcome,
+                    learning_challenges: userAssessmentData.learningChallenges,
+                    preferred_difficulty: userAssessmentData.preferredDifficulty
+                }
             })
         });
         

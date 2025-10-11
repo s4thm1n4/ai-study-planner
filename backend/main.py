@@ -101,7 +101,11 @@ def verify_token(token: str):
         if user_id is None:
             return None
         return {"user_id": user_id, "exp": payload.get("exp")}
-    except jwt.PyJWTError:
+    except JWTError as e:
+        print(f"JWT Error: {e}")
+        return None
+    except Exception as e:
+        print(f"Token verification error: {e}")
         return None
 
 async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]):
