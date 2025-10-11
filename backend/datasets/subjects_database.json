@@ -1,0 +1,140 @@
+{
+  "subjects": [
+    {
+      "name": "Machine Learning",
+      "estimated_hours": 30,
+      "difficulty": "intermediate",
+      "category": "Computer Science",
+      "keywords": ["ML", "algorithms", "data science", "prediction", "artificial intelligence"],
+      "topics": [
+        "Introduction to Machine Learning",
+        "Supervised Learning Algorithms",
+        "Unsupervised Learning Techniques", 
+        "Model Evaluation and Validation",
+        "Neural Networks Basics",
+        "Deep Learning Fundamentals",
+        "Feature Engineering",
+        "Model Deployment"
+      ]
+    },
+    {
+      "name": "Python Programming",
+      "estimated_hours": 25,
+      "difficulty": "beginner", 
+      "category": "Programming",
+      "keywords": ["python", "coding", "programming", "scripting"],
+      "topics": [
+        "Python Syntax and Basics",
+        "Data Types and Variables",
+        "Control Structures",
+        "Functions and Modules",
+        "Object-Oriented Programming",
+        "File Handling",
+        "Error Handling and Debugging",
+        "Libraries and Frameworks"
+      ]
+    },
+    {
+      "name": "Data Science",
+      "estimated_hours": 35,
+      "difficulty": "intermediate",
+      "category": "Computer Science", 
+      "keywords": ["data analysis", "statistics", "visualization", "insights"],
+      "topics": [
+        "Data Collection and Cleaning",
+        "Exploratory Data Analysis",
+        "Statistical Analysis", 
+        "Data Visualization",
+        "Hypothesis Testing",
+        "Predictive Modeling",
+        "Big Data Technologies",
+        "Data Ethics and Privacy"
+      ]
+    },
+    {
+      "name": "Web Development",
+      "estimated_hours": 40,
+      "difficulty": "intermediate",
+      "category": "Programming",
+      "keywords": ["web", "html", "css", "javascript", "frontend", "backend"],
+      "topics": [
+        "HTML Fundamentals",
+        "CSS Styling and Layout",
+        "JavaScript Programming",
+        "Frontend Frameworks",
+        "Backend Development",
+        "Database Integration", 
+        "API Development",
+        "Deployment and DevOps"
+      ]
+    },
+    {
+      "name": "Mobile Development",
+      "estimated_hours": 45,
+      "difficulty": "intermediate",
+      "category": "Programming",
+      "keywords": ["mobile", "android", "ios", "flutter", "react native"],
+      "topics": [
+        "Mobile Development Basics",
+        "User Interface Design",
+        "State Management",
+        "API Integration",
+        "Device Features Access",
+        "Performance Optimization",
+        "Testing and Debugging",
+        "App Store Deployment"
+      ]
+    },
+    {
+      "name": "Cybersecurity",
+      "estimated_hours": 50,
+      "difficulty": "advanced",
+      "category": "Information Technology",
+      "keywords": ["security", "hacking", "encryption", "firewall", "penetration testing"],
+      "topics": [
+        "Security Fundamentals",
+        "Network Security",
+        "Cryptography Basics",
+        "Ethical Hacking",
+        "Incident Response",
+        "Security Policies",
+        "Risk Assessment",
+        "Compliance and Governance"
+      ]
+    },
+    {
+      "name": "Cloud Computing",
+      "estimated_hours": 35,
+      "difficulty": "intermediate", 
+      "category": "Information Technology",
+      "keywords": ["cloud", "aws", "azure", "google cloud", "devops"],
+      "topics": [
+        "Cloud Computing Basics",
+        "Infrastructure as a Service",
+        "Platform as a Service", 
+        "Software as a Service",
+        "Cloud Architecture Design",
+        "Security in Cloud",
+        "Cost Management",
+        "Migration Strategies"
+      ]
+    },
+    {
+      "name": "Database Management",
+      "estimated_hours": 30,
+      "difficulty": "intermediate",
+      "category": "Information Technology",
+      "keywords": ["database", "sql", "nosql", "mongodb", "postgresql"],
+      "topics": [
+        "Database Design Principles",
+        "SQL Fundamentals",
+        "Database Normalization",
+        "Query Optimization",
+        "NoSQL Databases",
+        "Database Administration",
+        "Backup and Recovery",
+        "Performance Tuning"
+      ]
+    }
+  ]
+}
