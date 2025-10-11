@@ -41,25 +41,36 @@
       "id": 1,
       "tip": "Use the Pomodoro Technique: 25 minutes of focused study, then a 5-minute break.",
       "category": "time_management",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "mood_target": "distracted"
     },
     {
       "id": 2,
       "tip": "Create mind maps to visualize connections between concepts.",
       "category": "learning_technique",
-      "difficulty": "intermediate"
+      "difficulty": "intermediate",
+      "mood_target": "overwhelmed"
     },
     {
       "id": 3,
-      "tip": "Teach someone else what you've learned - it reinforces your understanding.",
-      "category": "retention",
-      "difficulty": "beginner"
+      "tip": "Break large tasks into smaller, manageable chunks.",
+      "category": "task_management",
+      "difficulty": "beginner",
+      "mood_target": "overwhelmed"
+    }
+  ],
+  "encouragement_messages": [
+    {
+      "id": 1,
+      "message": "Every expert was once a beginner. You're on the right path!",
+      "category": "confidence_building",
+      "mood_target": "imposter_syndrome"
     },
     {
-      "id": 4,
-      "tip": "Use spaced repetition to review material at increasing intervals.",
-      "category": "memory",
-      "difficulty": "advanced"
+      "id": 2,
+      "message": "Progress isn't always visible, but every effort counts. Keep going!",
+      "category": "persistence",
+      "mood_target": "discouraged"
     }
   ],
   "progress_messages": [

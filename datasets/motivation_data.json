@@ -1,0 +1,298 @@
+{
+  "motivational_quotes": [
+    {
+      "id": 1,
+      "quote": "The only way to do great work is to love what you do.",
+      "author": "Steve Jobs",
+      "category": "general_motivation",
+      "mood_target": "low_energy"
+    },
+    {
+      "id": 2,    }
+  ], "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+      "author": "Winston Churchill",
+      "category": "perseverance",
+      "mood_target": "frustrated"
+    },
+    {
+      "id": 3,
+      "quote": "Learning never exhausts the mind.",
+      "author": "Leonardo da Vinci",
+      "category": "learning",
+      "mood_target": "overwhelmed"
+    },
+    {
+      "id": 4,
+      "quote": "The expert in anything was once a beginner.",
+      "author": "Helen Hayes",
+      "category": "confidence",
+      "mood_target": "imposter_syndrome"
+    },
+    {
+      "id": 5,
+      "quote": "It is during our darkest moments that we must focus to see the light.",
+      "author": "Aristotle",
+      "category": "perseverance",
+      "mood_target": "discouraged"
+    },
+    {
+      "id": 6,
+      "quote": "The beautiful thing about learning is that nobody can take it away from you.",
+      "author": "B.B. King",
+      "category": "learning",
+      "mood_target": "unmotivated"
+    },
+    {
+      "id": 7,
+      "quote": "Success is the sum of small efforts, repeated day in and day out.",
+      "author": "Robert Collier",
+      "category": "consistency",
+      "mood_target": "procrastination"
+    },
+    {
+      "id": 8,
+      "quote": "Don't watch the clock; do what it does. Keep going.",
+      "author": "Sam Levenson",
+      "category": "persistence",
+      "mood_target": "impatient"
+    },
+    {
+      "id": 9,
+      "quote": "The future belongs to those who believe in the beauty of their dreams.",
+      "author": "Eleanor Roosevelt",
+      "category": "inspiration",
+      "mood_target": "doubtful"
+    },
+    {
+      "id": 10,
+      "quote": "Education is the most powerful weapon which you can use to change the world.",
+      "author": "Nelson Mandela",
+      "category": "purpose",
+      "mood_target": "purposeless"
+    },
+    {
+      "id": 11,
+      "quote": "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.",
+      "author": "Brian Herbert",
+      "category": "learning",
+      "mood_target": "resistant"
+    },
+    {
+      "id": 12,
+      "quote": "Progress, not perfection.",
+      "author": "Unknown",
+      "category": "perfectionism",
+      "mood_target": "perfectionist"
+    },
+    {
+      "id": 13,
+      "quote": "You are never too old to set another goal or to dream a new dream.",
+      "author": "C.S. Lewis",
+      "category": "age_confidence",
+      "mood_target": "age_doubt"
+    },
+    {
+      "id": 14,
+      "quote": "The only impossible journey is the one you never begin.",
+      "author": "Tony Robbins",
+      "category": "starting",
+      "mood_target": "paralyzed"
+    },
+    {
+      "id": 15,
+      "quote": "Learning is a treasure that will follow its owner everywhere.",
+      "author": "Chinese Proverb",
+      "category": "value_of_learning",
+      "mood_target": "questioning_worth"
+    }
+  ],
+  "study_tips": [
+    {
+      "id": 1,
+      "tip": "Use the Pomodoro Technique: 25 minutes of focused study, then a 5-minute break.",
+      "category": "time_management",
+      "difficulty": "beginner",
+      "mood_target": "distracted"
+    },
+    {
+      "id": 2,
+      "tip": "Create mind maps to visualize connections between concepts.",
+      "category": "learning_technique",
+      "difficulty": "intermediate",
+      "mood_target": "overwhelmed"
+    },
+    {
+      "id": 3,
+      "tip": "Study in short, frequent sessions rather than long cramming sessions.",
+      "category": "spaced_repetition",
+      "difficulty": "beginner",
+      "mood_target": "cramming"
+    },
+    {
+      "id": 4,
+      "tip": "Teach someone else what you've learned to reinforce your understanding.",
+      "category": "active_learning",
+      "difficulty": "intermediate",
+      "mood_target": "uncertain"
+    },
+    {
+      "id": 5,
+      "tip": "Set up a dedicated study space free from distractions.",
+      "category": "environment",
+      "difficulty": "beginner",
+      "mood_target": "distracted"
+    },
+    {
+      "id": 6,
+      "tip": "Use active recall: test yourself frequently instead of just re-reading notes.",
+      "category": "memory_technique",
+      "difficulty": "intermediate",
+      "mood_target": "forgetful"
+    },
+    {
+      "id": 7,
+      "tip": "Break large tasks into smaller, manageable chunks.",
+      "category": "task_management",
+      "difficulty": "beginner",
+      "mood_target": "overwhelmed"
+    },
+    {
+      "id": 8,
+      "tip": "Use the Feynman Technique: explain concepts in simple terms as if teaching a child.",
+      "category": "understanding",
+      "difficulty": "intermediate",
+      "mood_target": "confused"
+    },
+    {
+      "id": 9,
+      "tip": "Study during your peak energy hours when you're most alert.",
+      "category": "timing",
+      "difficulty": "beginner",
+      "mood_target": "tired"
+    },
+    {
+      "id": 10,
+      "tip": "Use mnemonic devices to remember complex information.",
+      "category": "memory_technique",
+      "difficulty": "intermediate",
+      "mood_target": "forgetful"
+    },
+    {
+      "id": 11,
+      "tip": "Take regular breaks to prevent burnout and maintain focus.",
+      "category": "wellness",
+      "difficulty": "beginner",
+      "mood_target": "burned_out"
+    },
+    {
+      "id": 12,
+      "tip": "Create a study schedule and stick to it for consistency.",
+      "category": "planning",
+      "difficulty": "beginner",
+      "mood_target": "disorganized"
+    },
+    {
+      "id": 13,
+      "tip": "Use multiple senses: read aloud, write notes, and create visual aids.",
+      "category": "multi_sensory",
+      "difficulty": "intermediate",
+      "mood_target": "struggling"
+    },
+    {
+      "id": 14,
+      "tip": "Set specific, achievable goals for each study session.",
+      "category": "goal_setting",
+      "difficulty": "beginner",
+      "mood_target": "aimless"
+    },
+    {
+      "id": 15,
+      "tip": "Review material within 24 hours to improve retention.",
+      "category": "retention",
+      "difficulty": "beginner",
+      "mood_target": "forgetful"
+    }
+  ],
+  "encouragement_messages": [
+    {
+      "id": 1,
+      "message": "Every expert was once a beginner. You're on the right path!",
+      "category": "confidence_building",
+      "mood_target": "imposter_syndrome"
+    },
+    {
+      "id": 2,
+      "message": "Progress isn't always visible, but every effort counts. Keep going!",
+      "category": "persistence",
+      "mood_target": "discouraged"
+    },
+    {
+      "id": 3,
+      "message": "Your brain is like a muscle - the more you use it, the stronger it gets.",
+      "category": "growth_mindset",
+      "mood_target": "struggling"
+    },
+    {
+      "id": 4,
+      "message": "Mistakes are proof that you're trying. Each one is a step toward mastery.",
+      "category": "error_positive",
+      "mood_target": "perfectionist"
+    },
+    {
+      "id": 5,
+      "message": "You've overcome challenges before, and you'll overcome this one too.",
+      "category": "resilience",
+      "mood_target": "defeated"
+    },
+    {
+      "id": 6,
+      "message": "Learning takes time. Be patient with yourself as you grow.",
+      "category": "patience",
+      "mood_target": "impatient"
+    },
+    {
+      "id": 7,
+      "message": "Your dedication to learning is admirable. You should be proud!",
+      "category": "recognition",
+      "mood_target": "unappreciated"
+    },
+    {
+      "id": 8,
+      "message": "Small steps daily lead to big changes yearly. You're building something great!",
+      "category": "long_term_thinking",
+      "mood_target": "impatient"
+    }
+  ]
+    },
+    {
+      "id": 3,
+      "tip": "Teach someone else what you've learned - it reinforces your understanding.",
+      "category": "retention",
+      "difficulty": "beginner"
+    },
+    {
+      "id": 4,
+      "tip": "Use spaced repetition to review material at increasing intervals.",
+      "category": "memory",
+      "difficulty": "advanced"
+    }
+  ],
+  "progress_messages": [
+    {
+      "milestone": "first_session",
+      "message": "🎉 Great start! You've taken the first step on your learning journey."
+    },
+    {
+      "milestone": "streak_3",
+      "message": "🔥 Three days in a row! You're building a great habit."
+    },
+    {
+      "milestone": "halfway",
+      "message": "💪 You're halfway through your study plan. Keep up the momentum!"
+    },
+    {
+      "milestone": "completion",
+      "message": "🏆 Congratulations! You've completed your study plan. Time to celebrate!"
+    }
+  ]
+}
