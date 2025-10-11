@@ -218,6 +218,15 @@ function showStep(stepNumber) {
 function validateCurrentStep() {
     switch(currentStep) {
         case 1:
+            // Step 1: Subject & Plan Details
+            const advancedSubject = document.getElementById('advancedSubject').value;
+            if (!advancedSubject.trim()) {
+                alert('Please enter the subject you want to learn.');
+                return false;
+            }
+            break;
+        case 2:
+            // Step 2: Educational Background
             const educationLevel = document.getElementById('educationLevel').value;
             const studyPurpose = document.getElementById('studyPurpose').value;
             if (!educationLevel || !studyPurpose) {
@@ -225,14 +234,16 @@ function validateCurrentStep() {
                 return false;
             }
             break;
-        case 2:
+        case 3:
+            // Step 3: Current Knowledge Level
             const knowledgeLevel = document.getElementById('selectedKnowledgeLevel').value;
             if (!knowledgeLevel) {
                 alert('Please select your current knowledge level.');
                 return false;
             }
             break;
-        case 3:
+        case 4:
+            // Step 4: Learning Goals
             const specificGoals = document.getElementById('specificGoals').value;
             const expectedOutcome = document.getElementById('expectedOutcome').value;
             if (!specificGoals.trim() || !expectedOutcome) {
@@ -252,29 +263,6 @@ function saveCurrentStepData() {
 
     switch(currentStep) {
         case 1:
-            userAssessment.educationLevel = getElementValue('educationLevel');
-            userAssessment.grade = getElementValue('grade');
-            userAssessment.studyPurpose = getElementValue('studyPurpose');
-            userAssessment.examDetails = getElementValue('examDetails');
-            break;
-        case 2:
-            userAssessment.knowledgeLevel = getElementValue('selectedKnowledgeLevel');
-            userAssessment.previousExperience = getElementValue('previousExperience');
-            userAssessment.strugglingAreas = getElementValue('strugglingAreas');
-            break;
-        case 3:
-            userAssessment.specificGoals = getElementValue('specificGoals');
-            userAssessment.expectedOutcome = getElementValue('expectedOutcome');
-            userAssessment.preferredDifficulty = getElementValue('difficultyRange');
-            
-            // Get selected challenges
-            const challenges = [];
-            document.querySelectorAll('.challenge-option input:checked').forEach(checkbox => {
-                challenges.push(checkbox.value);
-            });
-            userAssessment.learningChallenges = challenges;
-            break;
-        case 4:
             userAssessment.subjectOfInterest = getElementValue('advancedSubject');
             userAssessment.dailyStudyHours = getElementValue('dailyHours');
             
@@ -291,6 +279,29 @@ function saveCurrentStepData() {
             // Get selected mood
             const selectedMoodBtn = document.querySelector('.mood-btn.selected');
             userAssessment.currentMood = selectedMoodBtn ? selectedMoodBtn.dataset.mood : 'neutral';
+            break;
+        case 2:
+            userAssessment.educationLevel = getElementValue('educationLevel');
+            userAssessment.grade = getElementValue('grade');
+            userAssessment.studyPurpose = getElementValue('studyPurpose');
+            userAssessment.examDetails = getElementValue('examDetails');
+            break;
+        case 3:
+            userAssessment.knowledgeLevel = getElementValue('selectedKnowledgeLevel');
+            userAssessment.previousExperience = getElementValue('previousExperience');
+            userAssessment.strugglingAreas = getElementValue('strugglingAreas');
+            break;
+        case 4:
+            userAssessment.specificGoals = getElementValue('specificGoals');
+            userAssessment.expectedOutcome = getElementValue('expectedOutcome');
+            userAssessment.preferredDifficulty = getElementValue('difficultyRange');
+            
+            // Get selected challenges
+            const challenges = [];
+            document.querySelectorAll('.challenge-option input:checked').forEach(checkbox => {
+                challenges.push(checkbox.value);
+            });
+            userAssessment.learningChallenges = challenges;
             break;
     }
 }
