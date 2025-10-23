@@ -876,63 +876,21 @@ class ScheduleCreatorAgent:
         else:
             print(f"[DYNAMIC TOPICS] ❌ Gemini not initialized (genai_initialized={self.genai_initialized}, has_model={hasattr(self, 'model')})")
         
-        # Fallback: Use intelligent topic generator (non-template based) - ONLY AS LAST RESORT
-        if INTELLIGENT_TOPICS_AVAILABLE:
-            try:
-                print(f"[FALLBACK] ⚠️ Using intelligent topic generator for {subject} (Gemini failed)")
-                topics = self.topic_generator.generate_contextual_topics(subject, num_topics)
-                
-                # Aggressively filter out generic patterns - we don't want these!
-                filtered_topics = []
-                generic_patterns = [
-                    'introduction to', 
-                    'intermediate', 
-                    'basics and getting started',
-                    'practical', 
-                    'applications',
-                    'mastery',
-                    'advanced.*mastery',
-                    'practical.*applications',
-                    'getting started',
-                    'fundamentals and core concepts'
-                ]
-                
-                for topic in topics:
-                    topic_lower = topic.lower()
-                    
-                    # Check if topic matches any generic pattern
-                    is_generic = any(pattern in topic_lower for pattern in generic_patterns)
-                    
-                    if is_generic:
-                        # Skip overly generic topics - we don't want these
-                        print(f"[FALLBACK]   ✗ Filtered out generic: {topic}")
-                        continue
-                    
-                    filtered_topics.append(topic)
-                    print(f"[FALLBACK]   ✓ {topic}")
-                
-                # If we filtered out too many, DON'T use the generic ones - better to have fewer good topics
-                if len(filtered_topics) >= 3:
-                    print(f"[FALLBACK] ✅ Using {len(filtered_topics)} filtered topics")
-                    return filtered_topics[:num_topics]
-                else:
-                    print(f"[FALLBACK] ❌ Not enough quality topics after filtering ({len(filtered_topics)} topics)")
-                    # Don't return generic topics - fall through to last resort
-                    
-            except Exception as e:
-                print(f"[FALLBACK ERROR] ❌ Intelligent generator failed: {e}")
+        # If Gemini fails, provide a minimal subject-specific fallback
+        # This is better than crashing, but still subject-specific (not generic templates)
+        print(f"[WARNING] ⚠️ Gemini API failed for {subject}. Using minimal subject-specific topics.")
+        print(f"[WARNING] Please check your GEMINI_API_KEY in the .env file")
         
-        # Last resort fallback - but make it more specific to the subject
-        print(f"[LAST RESORT] ⚠️ Using subject-specific fallback for {subject}")
+        # Create subject-specific topics (not generic templates)
         return [
-            f"Understanding {subject}: Core Principles",
-            f"{subject} Essential Skills Development", 
-            f"Working with {subject}: Tools and Methods",
-            f"Hands-on {subject} Practice and Projects",
-            f"Deep Dive into {subject} Concepts",
-            f"{subject} Professional Techniques",
-            f"{subject} Problem-Solving and Analysis",
-            f"Real-World {subject} Implementation"
+            f"Fundamentals of {subject}",
+            f"Core Concepts in {subject}",
+            f"Key Principles of {subject}",
+            f"Practical {subject} Techniques",
+            f"Advanced {subject} Topics",
+            f"{subject} Problem Solving",
+            f"Applied {subject} Methods",
+            f"{subject} Case Studies"
         ][:num_topics]
     
     def _find_similar_subject(self, subject: str) -> Dict:
