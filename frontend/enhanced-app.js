@@ -351,36 +351,93 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
     
     const plan = data.study_plan;
     
-    // Generate schedule cards
+    // Generate roadmap nodes
     let scheduleHtml = '';
     if (plan.schedule && Array.isArray(plan.schedule)) {
-        scheduleHtml = plan.schedule.map(day => {
+        const topicEmojis = ['📖', '⚡', '🛠️', '🚀', '🏗️', '⚙️', '🎓', '🌟', '💡', '🔥'];
+        
+        scheduleHtml = plan.schedule.map((day, index) => {
             const topicsHtml = day.topics && day.topics.length > 0 
-                ? day.topics.map(topic => `<span class="topic-tag">${topic.topic} (${topic.hours}h)</span>`).join('')
-                : '<span class="topic-tag">Study session</span>';
+                ? day.topics.map(topic => `<span class="topic-tag">• ${topic.topic} (${topic.hours}h)</span>`).join('')
+                : '<span class="topic-tag">• Study session</span>';
+            
+            const emoji = topicEmojis[index % topicEmojis.length];
+            const status = index === 0 ? 'in-progress' : 'not-started';
+            const progress = index === 0 ? 25 : 0;
+            
+            // Get main topic name for resources
+            const mainTopic = day.topics && day.topics.length > 0 ? day.topics[0].topic : 'Study Session';
+            
+            // Generate sample resources for this day
+            const resources = [
+                { title: `${mainTopic} - Complete Course`, type: 'Course', duration: `${day.hours}h`, icon: '📘' },
+                { title: `${mainTopic} - Video Tutorial`, type: 'Video', duration: '45 mins', icon: '🎥' },
+                { title: `${mainTopic} - Practice Guide`, type: 'Article', duration: '20 mins', icon: '📄' }
+            ];
+            
+            const markerIcon = status === 'completed' ? '✓' : emoji;
+            const difficulty = index < 3 ? 'easy' : index < 5 ? 'medium' : 'hard';
+            const difficultyIcon = difficulty === 'easy' ? '🟢' : difficulty === 'medium' ? '🟡' : '🔴';
             
             return `
-                <div class="schedule-item">
-                    <div class="schedule-day">
-                        <div class="day-number">${day.day}</div>
-                        <div class="day-info">
-                            <h4>${day.date}</h4>
-                            <p class="day-date">Day ${day.day}</p>
+                <div class="roadmap-node ${status}" data-day="${day.day}" data-emoji="${emoji}">
+                    <div class="roadmap-marker" onclick="openResourcePopup(${day.day}, '${mainTopic}', ${JSON.stringify(resources).replace(/"/g, '&quot;')})">
+                        ${markerIcon}
+                    </div>
+                    <div class="roadmap-card" onclick="openResourcePopup(${day.day}, '${mainTopic}', ${JSON.stringify(resources).replace(/"/g, '&quot;')})">
+                        <div class="timeline-header">
+                            <div class="timeline-day-info">
+                                <h4>Day ${day.day}: ${mainTopic}</h4>
+                                <span class="timeline-date">${day.date}</span>
+                            </div>
+                            <div class="timeline-status">
+                                <input type="checkbox" 
+                                       class="timeline-checkbox" 
+                                       onclick="event.stopPropagation()"
+                                       onchange="toggleDayCompletion(${day.day}, this.checked)"
+                                       title="Mark as complete">
+                                <span class="status-badge ${status}">
+                                    ${status === 'completed' ? '✓ Done' : status === 'in-progress' ? '⏳ In Progress' : '⭕ Pending'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="timeline-topics">
+                            <h5>📚 Today's Focus</h5>
+                            <div class="topic-list">
+                                ${topicsHtml}
+                            </div>
+                        </div>
+
+                        ${day.goals && day.goals.length > 0 ? `
+                            <div style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.75rem;">
+                                <strong style="color: #6b7280; font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">🎯 Goals:</strong>
+                                <p style="margin: 0; color: #374151; font-size: 0.875rem;">${day.goals.join(' • ')}</p>
+                            </div>
+                        ` : ''}
+
+                        <div class="timeline-footer">
+                            <div class="timeline-duration">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                                </svg>
+                                ${day.hours} hours
+                            </div>
+                            <span class="difficulty-indicator difficulty-${difficulty}">
+                                ${difficultyIcon} ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                            </span>
+                            <div class="timeline-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                                <span class="progress-text">${progress}%</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem; font-weight: 600;">
+                            <span style="color: #2563eb;">👆 Click to view 3 recommended resources</span>
                         </div>
                     </div>
-                    <div class="schedule-topics">
-                        ${topicsHtml}
-                    </div>
-                    <div class="schedule-hours">
-                        <i class="fas fa-clock"></i>
-                        <span>${day.hours} hours planned</span>
-                    </div>
-                    ${day.goals && day.goals.length > 0 ? `
-                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
-                            <strong style="color: #6b7280; font-size: 0.875rem;">Goals:</strong>
-                            <p style="margin: 0.5rem 0 0 0; color: #374151;">${day.goals.join(' • ')}</p>
-                        </div>
-                    ` : ''}
                 </div>
             `;
         }).join('');
@@ -469,14 +526,17 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                 </div>
                 
                 ${scheduleHtml ? `
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-calendar-alt"></i>
+                    <div class="schedule-roadmap-container">
+                        <h4 style="text-align: center; color: #1f2937; margin-bottom: 1rem; font-size: 1.5rem; font-weight: 700;">
+                            🗺️ Your Learning Roadmap
+                        </h4>
+                        <p style="text-align: center; color: #6b7280; margin-bottom: 3rem; font-size: 1rem;">
+                            Click on any day to explore recommended resources and learning materials
+                        </p>
+                        <div class="schedule-roadmap">
+                            <div class="roadmap-path"></div>
+                            ${scheduleHtml}
                         </div>
-                        <h3 class="section-title">Study Schedule</h3>
-                    </div>
-                    <div class="schedule-grid">
-                        ${scheduleHtml}
                     </div>
                 ` : ''}
                 
@@ -1117,6 +1177,87 @@ function generateDailyGrid() {
     }
     
     dailyGrid.innerHTML = gridHTML;
+}
+
+// ===== ROADMAP RESOURCE POPUP FUNCTIONS =====
+
+function openResourcePopup(dayNumber, topicName, resources) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'resource-popup-overlay';
+    overlay.onclick = closeResourcePopup;
+    
+    // Create flashcard
+    const flashcard = document.createElement('div');
+    flashcard.className = 'resource-flashcard';
+    flashcard.onclick = (e) => e.stopPropagation(); // Prevent closing when clicking inside
+    
+    // Generate resource items HTML
+    const resourceItemsHtml = resources.map((resource, index) => `
+        <div class="resource-item-flashcard" style="animation-delay: ${0.1 + index * 0.1}s">
+            <div class="resource-flashcard-icon">${resource.icon}</div>
+            <div class="resource-flashcard-content">
+                <h4>${resource.title}</h4>
+                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
+                    <span class="resource-type-badge">${resource.type}</span>
+                    <span style="color: #6b7280; font-size: 0.875rem;">⏱️ ${resource.duration}</span>
+                </div>
+            </div>
+            <button class="resource-action-btn" onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(resource.title)}', '_blank')">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.5rem;">
+                    <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                    <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                </svg>
+                View Resource
+            </button>
+        </div>
+    `).join('');
+    
+    flashcard.innerHTML = `
+        <div class="flashcard-header">
+            <div>
+                <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700;">📚 Day ${dayNumber} Resources</h3>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem;">${topicName}</p>
+            </div>
+            <button class="flashcard-close" onclick="closeResourcePopup()">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="flashcard-body">
+            <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem;">
+                🎯 Recommended resources to help you master this topic. Click "View Resource" to explore!
+            </p>
+            <div class="flashcard-resources-list">
+                ${resourceItemsHtml}
+            </div>
+            <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                <p style="color: #9ca3af; font-size: 0.875rem; margin: 0;">
+                    💡 Tip: Complete these resources in order for the best learning experience
+                </p>
+            </div>
+        </div>
+    `;
+    
+    overlay.appendChild(flashcard);
+    document.body.appendChild(overlay);
+    
+    // Trigger animation
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        flashcard.style.animation = 'slideUpBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+    }, 10);
+}
+
+function closeResourcePopup() {
+    const overlay = document.querySelector('.resource-popup-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+        }, 300);
+    }
 }
 
 function toggleDayCompletion(dateStr) {

@@ -877,43 +877,69 @@
             letter-spacing: 0.5px;
         }
 
-        /* ===== TIMELINE SCHEDULE STYLES ===== */
-        .schedule-timeline-container {
+        /* ===== ROADMAP SCHEDULE STYLES ===== */
+        .schedule-roadmap-container {
             position: relative;
-            padding: 2rem 0;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            border-radius: 2rem;
+            margin: 2rem 0;
         }
 
-        .schedule-timeline {
+        body.dark-mode .schedule-roadmap-container {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .schedule-roadmap {
             position: relative;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
+            padding: 2rem;
         }
 
-        .schedule-timeline::before {
-            content: '';
+        .roadmap-path {
             position: absolute;
-            left: 40px;
             top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(180deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                #10b981 0%, 
+                #3b82f6 25%, 
+                #8b5cf6 50%, 
+                #ec4899 75%, 
+                #f59e0b 100%
+            );
+            opacity: 0.3;
+            z-index: 0;
         }
 
-        .timeline-item {
+        .roadmap-node {
             position: relative;
-            padding-left: 90px;
-            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 4rem;
             opacity: 0;
             animation: fadeInUp 0.6s ease forwards;
+            z-index: 1;
         }
 
-        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
-        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
-        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
-        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
-        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
-        .timeline-item:nth-child(6) { animation-delay: 0.6s; }
-        .timeline-item:nth-child(7) { animation-delay: 0.7s; }
+        .roadmap-node:nth-child(odd) {
+            justify-content: flex-start;
+        }
+
+        .roadmap-node:nth-child(even) {
+            justify-content: flex-end;
+        }
+
+        .roadmap-node:nth-child(1) { animation-delay: 0.1s; }
+        .roadmap-node:nth-child(2) { animation-delay: 0.2s; }
+        .roadmap-node:nth-child(3) { animation-delay: 0.3s; }
+        .roadmap-node:nth-child(4) { animation-delay: 0.4s; }
+        .roadmap-node:nth-child(5) { animation-delay: 0.5s; }
+        .roadmap-node:nth-child(6) { animation-delay: 0.6s; }
+        .roadmap-node:nth-child(7) { animation-delay: 0.7s; }
 
         @keyframes fadeInUp {
             from {
@@ -926,37 +952,49 @@
             }
         }
 
-        .timeline-marker {
+        .roadmap-marker {
             position: absolute;
-            left: 24px;
-            top: 0;
-            width: 35px;
-            height: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            background: white;
-            border: 4px solid #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            border: 5px solid #10b981;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.875rem;
+            font-size: 1.5rem;
             color: #10b981;
-            z-index: 2;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            z-index: 3;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.4), 0 0 0 0 rgba(16, 185, 129, 0.4);
+            cursor: pointer;
         }
 
-        .timeline-item.completed .timeline-marker {
+        .roadmap-marker:hover {
+            transform: translateX(-50%) scale(1.15) rotate(10deg);
+            box-shadow: 0 20px 40px -5px rgba(16, 185, 129, 0.6);
+        }
+
+        .roadmap-node.completed .roadmap-marker {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border-color: #059669;
-            animation: pulse 2s infinite;
+            animation: pulse 2s infinite, float 3s ease-in-out infinite;
         }
 
-        .timeline-item.in-progress .timeline-marker {
+        .roadmap-node.in-progress .roadmap-marker {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             border-color: #f59e0b;
-            color: #f59e0b;
-            animation: pulse 1.5s infinite;
+            color: white;
+            animation: pulse 1.5s infinite, float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
         }
 
         @keyframes pulse {
@@ -968,29 +1006,54 @@
             }
         }
 
-        .timeline-content {
+        .roadmap-card {
             background: white;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            width: 420px;
+            max-width: 45%;
+            cursor: pointer;
         }
 
-        .timeline-item:hover .timeline-content {
-            transform: translateX(8px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        body.dark-mode .roadmap-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
         }
 
-        .timeline-item.completed .timeline-content {
-            border-left: 4px solid #10b981;
-            background: linear-gradient(to right, #f0fdf4 0%, white 10%);
+        .roadmap-node:nth-child(odd) .roadmap-card {
+            margin-right: 120px;
         }
 
-        .timeline-item.in-progress .timeline-content {
-            border-left: 4px solid #f59e0b;
-            background: linear-gradient(to right, #fffbeb 0%, white 10%);
+        .roadmap-node:nth-child(even) .roadmap-card {
+            margin-left: 120px;
+        }
+
+        .roadmap-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-color: #2563eb;
+        }
+
+        .roadmap-node.completed .roadmap-card {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, white 50%);
+        }
+
+        body.dark-mode .roadmap-node.completed .roadmap-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--card-bg) 50%);
+        }
+
+        .roadmap-node.in-progress .roadmap-card {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, white 50%);
+        }
+
+        body.dark-mode .roadmap-node.in-progress .roadmap-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, var(--card-bg) 50%);
         }
 
         .timeline-header {
@@ -1175,6 +1238,216 @@
         .difficulty-hard {
             background: #fecaca;
             color: #991b1b;
+        }
+
+        /* ===== ROADMAP RESOURCE POPUP FLASHCARD ===== */
+        .resource-popup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .resource-popup-overlay.active {
+            display: flex;
+        }
+
+        .resource-flashcard {
+            background: white;
+            border-radius: 2rem;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUpBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        body.dark-mode .resource-flashcard {
+            background: var(--card-bg);
+        }
+
+        @keyframes slideUpBounce {
+            from {
+                opacity: 0;
+                transform: translateY(100px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .flashcard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 2rem 2rem 0 0;
+            color: white;
+            position: relative;
+        }
+
+        .flashcard-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .flashcard-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .flashcard-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .flashcard-subtitle {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .flashcard-body {
+            padding: 2rem;
+        }
+
+        .resource-item-flashcard {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        body.dark-mode .resource-item-flashcard {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--card-bg) 100%);
+            border-color: var(--border-color);
+        }
+
+        .resource-item-flashcard:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: #2563eb;
+        }
+
+        .resource-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .resource-item-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .resource-item-info {
+            flex: 1;
+        }
+
+        .resource-item-title {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--text-primary);
+            margin: 0 0 0.375rem 0;
+        }
+
+        .resource-item-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .resource-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        body.dark-mode .resource-item-footer {
+            border-top-color: var(--border-color);
+        }
+
+        .resource-meta-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .resource-action-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.75rem;
+            border: none;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resource-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .resource-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* ===== RESOURCE HUB CARD GRID STYLES ===== */
@@ -2023,20 +2296,38 @@
                 padding: 1rem;
             }
 
-            /* Timeline Mobile Styles */
-            .schedule-timeline::before {
-                left: 20px;
+            /* Roadmap Mobile Styles */
+            .roadmap-path {
+                left: 30px;
+                transform: none;
             }
 
-            .timeline-item {
-                padding-left: 60px;
+            .roadmap-node {
+                justify-content: flex-start !important;
+                margin-bottom: 3rem;
             }
 
-            .timeline-marker {
-                left: 4px;
-                width: 32px;
-                height: 32px;
-                font-size: 0.75rem;
+            .roadmap-card {
+                width: 100%;
+                max-width: 100%;
+                margin: 0 0 0 80px !important;
+            }
+
+            .roadmap-marker {
+                left: 30px;
+                transform: none;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .roadmap-marker:hover {
+                transform: scale(1.1);
+            }
+
+            .roadmap-node.completed .roadmap-marker,
+            .roadmap-node.in-progress .roadmap-marker {
+                animation: pulse 2s infinite;
             }
 
             .timeline-header {
@@ -2059,6 +2350,23 @@
             .timeline-progress {
                 width: 100%;
                 margin-left: 0;
+            }
+
+            .resource-flashcard {
+                max-height: 90vh;
+                border-radius: 1.5rem 1.5rem 0 0;
+            }
+
+            .flashcard-header {
+                padding: 1.5rem;
+            }
+
+            .flashcard-title {
+                font-size: 1.25rem;
+            }
+
+            .flashcard-body {
+                padding: 1.5rem;
             }
         }
 
@@ -2353,6 +2661,66 @@
         body.dark-mode .pricing-card {
             background: var(--card-bg);
             border-color: var(--border-color);
+        }
+
+        /* Additional Dark Mode for Main Dashboard Components */
+        body.dark-mode .tabs-container {
+            background: var(--card-bg);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .tabs {
+            background: var(--bg-secondary);
+            border-bottom-color: var(--border-color);
+        }
+
+        body.dark-mode .tab {
+            color: var(--text-secondary);
+        }
+
+        body.dark-mode .tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .tab-content {
+            background: var(--card-bg);
+        }
+
+        body.dark-mode .results-container {
+            background: var(--card-bg);
+        }
+
+        body.dark-mode .results-header {
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .results-header p {
+            color: var(--text-secondary);
+        }
+
+        body.dark-mode .motivation-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .assessment-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="email"],
+        body.dark-mode input[type="number"],
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        body.dark-mode label {
+            color: var(--text-primary);
         }
 
         .skeleton-card {
@@ -3760,9 +4128,6 @@
                     <a href="index.html" class="nav-link">
                         <i class="fas fa-home"></i> Home
                     </a>
-                    <a href="documentation.html" class="nav-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; margin-left: 0.5rem;">
-                        <i class="fas fa-book"></i> Documentation
-                    </a>
                 </div>
                 <div class="user-info" id="userDisplay">
                     <i class="fas fa-user-circle"></i>
@@ -3815,14 +4180,6 @@
 
             <!-- Main Dashboard -->
             <div id="mainContent" style="display: none;">
-                <!-- Welcome Section -->
-                <section class="welcome-section">
-                    <div class="welcome-content">
-                        <h1>🎓 Welcome to Your Study Dashboard</h1>
-                        <p>Access advanced AI-powered study planning, resource discovery, and motivational coaching tailored just for you.</p>
-                    </div>
-                </section>
-
                 <!-- Tabs Container -->
                 <div class="tabs-container">
                     <div class="tabs">
@@ -4380,22 +4737,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer style="background: rgba(255,255,255,0.1); padding: 1rem; text-align: center; margin-top: 2rem; backdrop-filter: blur(10px);">
-        <div style="max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="color: white; opacity: 0.8; font-size: 0.9rem;">
-                <i class="fas fa-graduation-cap"></i> AI Study Planner - Advanced IRWA Implementation
-            </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <a href="documentation.html" style="color: white; text-decoration: none; font-size: 0.95rem; padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.25); border-radius: 0.75rem; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.3); font-weight: 600;" 
-                   onmouseover="this.style.background='rgba(255,255,255,0.35)'; this.style.transform='translateY(-1px)'" 
-                   onmouseout="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='translateY(0)'"
-                    <i class="fas fa-book"></i> Project Documentation
-                </a>
-            </div>
-        </div>
-    </footer>
-
     <!-- Modern Onboarding JavaScript -->
     <script>
         // Onboarding State
@@ -4735,19 +5076,89 @@
         function displayDemoAdvancedResults(planData) {
             const resultsDiv = document.getElementById('advanced-results');
             
-            // Generate timeline items with interactive progress
+            // Generate roadmap nodes with interactive progress
             let scheduleHtml = '';
             const daysToShow = Math.min(planData.totalDays, 7);
             const today = new Date();
             
             const topics = [
-                { name: 'Introduction & Fundamentals', difficulty: 'easy', activities: ['Reading', 'Video Lectures', 'Note-taking'] },
-                { name: 'Core Concepts', difficulty: 'easy', activities: ['Practice Exercises', 'Interactive Demos', 'Quizzes'] },
-                { name: 'Practical Applications', difficulty: 'medium', activities: ['Hands-on Projects', 'Code Labs', 'Case Studies'] },
-                { name: 'Advanced Techniques', difficulty: 'medium', activities: ['Problem Solving', 'Research Papers', 'Deep Dive'] },
-                { name: 'Real-World Projects', difficulty: 'hard', activities: ['Build Projects', 'Peer Review', 'Portfolio Work'] },
-                { name: 'Optimization & Best Practices', difficulty: 'hard', activities: ['Code Review', 'Performance Tuning', 'Testing'] },
-                { name: 'Mastery & Assessment', difficulty: 'medium', activities: ['Final Project', 'Comprehensive Test', 'Self-Assessment'] }
+                { 
+                    name: 'Introduction & Fundamentals', 
+                    difficulty: 'easy', 
+                    emoji: '📖',
+                    activities: ['Reading', 'Video Lectures', 'Note-taking'],
+                    resources: [
+                        { title: `${planData.subject} Basics Course`, type: 'Course', duration: '2 hours', icon: '📘' },
+                        { title: 'Beginner Tutorial', type: 'Video', duration: '30 mins', icon: '🎥' },
+                        { title: 'Quick Start Guide', type: 'Article', duration: '15 mins', icon: '📄' }
+                    ]
+                },
+                { 
+                    name: 'Core Concepts', 
+                    difficulty: 'easy', 
+                    emoji: '⚡',
+                    activities: ['Practice Exercises', 'Interactive Demos', 'Quizzes'],
+                    resources: [
+                        { title: 'Interactive Practice Platform', type: 'Course', duration: '3 hours', icon: '📘' },
+                        { title: 'Concept Deep Dive', type: 'Video', duration: '45 mins', icon: '🎥' },
+                        { title: 'Core Principles Guide', type: 'Article', duration: '20 mins', icon: '📄' }
+                    ]
+                },
+                { 
+                    name: 'Practical Applications', 
+                    difficulty: 'medium', 
+                    emoji: '🛠️',
+                    activities: ['Hands-on Projects', 'Code Labs', 'Case Studies'],
+                    resources: [
+                        { title: 'Real-World Projects', type: 'Course', duration: '4 hours', icon: '📘' },
+                        { title: 'Build With Me Tutorial', type: 'Video', duration: '1 hour', icon: '🎥' },
+                        { title: 'Case Study Collection', type: 'Article', duration: '30 mins', icon: '📄' }
+                    ]
+                },
+                { 
+                    name: 'Advanced Techniques', 
+                    difficulty: 'medium', 
+                    emoji: '🚀',
+                    activities: ['Problem Solving', 'Research Papers', 'Deep Dive'],
+                    resources: [
+                        { title: 'Advanced Masterclass', type: 'Course', duration: '5 hours', icon: '📘' },
+                        { title: 'Expert Techniques', type: 'Video', duration: '1.5 hours', icon: '🎥' },
+                        { title: 'Research Papers Summary', type: 'Article', duration: '40 mins', icon: '📄' }
+                    ]
+                },
+                { 
+                    name: 'Real-World Projects', 
+                    difficulty: 'hard', 
+                    emoji: '🏗️',
+                    activities: ['Build Projects', 'Peer Review', 'Portfolio Work'],
+                    resources: [
+                        { title: 'Portfolio Projects Guide', type: 'Course', duration: '6 hours', icon: '📘' },
+                        { title: 'Project Walkthrough', type: 'Video', duration: '2 hours', icon: '🎥' },
+                        { title: 'Best Practices', type: 'Article', duration: '25 mins', icon: '📄' }
+                    ]
+                },
+                { 
+                    name: 'Optimization & Best Practices', 
+                    difficulty: 'hard', 
+                    emoji: '⚙️',
+                    activities: ['Code Review', 'Performance Tuning', 'Testing'],
+                    resources: [
+                        { title: 'Optimization Techniques', type: 'Course', duration: '4 hours', icon: '📘' },
+                        { title: 'Performance Tuning Tips', type: 'Video', duration: '1 hour', icon: '🎥' },
+                        { title: 'Testing Strategies', type: 'Article', duration: '30 mins', icon: '📄' }
+                    ]
+                },
+                { 
+                    name: 'Mastery & Assessment', 
+                    difficulty: 'medium', 
+                    emoji: '🎓',
+                    activities: ['Final Project', 'Comprehensive Test', 'Self-Assessment'],
+                    resources: [
+                        { title: 'Final Exam Prep', type: 'Course', duration: '3 hours', icon: '📘' },
+                        { title: 'Certification Guide', type: 'Video', duration: '45 mins', icon: '🎥' },
+                        { title: 'Assessment Checklist', type: 'Article', duration: '20 mins', icon: '📄' }
+                    ]
+                }
             ];
 
             for (let i = 0; i < daysToShow; i++) {
@@ -4763,19 +5174,24 @@
                 const difficultyClass = `difficulty-${topic.difficulty}`;
                 const difficultyIcon = topic.difficulty === 'easy' ? '🟢' : topic.difficulty === 'medium' ? '🟡' : '🔴';
                 
+                const markerIcon = status === 'completed' ? '✓' : topic.emoji;
+                
                 scheduleHtml += `
-                    <div class="timeline-item ${status}" data-day="${i + 1}">
-                        <div class="timeline-marker">${status === 'completed' ? '✓' : i + 1}</div>
-                        <div class="timeline-content">
+                    <div class="roadmap-node ${status}" data-day="${i + 1}" data-emoji="${topic.emoji}">
+                        <div class="roadmap-marker" onclick="openResourcePopup(${i + 1}, '${topic.name}', ${JSON.stringify(topic.resources).replace(/"/g, '&quot;')})">
+                            ${markerIcon}
+                        </div>
+                        <div class="roadmap-card" onclick="openResourcePopup(${i + 1}, '${topic.name}', ${JSON.stringify(topic.resources).replace(/"/g, '&quot;')})">
                             <div class="timeline-header">
                                 <div class="timeline-day-info">
-                                    <h4>📅 Day ${i + 1}: ${topic.name}</h4>
+                                    <h4>Day ${i + 1}: ${topic.name}</h4>
                                     <span class="timeline-date">${formattedDate}</span>
                                 </div>
                                 <div class="timeline-status">
                                     <input type="checkbox" 
                                            class="timeline-checkbox" 
                                            ${checkboxChecked}
+                                           onclick="event.stopPropagation()"
                                            onchange="toggleDayCompletion(${i + 1}, this.checked)"
                                            title="Mark as complete">
                                     <span class="status-badge ${status}">
@@ -4785,7 +5201,7 @@
                             </div>
 
                             <div class="timeline-topics">
-                                <h5>📚 Topics & Activities</h5>
+                                <h5>📚 Today's Focus</h5>
                                 <div class="topic-list">
                                     ${topic.activities.map(activity => `<span class="topic-tag">• ${activity}</span>`).join('')}
                                 </div>
@@ -4808,6 +5224,9 @@
                                     </div>
                                     <span class="progress-text">${progress}%</span>
                                 </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem; font-weight: 600;">
+                                <span style="color: #2563eb;">👆 Click to view ${topic.resources.length} recommended resources</span>
                             </div>
                         </div>
                     </div>
@@ -4927,9 +5346,15 @@
                         </div>
                     </div>
                     
-                    <div class="schedule-timeline-container">
-                        <h4 style="text-align: center; color: #1f2937; margin-bottom: 2rem;">📅 Interactive Study Timeline</h4>
-                        <div class="schedule-timeline">
+                    <div class="schedule-roadmap-container">
+                        <h4 style="text-align: center; color: #1f2937; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700;">
+                            �️ Your Learning Roadmap
+                        </h4>
+                        <p style="text-align: center; color: #6b7280; margin-bottom: 3rem; font-size: 1rem;">
+                            Click on any day to explore recommended resources and learning materials
+                        </p>
+                        <div class="schedule-roadmap">
+                            <div class="roadmap-path"></div>
                             ${scheduleHtml}
                         </div>
                     </div>
@@ -4999,17 +5424,17 @@
 
         // Toggle day completion status
         function toggleDayCompletion(dayNumber, isCompleted) {
-            const timelineItem = document.querySelector(`[data-day="${dayNumber}"]`);
-            if (!timelineItem) return;
+            const roadmapNode = document.querySelector(`[data-day="${dayNumber}"]`);
+            if (!roadmapNode) return;
 
-            const marker = timelineItem.querySelector('.timeline-marker');
-            const statusBadge = timelineItem.querySelector('.status-badge');
-            const progressFill = timelineItem.querySelector('.progress-fill');
-            const progressText = timelineItem.querySelector('.progress-text');
+            const marker = roadmapNode.querySelector('.roadmap-marker');
+            const statusBadge = roadmapNode.querySelector('.status-badge');
+            const progressFill = roadmapNode.querySelector('.progress-fill');
+            const progressText = roadmapNode.querySelector('.progress-text');
 
             if (isCompleted) {
-                timelineItem.classList.remove('in-progress', 'not-started');
-                timelineItem.classList.add('completed');
+                roadmapNode.classList.remove('in-progress', 'not-started');
+                roadmapNode.classList.add('completed');
                 marker.textContent = '✓';
                 statusBadge.className = 'status-badge completed';
                 statusBadge.textContent = '✓ Done';
@@ -5017,14 +5442,16 @@
                 progressText.textContent = '100%';
 
                 // Celebrate with a subtle animation
-                timelineItem.style.animation = 'none';
+                roadmapNode.style.animation = 'none';
                 setTimeout(() => {
-                    timelineItem.style.animation = 'celebration 0.6s ease';
+                    roadmapNode.style.animation = 'pulse 1.5s ease-in-out infinite';
                 }, 10);
             } else {
-                timelineItem.classList.remove('completed');
-                timelineItem.classList.add('not-started');
-                marker.textContent = dayNumber;
+                roadmapNode.classList.remove('completed');
+                roadmapNode.classList.add('not-started');
+                // Get the original emoji from the data attribute or set to day number
+                const originalEmoji = roadmapNode.getAttribute('data-emoji') || dayNumber;
+                marker.textContent = originalEmoji;
                 statusBadge.className = 'status-badge not-started';
                 statusBadge.textContent = '⭕ Pending';
                 progressFill.style.width = '0%';
@@ -5040,6 +5467,87 @@
                 if (index > -1) completedDays.splice(index, 1);
             }
             localStorage.setItem('completedDays', JSON.stringify(completedDays));
+        }
+
+        // ===== ROADMAP RESOURCE POPUP FUNCTIONS =====
+        
+        function openResourcePopup(dayNumber, topicName, resources) {
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'resource-popup-overlay';
+            overlay.onclick = closeResourcePopup;
+            
+            // Create flashcard
+            const flashcard = document.createElement('div');
+            flashcard.className = 'resource-flashcard';
+            flashcard.onclick = (e) => e.stopPropagation(); // Prevent closing when clicking inside
+            
+            // Generate resource items HTML
+            const resourceItemsHtml = resources.map((resource, index) => `
+                <div class="resource-item-flashcard" style="animation-delay: ${0.1 + index * 0.1}s">
+                    <div class="resource-flashcard-icon">${resource.icon}</div>
+                    <div class="resource-flashcard-content">
+                        <h4>${resource.title}</h4>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
+                            <span class="resource-type-badge">${resource.type}</span>
+                            <span style="color: #6b7280; font-size: 0.875rem;">⏱️ ${resource.duration}</span>
+                        </div>
+                    </div>
+                    <button class="resource-action-btn" onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(resource.title)}', '_blank')">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.5rem;">
+                            <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                            <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                        </svg>
+                        View Resource
+                    </button>
+                </div>
+            `).join('');
+            
+            flashcard.innerHTML = `
+                <div class="flashcard-header">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700;">📚 Day ${dayNumber} Resources</h3>
+                        <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem;">${topicName}</p>
+                    </div>
+                    <button class="flashcard-close" onclick="closeResourcePopup()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flashcard-body">
+                    <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem;">
+                        🎯 Recommended resources to help you master this topic. Click "View Resource" to explore!
+                    </p>
+                    <div class="flashcard-resources-list">
+                        ${resourceItemsHtml}
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                        <p style="color: #9ca3af; font-size: 0.875rem; margin: 0;">
+                            💡 Tip: Complete these resources in order for the best learning experience
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            overlay.appendChild(flashcard);
+            document.body.appendChild(overlay);
+            
+            // Trigger animation
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                flashcard.style.animation = 'slideUpBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+            }, 10);
+        }
+        
+        function closeResourcePopup() {
+            const overlay = document.querySelector('.resource-popup-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 300);
+            }
         }
 
         // ===== RESOURCE HUB FUNCTIONS =====
