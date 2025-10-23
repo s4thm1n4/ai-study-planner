@@ -12,11 +12,67 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --hover-bg: #f3f4f6;
+        }
+
+        body.dark-mode {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --card-bg: #1e293b;
+            --hover-bg: #334155;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #1a1a1a;
-            background: #f8fafc;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9997;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark-mode-toggle:active {
+            transform: scale(0.95) rotate(0deg);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         }
 
         /* Navigation */
@@ -27,9 +83,13 @@
             right: 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
             z-index: 1000;
             padding: 1rem 0;
+        }
+
+        body.dark-mode .navbar {
+            background: rgba(30, 41, 59, 0.95);
         }
 
         .nav-container {
@@ -817,94 +877,386 @@
             letter-spacing: 0.5px;
         }
 
-        .schedule-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .schedule-item {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* ===== TIMELINE SCHEDULE STYLES ===== */
+        .schedule-timeline-container {
             position: relative;
-            overflow: hidden;
+            padding: 2rem 0;
         }
 
-        .schedule-item::before {
+        .schedule-timeline {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .schedule-timeline::before {
             content: '';
             position: absolute;
+            left: 40px;
             top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
         }
 
-        .schedule-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        .timeline-item {
+            position: relative;
+            padding-left: 90px;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
         }
 
-        .schedule-day {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+        .timeline-item:nth-child(6) { animation-delay: 0.6s; }
+        .timeline-item:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .day-number {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 2.5rem;
-            height: 2.5rem;
+        .timeline-marker {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
+            background: white;
+            border: 4px solid #10b981;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             font-size: 0.875rem;
+            color: #10b981;
+            z-index: 2;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
         }
 
-        .day-info h4 {
-            color: #1f2937;
-            font-weight: 700;
-            font-size: 1.125rem;
-            margin: 0;
+        .timeline-item.completed .timeline-marker {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-color: #059669;
+            animation: pulse 2s infinite;
         }
 
-        .day-date {
-            color: #6b7280;
-            font-size: 0.875rem;
-            margin: 0;
+        .timeline-item.in-progress .timeline-marker {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            animation: pulse 1.5s infinite;
         }
 
-        .schedule-topics {
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+        }
+
+        .timeline-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .timeline-item:hover .timeline-content {
+            transform: translateX(8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .timeline-item.completed .timeline-content {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(to right, #f0fdf4 0%, white 10%);
+        }
+
+        .timeline-item.in-progress .timeline-content {
+            border-left: 4px solid #f59e0b;
+            background: linear-gradient(to right, #fffbeb 0%, white 10%);
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 1rem;
         }
 
+        .timeline-day-info h4 {
+            color: #1f2937;
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .timeline-date {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .timeline-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.completed {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .status-badge.in-progress {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #fbbf24;
+        }
+
+        .status-badge.not-started {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+        }
+
+        .timeline-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #10b981;
+        }
+
+        .timeline-topics {
+            margin-bottom: 1rem;
+        }
+
+        .timeline-topics h5 {
+            color: #6b7280;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .topic-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
         .topic-tag {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
             background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
             color: #5b21b6;
             padding: 0.375rem 0.75rem;
             border-radius: 1rem;
             font-size: 0.75rem;
             font-weight: 600;
-            margin: 0.25rem 0.25rem 0.25rem 0;
             border: 1px solid #c4b5fd;
         }
 
-        .schedule-hours {
+        .timeline-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .timeline-duration {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #10b981;
+            color: #3b82f6;
             font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .timeline-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+            border-radius: 1rem;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6b7280;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .difficulty-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        /* ===== RESOURCE HUB CARD GRID STYLES ===== */
+        .resource-hub-container {
+            margin: 2rem 0;
+        }
+
+        .resource-filters {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            display: block;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-color: #1d4ed8;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e5e7eb;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>') no-repeat 1rem center;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .resources-grid {
@@ -912,6 +1264,496 @@
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 1.5rem;
             margin: 2rem 0;
+        }
+
+        .resource-card-modern {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .resource-card-modern:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .resource-thumbnail {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        .resource-thumbnail.video {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .resource-thumbnail.article {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .resource-thumbnail.book {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+
+        .resource-thumbnail.course {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .resource-card-body {
+            padding: 1.25rem;
+        }
+
+        .resource-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .resource-type-badge {
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .resource-type-badge.video {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+
+        .resource-type-badge.article {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+
+        .resource-type-badge.book {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+
+        .resource-type-badge.course {
+            background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+            color: #6b21a8;
+        }
+
+        .resource-favorite {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .resource-favorite:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .resource-favorite.active {
+            background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+            color: #dc2626;
+        }
+
+        .resource-card-title {
+            color: #1f2937;
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .resource-card-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .resource-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            display: flex;
+            gap: 0.125rem;
+            color: #f59e0b;
+            font-size: 1rem;
+        }
+
+        .rating-count {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .resource-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .resource-duration {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .resource-view-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.625rem;
+            border: none;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resource-view-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .premium-lock {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            color: #fbbf24;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            z-index: 1;
+        }
+
+        .no-resources {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9ca3af;
+        }
+
+        .no-resources-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-resources-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        /* ===== PROGRESS TRACKING DASHBOARD STYLES ===== */
+        .progress-dashboard {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-dashboard::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .progress-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-header h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .progress-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .progress-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-stat-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
+
+        .streak-counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .streak-flame {
+            animation: flicker 1.5s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .achievements-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .achievements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .achievements-header h5 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .view-all-link {
+            color: white;
+            text-decoration: none;
+            font-size: 0.875rem;
+            opacity: 0.9;
+            transition: opacity 0.2s ease;
+        }
+
+        .view-all-link:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement-badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .achievement-badge:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .achievement-badge.locked {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .progress-chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-chart-header {
+            margin-bottom: 1rem;
+        }
+
+        .progress-chart-header h5 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .progress-chart-header p {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .weekly-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 0.5rem;
+            height: 120px;
+            position: relative;
+        }
+
+        .weekly-chart::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem 0.5rem 0 0;
+            min-height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .chart-bar:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .chart-bar.active {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+        }
+
+        .chart-bar-value {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .chart-bar-label {
+            font-size: 0.625rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
         }
 
         .resource-item {
@@ -1180,6 +2022,44 @@
             .resource-item {
                 padding: 1rem;
             }
+
+            /* Timeline Mobile Styles */
+            .schedule-timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                padding-left: 60px;
+            }
+
+            .timeline-marker {
+                left: 4px;
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
+
+            .timeline-header {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-start;
+            }
+
+            .timeline-status {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .timeline-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .timeline-progress {
+                width: 100%;
+                margin-left: 0;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1207,6 +2087,14 @@
                 text-align: center;
                 gap: 0.5rem;
             }
+
+            .timeline-day-info h4 {
+                font-size: 1rem;
+            }
+
+            .topic-list {
+                flex-direction: column;
+            }
         }
 
         /* Animation Enhancements */
@@ -1219,6 +2107,12 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.05) rotate(2deg); }
+            75% { transform: scale(1.05) rotate(-2deg); }
         }
 
         @keyframes fadeIn {
@@ -1245,6 +2139,502 @@
 
         .schedule-item:nth-child(even) {
             animation-delay: 0.2s;
+        }
+
+        /* ===== TOAST NOTIFICATION STYLES ===== */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #10b981;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideInRight 0.3s ease-out;
+            min-width: 300px;
+        }
+
+        .toast.success {
+            border-left-color: #10b981;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        .toast.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .toast.info {
+            border-left-color: #3b82f6;
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 0.25rem 0;
+            font-size: 0.875rem;
+        }
+
+        .toast-message {
+            color: #6b7280;
+            margin: 0;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .toast-close:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* ===== SKELETON LOADER STYLES ===== */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+            background-size: 200% 100%;
+            animation: shimmerSkeleton 1.5s infinite;
+            border-radius: 0.5rem;
+        }
+
+        @keyframes shimmerSkeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ===== COMPREHENSIVE DARK MODE STYLES ===== */
+        body.dark-mode .timeline-content,
+        body.dark-mode .resource-card-modern,
+        body.dark-mode .skeleton-card,
+        body.dark-mode .tab {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .timeline-day-info h4,
+        body.dark-mode .resource-card-title,
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4 {
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .timeline-date,
+        body.dark-mode .resource-card-description,
+        body.dark-mode p {
+            color: var(--text-secondary);
+        }
+
+        body.dark-mode .toast {
+            background: var(--card-bg);
+            border-left-color: #10b981;
+        }
+
+        body.dark-mode .toast-title {
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .toast-message {
+            color: var(--text-secondary);
+        }
+
+        body.dark-mode .resource-filters,
+        body.dark-mode .filter-btn {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .search-bar {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .sidebar {
+            background: var(--bg-secondary);
+            border-right-color: var(--border-color);
+        }
+
+        body.dark-mode .sidebar-header h2 {
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .plan-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .plan-card h4 {
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .resource-favorite {
+            background: var(--hover-bg);
+            color: var(--text-secondary);
+        }
+
+        body.dark-mode .onboarding-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .quiz-option {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .quiz-option:hover {
+            background: var(--hover-bg);
+        }
+
+        body.dark-mode .level-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .pricing-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        .skeleton-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .skeleton-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .skeleton-title {
+            height: 24px;
+            width: 60%;
+        }
+
+        .skeleton-badge {
+            height: 20px;
+            width: 80px;
+        }
+
+        .skeleton-text {
+            height: 16px;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-text.short {
+            width: 70%;
+        }
+
+        .skeleton-button {
+            height: 40px;
+            width: 120px;
+            margin-top: 1rem;
+        }
+
+        /* ===== CONFETTI STYLES ===== */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f59e0b;
+            animation: confettiFall 3s linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* ===== SMOOTH PAGE TRANSITIONS ===== */
+        .page-transition {
+            animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ===== MICRO-INTERACTIONS ===== */
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .interactive-element {
+            transition: all 0.2s ease;
+        }
+
+        .interactive-element:hover {
+            transform: translateY(-2px);
+        }
+
+        .bounce-on-hover:hover {
+            animation: gentleBounce 0.6s ease;
+        }
+
+        @keyframes gentleBounce {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-5px); }
+            50% { transform: translateY(0); }
+            75% { transform: translateY(-2px); }
+        }
+
+        /* ===== HELP MODAL STYLES ===== */
+        .help-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 9997;
+            color: white;
+            font-weight: 700;
+        }
+
+        .help-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .help-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .help-modal.active {
+            display: flex;
+        }
+
+        .help-modal-content {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: fadeInScale 0.3s ease;
+        }
+
+        .help-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .help-modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .help-modal-close {
+            background: var(--hover-bg);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .help-modal-close:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .shortcuts-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .shortcuts-section h4 {
+            color: var(--text-primary);
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--hover-bg);
+        }
+
+        .shortcut-keys {
+            display: flex;
+            gap: 0.375rem;
+        }
+
+        .key {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .shortcut-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* ===== LOADING SPINNER MODERN ===== */
+        .spinner-modern {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spinModern 0.8s linear infinite;
+        }
+
+        @keyframes spinModern {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: #6b7280;
+            font-weight: 600;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .resource-item:nth-child(1) { animation-delay: 0.1s; }
@@ -3345,14 +4735,81 @@
         function displayDemoAdvancedResults(planData) {
             const resultsDiv = document.getElementById('advanced-results');
             
+            // Generate timeline items with interactive progress
             let scheduleHtml = '';
-            for (let i = 1; i <= Math.min(planData.totalDays, 7); i++) {
+            const daysToShow = Math.min(planData.totalDays, 7);
+            const today = new Date();
+            
+            const topics = [
+                { name: 'Introduction & Fundamentals', difficulty: 'easy', activities: ['Reading', 'Video Lectures', 'Note-taking'] },
+                { name: 'Core Concepts', difficulty: 'easy', activities: ['Practice Exercises', 'Interactive Demos', 'Quizzes'] },
+                { name: 'Practical Applications', difficulty: 'medium', activities: ['Hands-on Projects', 'Code Labs', 'Case Studies'] },
+                { name: 'Advanced Techniques', difficulty: 'medium', activities: ['Problem Solving', 'Research Papers', 'Deep Dive'] },
+                { name: 'Real-World Projects', difficulty: 'hard', activities: ['Build Projects', 'Peer Review', 'Portfolio Work'] },
+                { name: 'Optimization & Best Practices', difficulty: 'hard', activities: ['Code Review', 'Performance Tuning', 'Testing'] },
+                { name: 'Mastery & Assessment', difficulty: 'medium', activities: ['Final Project', 'Comprehensive Test', 'Self-Assessment'] }
+            ];
+
+            for (let i = 0; i < daysToShow; i++) {
+                const dayDate = new Date(today);
+                dayDate.setDate(today.getDate() + i);
+                const formattedDate = dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                const topic = topics[i] || topics[topics.length - 1];
+                const status = i === 0 ? 'in-progress' : i < 2 ? 'completed' : 'not-started';
+                const progress = i === 0 ? 45 : i < 2 ? 100 : 0;
+                const checkboxChecked = status === 'completed' ? 'checked' : '';
+                
+                const difficultyClass = `difficulty-${topic.difficulty}`;
+                const difficultyIcon = topic.difficulty === 'easy' ? '🟢' : topic.difficulty === 'medium' ? '🟡' : '🔴';
+                
                 scheduleHtml += `
-                    <div class="schedule-item">
-                        <h4>📅 Day ${i}</h4>
-                        <p><strong>Topic:</strong> ${planData.subject} - ${i === 1 ? 'Introduction & Fundamentals' : i === 2 ? 'Core Concepts' : i === 3 ? 'Practical Applications' : `Advanced Topic ${i-3}`}</p>
-                        <p><strong>Duration:</strong> ${planData.dailyHours} hours</p>
-                        <p><strong>Activities:</strong> Reading, Practice Exercises, Hands-on Projects</p>
+                    <div class="timeline-item ${status}" data-day="${i + 1}">
+                        <div class="timeline-marker">${status === 'completed' ? '✓' : i + 1}</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div class="timeline-day-info">
+                                    <h4>📅 Day ${i + 1}: ${topic.name}</h4>
+                                    <span class="timeline-date">${formattedDate}</span>
+                                </div>
+                                <div class="timeline-status">
+                                    <input type="checkbox" 
+                                           class="timeline-checkbox" 
+                                           ${checkboxChecked}
+                                           onchange="toggleDayCompletion(${i + 1}, this.checked)"
+                                           title="Mark as complete">
+                                    <span class="status-badge ${status}">
+                                        ${status === 'completed' ? '✓ Done' : status === 'in-progress' ? '⏳ In Progress' : '⭕ Pending'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="timeline-topics">
+                                <h5>📚 Topics & Activities</h5>
+                                <div class="topic-list">
+                                    ${topic.activities.map(activity => `<span class="topic-tag">• ${activity}</span>`).join('')}
+                                </div>
+                            </div>
+
+                            <div class="timeline-footer">
+                                <div class="timeline-duration">
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                                    </svg>
+                                    ${planData.dailyHours} hours
+                                </div>
+                                <span class="difficulty-indicator ${difficultyClass}">
+                                    ${difficultyIcon} ${topic.difficulty.charAt(0).toUpperCase() + topic.difficulty.slice(1)}
+                                </span>
+                                <div class="timeline-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${progress}%"></div>
+                                    </div>
+                                    <span class="progress-text">${progress}%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -3361,21 +4818,174 @@
                 <div class="results-container">
                     <div class="results-header">
                         <h3>🎯 Your Personalized Study Plan</h3>
-                        <p>Subject: <strong>${planData.subject}</strong> | Level: <strong>${planData.difficulty}</strong></p>
-                    </div>
-                    
-                    <div class="schedule-container">
-                        <h4>📅 Study Schedule</h4>
-                        ${scheduleHtml}
+                        <p>Subject: <strong>${planData.subject}</strong> | Level: <strong>${planData.difficulty}</strong> | Duration: <strong>${planData.totalDays} days</strong></p>
                     </div>
 
-                    <div class="resources-preview">
-                        <h4>📚 Recommended Resources</h4>
-                        <div class="resource-card">
-                            <p><strong>📖 Course:</strong> <a href="https://www.coursera.org/search?query=${encodeURIComponent(planData.subject)}" target="_blank">Best ${planData.subject} Course on Coursera</a></p>
+                    <!-- Progress Tracking Dashboard -->
+                    <div class="progress-dashboard">
+                        <div class="progress-header">
+                            <h4>📊 Your Learning Progress</h4>
+                            <p>Track your journey and celebrate milestones</p>
                         </div>
-                        <div class="resource-card">
-                            <p><strong>🎥 Tutorial:</strong> <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(planData.subject)}+tutorial" target="_blank">${planData.subject} Video Tutorials</a></p>
+
+                        <div class="progress-stats-grid">
+                            <div class="progress-stat-card">
+                                <span class="stat-icon">🎯</span>
+                                <p class="stat-value" id="daysCompleted">2</p>
+                                <p class="stat-label">Days Completed</p>
+                            </div>
+
+                            <div class="progress-stat-card">
+                                <span class="stat-icon">
+                                    <span class="streak-counter">
+                                        <span class="streak-flame">🔥</span>
+                                        <span id="streakCount" class="stat-value" style="font-size: 1.5rem;">3</span>
+                                    </span>
+                                </span>
+                                <p class="stat-label">Day Streak</p>
+                            </div>
+
+                            <div class="progress-stat-card">
+                                <span class="stat-icon">⏱️</span>
+                                <p class="stat-value" id="totalHours">${planData.dailyHours * 2}</p>
+                                <p class="stat-label">Hours Studied</p>
+                            </div>
+
+                            <div class="progress-stat-card">
+                                <span class="stat-icon">📈</span>
+                                <p class="stat-value" id="overallProgress">29%</p>
+                                <p class="stat-label">Overall Progress</p>
+                            </div>
+                        </div>
+
+                        <div class="achievements-section">
+                            <div class="achievements-header">
+                                <h5>🏆 Achievements</h5>
+                                <a href="#" class="view-all-link">View All →</a>
+                            </div>
+                            <div class="achievements-grid">
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">🎖️</div>
+                                    <p class="achievement-name">First Step</p>
+                                </div>
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">⚡</div>
+                                    <p class="achievement-name">Quick Learner</p>
+                                </div>
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">📚</div>
+                                    <p class="achievement-name">Bookworm</p>
+                                </div>
+                                <div class="achievement-badge locked">
+                                    <div class="achievement-icon">🔒</div>
+                                    <p class="achievement-name">Week Warrior</p>
+                                </div>
+                                <div class="achievement-badge locked">
+                                    <div class="achievement-icon">🔒</div>
+                                    <p class="achievement-name">Master Mind</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-chart-container">
+                            <div class="progress-chart-header">
+                                <h5>📊 Weekly Activity</h5>
+                                <p>Your study hours this week</p>
+                            </div>
+                            <div class="weekly-chart">
+                                <div class="chart-bar active" style="height: 80%;" title="Monday: 4 hours">
+                                    <span class="chart-bar-value">4h</span>
+                                </div>
+                                <div class="chart-bar active" style="height: 65%;" title="Tuesday: 3 hours">
+                                    <span class="chart-bar-value">3h</span>
+                                </div>
+                                <div class="chart-bar active" style="height: 90%;" title="Wednesday: 4.5 hours">
+                                    <span class="chart-bar-value">4.5h</span>
+                                </div>
+                                <div class="chart-bar" style="height: 20%;" title="Thursday: 0 hours">
+                                    <span class="chart-bar-value">0h</span>
+                                </div>
+                                <div class="chart-bar" style="height: 20%;" title="Friday: 0 hours">
+                                    <span class="chart-bar-value">0h</span>
+                                </div>
+                                <div class="chart-bar" style="height: 20%;" title="Saturday: 0 hours">
+                                    <span class="chart-bar-value">0h</span>
+                                </div>
+                                <div class="chart-bar" style="height: 20%;" title="Sunday: 0 hours">
+                                    <span class="chart-bar-value">0h</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.9;">
+                                <span>Mon</span>
+                                <span>Tue</span>
+                                <span>Wed</span>
+                                <span>Thu</span>
+                                <span>Fri</span>
+                                <span>Sat</span>
+                                <span>Sun</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="schedule-timeline-container">
+                        <h4 style="text-align: center; color: #1f2937; margin-bottom: 2rem;">📅 Interactive Study Timeline</h4>
+                        <div class="schedule-timeline">
+                            ${scheduleHtml}
+                        </div>
+                    </div>
+
+                    <div class="resource-hub-container">
+                        <h4 style="text-align: center; color: #1f2937; margin-bottom: 1.5rem;">📚 Learning Resources Hub</h4>
+                        
+                        <div class="resource-filters">
+                            <div class="filter-section">
+                                <label class="filter-label">� Search Resources</label>
+                                <input type="text" 
+                                       class="search-bar" 
+                                       placeholder="Search by title, topic, or keyword..." 
+                                       onkeyup="filterResources()"
+                                       id="resourceSearch">
+                            </div>
+                            
+                            <div class="filter-section">
+                                <label class="filter-label">📂 Filter by Type</label>
+                                <div class="filter-buttons">
+                                    <button class="filter-btn active" data-type="all" onclick="filterByType('all')">
+                                        <span>All</span>
+                                    </button>
+                                    <button class="filter-btn" data-type="video" onclick="filterByType('video')">
+                                        <span>🎥 Videos</span>
+                                    </button>
+                                    <button class="filter-btn" data-type="course" onclick="filterByType('course')">
+                                        <span>📘 Courses</span>
+                                    </button>
+                                    <button class="filter-btn" data-type="article" onclick="filterByType('article')">
+                                        <span>📄 Articles</span>
+                                    </button>
+                                    <button class="filter-btn" data-type="book" onclick="filterByType('book')">
+                                        <span>📚 Books</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-section">
+                                <label class="filter-label">⭐ Sort By</label>
+                                <div class="filter-buttons">
+                                    <button class="filter-btn active" onclick="sortResources('rating')">Highest Rated</button>
+                                    <button class="filter-btn" onclick="sortResources('duration')">Shortest First</button>
+                                    <button class="filter-btn" onclick="sortResources('newest')">Newest</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resources-grid" id="resourcesGrid">
+                            ${generateResourceCards(planData.subject)}
+                        </div>
+
+                        <div class="no-resources" id="noResourcesMessage" style="display: none;">
+                            <div class="no-resources-icon">🔍</div>
+                            <p class="no-resources-text">No resources found matching your filters</p>
+                            <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 0.5rem;">Try adjusting your search or filters</p>
                         </div>
                     </div>
 
@@ -3386,6 +4996,579 @@
                 </div>
             `;
         }
+
+        // Toggle day completion status
+        function toggleDayCompletion(dayNumber, isCompleted) {
+            const timelineItem = document.querySelector(`[data-day="${dayNumber}"]`);
+            if (!timelineItem) return;
+
+            const marker = timelineItem.querySelector('.timeline-marker');
+            const statusBadge = timelineItem.querySelector('.status-badge');
+            const progressFill = timelineItem.querySelector('.progress-fill');
+            const progressText = timelineItem.querySelector('.progress-text');
+
+            if (isCompleted) {
+                timelineItem.classList.remove('in-progress', 'not-started');
+                timelineItem.classList.add('completed');
+                marker.textContent = '✓';
+                statusBadge.className = 'status-badge completed';
+                statusBadge.textContent = '✓ Done';
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+
+                // Celebrate with a subtle animation
+                timelineItem.style.animation = 'none';
+                setTimeout(() => {
+                    timelineItem.style.animation = 'celebration 0.6s ease';
+                }, 10);
+            } else {
+                timelineItem.classList.remove('completed');
+                timelineItem.classList.add('not-started');
+                marker.textContent = dayNumber;
+                statusBadge.className = 'status-badge not-started';
+                statusBadge.textContent = '⭕ Pending';
+                progressFill.style.width = '0%';
+                progressText.textContent = '0%';
+            }
+
+            // Save to localStorage
+            const completedDays = JSON.parse(localStorage.getItem('completedDays') || '[]');
+            if (isCompleted && !completedDays.includes(dayNumber)) {
+                completedDays.push(dayNumber);
+            } else if (!isCompleted) {
+                const index = completedDays.indexOf(dayNumber);
+                if (index > -1) completedDays.splice(index, 1);
+            }
+            localStorage.setItem('completedDays', JSON.stringify(completedDays));
+        }
+
+        // ===== RESOURCE HUB FUNCTIONS =====
+
+        function generateResourceCards(subject) {
+            const resources = [
+                {
+                    type: 'course',
+                    title: `Complete ${subject} Masterclass 2024`,
+                    description: 'Comprehensive course covering all fundamentals to advanced concepts with hands-on projects',
+                    rating: 4.8,
+                    reviews: 12543,
+                    duration: '24 hours',
+                    url: `https://www.coursera.org/search?query=${encodeURIComponent(subject)}`,
+                    premium: false
+                },
+                {
+                    type: 'video',
+                    title: `${subject} Crash Course for Beginners`,
+                    description: 'Fast-paced introduction to key concepts with practical examples and exercises',
+                    rating: 4.6,
+                    reviews: 8921,
+                    duration: '2.5 hours',
+                    url: `https://www.youtube.com/results?search_query=${encodeURIComponent(subject)}+tutorial`,
+                    premium: false
+                },
+                {
+                    type: 'article',
+                    title: `${subject} Best Practices & Patterns`,
+                    description: 'In-depth article series exploring modern techniques and industry standards',
+                    rating: 4.7,
+                    reviews: 3456,
+                    duration: '45 min read',
+                    url: `https://medium.com/search?q=${encodeURIComponent(subject)}`,
+                    premium: false
+                },
+                {
+                    type: 'book',
+                    title: `The Definitive ${subject} Guide`,
+                    description: 'Authoritative textbook used by top universities and professionals worldwide',
+                    rating: 4.9,
+                    reviews: 15678,
+                    duration: '450 pages',
+                    url: `https://www.amazon.com/s?k=${encodeURIComponent(subject)}+book`,
+                    premium: true
+                },
+                {
+                    type: 'course',
+                    title: `Advanced ${subject} Techniques`,
+                    description: 'Expert-level course with real-world projects and industry case studies',
+                    rating: 4.8,
+                    reviews: 6789,
+                    duration: '18 hours',
+                    url: `https://www.udemy.com/courses/search/?q=${encodeURIComponent(subject)}`,
+                    premium: true
+                },
+                {
+                    type: 'video',
+                    title: `${subject} Project-Based Learning`,
+                    description: 'Build 10 real-world projects while learning core concepts step-by-step',
+                    rating: 4.7,
+                    reviews: 9834,
+                    duration: '8 hours',
+                    url: `https://www.youtube.com/results?search_query=${encodeURIComponent(subject)}+projects`,
+                    premium: false
+                }
+            ];
+
+            return resources.map((resource, index) => {
+                const stars = '★'.repeat(Math.floor(resource.rating)) + (resource.rating % 1 >= 0.5 ? '☆' : '');
+                const iconMap = { video: '🎥', course: '📘', article: '📄', book: '📚' };
+                
+                return `
+                    <div class="resource-card-modern" data-type="${resource.type}" data-rating="${resource.rating}" data-title="${resource.title.toLowerCase()}" data-index="${index}">
+                        ${resource.premium ? '<div class="premium-lock">🔒 Premium</div>' : ''}
+                        <div class="resource-thumbnail ${resource.type}">
+                            ${iconMap[resource.type]}
+                        </div>
+                        <div class="resource-card-body">
+                            <div class="resource-card-header">
+                                <span class="resource-type-badge ${resource.type}">${resource.type}</span>
+                                <button class="resource-favorite" onclick="toggleFavorite(${index}, this)">
+                                    ♡
+                                </button>
+                            </div>
+                            <h5 class="resource-card-title">${resource.title}</h5>
+                            <p class="resource-card-description">${resource.description}</p>
+                            <div class="resource-rating">
+                                <div class="stars">${stars}</div>
+                                <span class="rating-count">${resource.rating} (${resource.reviews.toLocaleString()})</span>
+                            </div>
+                            <div class="resource-card-footer">
+                                <span class="resource-duration">
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                                    </svg>
+                                    ${resource.duration}
+                                </span>
+                                <button class="resource-view-btn" onclick="window.open('${resource.url}', '_blank')">
+                                    View
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                                        <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterByType(type) {
+            // Update active button
+            document.querySelectorAll('.filter-btn[data-type]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+
+            // Filter cards
+            const cards = document.querySelectorAll('.resource-card-modern');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardType = card.dataset.type;
+                const shouldShow = type === 'all' || cardType === type;
+                card.style.display = shouldShow ? 'block' : 'none';
+                if (shouldShow) visibleCount++;
+            });
+
+            // Show/hide no results message
+            document.getElementById('noResourcesMessage').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        function filterResources() {
+            const searchTerm = document.getElementById('resourceSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('.resource-card-modern');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const title = card.dataset.title;
+                const shouldShow = title.includes(searchTerm);
+                card.style.display = shouldShow ? 'block' : 'none';
+                if (shouldShow) visibleCount++;
+            });
+
+            document.getElementById('noResourcesMessage').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        function sortResources(sortBy) {
+            // Update active button (simplified - could enhance)
+            const grid = document.getElementById('resourcesGrid');
+            const cards = Array.from(document.querySelectorAll('.resource-card-modern'));
+
+            cards.sort((a, b) => {
+                if (sortBy === 'rating') {
+                    return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+                } else if (sortBy === 'duration') {
+                    // Simple duration sort (would need parsing in real app)
+                    return parseInt(a.querySelector('.resource-duration').textContent) - 
+                           parseInt(b.querySelector('.resource-duration').textContent);
+                } else if (sortBy === 'newest') {
+                    return parseInt(b.dataset.index) - parseInt(a.dataset.index);
+                }
+            });
+
+            // Re-append in sorted order
+            cards.forEach(card => grid.appendChild(card));
+        }
+
+        function toggleFavorite(resourceIndex, button) {
+            const favorites = JSON.parse(localStorage.getItem('favoriteResources') || '[]');
+            
+            if (button.classList.contains('active')) {
+                button.classList.remove('active');
+                button.textContent = '♡';
+                const index = favorites.indexOf(resourceIndex);
+                if (index > -1) favorites.splice(index, 1);
+            } else {
+                button.classList.add('active');
+                button.textContent = '♥';
+                if (!favorites.includes(resourceIndex)) {
+                    favorites.push(resourceIndex);
+                }
+            }
+
+            localStorage.setItem('favoriteResources', JSON.stringify(favorites));
+            
+            // Show toast notification
+            if (button.classList.contains('active')) {
+                showToast('success', 'Saved!', 'Resource added to favorites');
+            } else {
+                showToast('info', 'Removed', 'Resource removed from favorites');
+            }
+        }
+
+        // ===== TOAST NOTIFICATION SYSTEM =====
+
+        function showToast(type = 'success', title = '', message = '') {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Icon mapping
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type]}</span>
+                <div class="toast-content">
+                    <p class="toast-title">${title}</p>
+                    <p class="toast-message">${message}</p>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+
+            // Add to container
+            toastContainer.appendChild(toast);
+
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ===== CONFETTI CELEBRATION =====
+
+        function triggerConfetti() {
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            document.body.appendChild(container);
+
+            const colors = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#ec4899'];
+            const confettiCount = 50;
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                
+                // Random shapes
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                }
+                
+                container.appendChild(confetti);
+            }
+
+            // Remove after animation
+            setTimeout(() => container.remove(), 5000);
+        }
+
+        // ===== LOADING OVERLAY =====
+
+        function showLoading(text = 'Loading...') {
+            let overlay = document.querySelector('.loading-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'loading-overlay';
+                overlay.innerHTML = `
+                    <div class="spinner-modern"></div>
+                    <p class="loading-text">${text}</p>
+                `;
+                document.body.appendChild(overlay);
+            }
+            overlay.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            const overlay = document.querySelector('.loading-overlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // ===== SKELETON LOADERS =====
+
+        function showSkeletonLoaders(containerId, count = 3) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            let skeletonHTML = '';
+            for (let i = 0; i < count; i++) {
+                skeletonHTML += `
+                    <div class="skeleton-card">
+                        <div class="skeleton-header">
+                            <div class="skeleton skeleton-title"></div>
+                            <div class="skeleton skeleton-badge"></div>
+                        </div>
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text short"></div>
+                        <div class="skeleton skeleton-button"></div>
+                    </div>
+                `;
+            }
+            container.innerHTML = skeletonHTML;
+        }
+
+        // Enhanced toggleDayCompletion with celebration
+        const originalToggleDayCompletion = toggleDayCompletion;
+        function toggleDayCompletion(dayNumber, isCompleted) {
+            const timelineItem = document.querySelector(`[data-day="${dayNumber}"]`);
+            if (!timelineItem) return;
+
+            const marker = timelineItem.querySelector('.timeline-marker');
+            const statusBadge = timelineItem.querySelector('.status-badge');
+            const progressFill = timelineItem.querySelector('.progress-fill');
+            const progressText = timelineItem.querySelector('.progress-text');
+
+            if (isCompleted) {
+                timelineItem.classList.remove('in-progress', 'not-started');
+                timelineItem.classList.add('completed');
+                marker.textContent = '✓';
+                statusBadge.className = 'status-badge completed';
+                statusBadge.textContent = '✓ Done';
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+
+                // Celebrate with animation and confetti
+                timelineItem.style.animation = 'none';
+                setTimeout(() => {
+                    timelineItem.style.animation = 'celebration 0.6s ease';
+                }, 10);
+
+                // Show success toast
+                showToast('success', 'Well Done! 🎉', `Day ${dayNumber} completed successfully!`);
+
+                // Trigger confetti for milestones
+                if (dayNumber % 3 === 0) {
+                    triggerConfetti();
+                }
+            } else {
+                timelineItem.classList.remove('completed');
+                timelineItem.classList.add('not-started');
+                marker.textContent = dayNumber;
+                statusBadge.className = 'status-badge not-started';
+                statusBadge.textContent = '⭕ Pending';
+                progressFill.style.width = '0%';
+                progressText.textContent = '0%';
+                
+                showToast('info', 'Unmarked', `Day ${dayNumber} set back to pending`);
+            }
+
+            // Save to localStorage
+            const completedDays = JSON.parse(localStorage.getItem('completedDays') || '[]');
+            if (isCompleted && !completedDays.includes(dayNumber)) {
+                completedDays.push(dayNumber);
+            } else if (!isCompleted) {
+                const index = completedDays.indexOf(dayNumber);
+                if (index > -1) completedDays.splice(index, 1);
+            }
+            localStorage.setItem('completedDays', JSON.stringify(completedDays));
+        }
+
+        // ===== DARK MODE FUNCTIONALITY =====
+
+        function toggleDarkMode() {
+            const body = document.body;
+            const icon = document.getElementById('darkModeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            // Update icon
+            if (body.classList.contains('dark-mode')) {
+                icon.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+                showToast('success', 'Dark Mode Enabled', 'Easy on the eyes! ✨');
+            } else {
+                icon.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+                showToast('info', 'Light Mode Enabled', 'Bright and clear! 💡');
+            }
+        }
+
+        // Initialize dark mode from localStorage
+        function initDarkMode() {
+            const darkMode = localStorage.getItem('darkMode');
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+                if (icon) icon.textContent = '☀️';
+            }
+        }
+
+        // Call on page load
+        document.addEventListener('DOMContentLoaded', initDarkMode);
+
+        // ===== HELP MODAL =====
+
+        function toggleHelpModal() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.toggle('active');
+        }
+
+        // ===== KEYBOARD SHORTCUTS =====
+
+        document.addEventListener('keydown', function(e) {
+            // ?: Show Help Modal
+            if (e.key === '?' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                toggleHelpModal();
+            }
+
+            // Ctrl/Cmd + D: Toggle Dark Mode
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                toggleDarkMode();
+            }
+
+            // Ctrl/Cmd + S: Open Sidebar
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                toggleSidebar();
+            }
+
+            // Ctrl/Cmd + K: Focus Search (if on resources page)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchBar = document.getElementById('resourceSearch');
+                if (searchBar) {
+                    searchBar.focus();
+                    showToast('info', 'Search Active', 'Start typing to filter resources');
+                }
+            }
+
+            // Escape: Close modals/sidebar
+            if (e.key === 'Escape') {
+                const helpModal = document.getElementById('helpModal');
+                if (helpModal && helpModal.classList.contains('active')) {
+                    toggleHelpModal();
+                    return;
+                }
+
+                const sidebar = document.getElementById('studyPlansSidebar');
+                if (sidebar && sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
+            }
+        });
+
+        // ===== ERROR HANDLING =====
+
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            showToast('error', 'Oops!', 'Something went wrong. Please try again.');
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            showToast('error', 'Connection Issue', 'Please check your internet connection.');
+        });
+
+        // Enhanced error handling for API calls
+        function handleApiError(error, context = 'API call') {
+            console.error(`Error in ${context}:`, error);
+            
+            if (error.message && error.message.includes('Failed to fetch')) {
+                showToast('error', 'Network Error', 'Unable to connect. Please check your connection.');
+            } else if (error.status === 401) {
+                showToast('warning', 'Session Expired', 'Please log in again.');
+            } else if (error.status === 429) {
+                showToast('warning', 'Too Many Requests', 'Please wait a moment and try again.');
+            } else {
+                showToast('error', 'Error', error.message || 'An unexpected error occurred.');
+            }
+        }
+
+        // ===== EMPTY STATE HANDLERS =====
+
+        function showEmptyState(containerId, icon, title, message) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            container.innerHTML = `
+                <div style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">${icon}</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">${title}</h3>
+                    <p style="max-width: 400px; margin: 0 auto;">${message}</p>
+                </div>
+            `;
+        }
+
+        // ===== ACCESSIBILITY ENHANCEMENTS =====
+
+        // Add focus visible styles programmatically
+        const style = document.createElement('style');
+        style.textContent = `
+            *:focus-visible {
+                outline: 2px solid #2563eb;
+                outline-offset: 2px;
+            }
+            
+            button:focus-visible,
+            a:focus-visible {
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ===== PERFORMANCE MONITORING =====
+
+        // Log page load time
+        window.addEventListener('load', function() {
+            if (window.performance && window.performance.timing) {
+                const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+                console.log(`Page loaded in ${loadTime}ms`);
+                
+                if (loadTime > 3000) {
+                    console.warn('Slow page load detected');
+                }
+            }
+        });
 
         // ===== STUDY PLANS SIDEBAR FUNCTIONALITY =====
 
@@ -3576,6 +5759,80 @@
             originalShowPremiumModal();
         };
     </script>
+
+    <!-- Toast Container (dynamically populated) -->
+    <div class="toast-container"></div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+        <span id="darkModeIcon">🌙</span>
+    </button>
+
+    <!-- Help Button -->
+    <button class="help-button" onclick="toggleHelpModal()" title="Keyboard Shortcuts (?)">
+        ?
+    </button>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="helpModal">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h3>⌨️ Keyboard Shortcuts</h3>
+                <button class="help-modal-close" onclick="toggleHelpModal()">×</button>
+            </div>
+
+            <div class="shortcuts-section">
+                <h4>General</h4>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">
+                        <span class="key">Ctrl</span>
+                        <span>+</span>
+                        <span class="key">D</span>
+                    </div>
+                    <span class="shortcut-description">Toggle Dark Mode</span>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">
+                        <span class="key">Ctrl</span>
+                        <span>+</span>
+                        <span class="key">S</span>
+                    </div>
+                    <span class="shortcut-description">Open Sidebar</span>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">
+                        <span class="key">Ctrl</span>
+                        <span>+</span>
+                        <span class="key">K</span>
+                    </div>
+                    <span class="shortcut-description">Focus Search</span>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">
+                        <span class="key">Esc</span>
+                    </div>
+                    <span class="shortcut-description">Close Modals</span>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">
+                        <span class="key">?</span>
+                    </div>
+                    <span class="shortcut-description">Show This Help</span>
+                </div>
+            </div>
+
+            <div class="shortcuts-section">
+                <h4>💡 Pro Tips</h4>
+                <div style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6;">
+                    <p>• Click the flame icon 🔥 to see your study streak</p>
+                    <p>• Mark days complete to unlock achievements</p>
+                    <p>• Filter resources by type for focused learning</p>
+                    <p>• Use dark mode for comfortable night studying</p>
+                    <p>• Save your favorite resources with the ♥ button</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- User Assessment JavaScript -->
     <script src="user-assessment.js"></script>
