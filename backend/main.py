@@ -101,7 +101,11 @@ def verify_token(token: str):
         if user_id is None:
             return None
         return {"user_id": user_id, "exp": payload.get("exp")}
-    except jwt.PyJWTError:
+    except JWTError as e:
+        print(f"JWT Error: {e}")
+        return None
+    except Exception as e:
+        print(f"Token verification error: {e}")
         return None
 
 async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]):
@@ -216,6 +220,21 @@ async def generate_advanced_plan(
     try:
         print(f"[DEBUG] Generating advanced plan for user: {current_user['id']}")
         print(f"[DEBUG] Request: {request}")
+        
+        # ETHICAL CONTENT VALIDATION - Secondary check at backend
+        is_valid, error_category, error_message = coordinator.planner.validate_ethical_content(request.subject)
+        if not is_valid:
+            print(f"[ETHICS] ❌ Request blocked: {request.subject}")
+            print(f"[ETHICS] Category: {error_category}")
+            raise HTTPException(
+                status_code=400, 
+                detail={
+                    "error": "Ethical Content Violation",
+                    "category": error_category,
+                    "message": error_message,
+                    "user_friendly": f"We cannot create study plans for topics related to {error_category.replace('_', ' ')}. Our platform is designed for educational and constructive learning only."
+                }
+            )
         
         result = await coordinator.generate_complete_study_plan(
             user_id=current_user["id"],
