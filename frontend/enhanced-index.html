@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Study Planner - Dashboard</title>
+    <!-- Version: 2025-10-23-15:54 - Interactive Roadmap Update -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -1054,6 +1055,37 @@
 
         body.dark-mode .roadmap-node.in-progress .roadmap-card {
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, var(--card-bg) 50%);
+        }
+        
+        .resource-view-prompt {
+            text-align: center;
+            margin-top: 1.25rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed rgba(107, 114, 128, 0.2);
+        }
+        
+        .view-resources-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.6rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
+        }
+        
+        .view-resources-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.1);
+        }
+        
+        body.dark-mode .view-resources-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
         }
 
         .timeline-header {
@@ -5175,13 +5207,14 @@
                 const difficultyIcon = topic.difficulty === 'easy' ? '🟢' : topic.difficulty === 'medium' ? '🟡' : '🔴';
                 
                 const markerIcon = status === 'completed' ? '✓' : topic.emoji;
+                const resourcesJson = JSON.stringify(topic.resources);
                 
                 scheduleHtml += `
-                    <div class="roadmap-node ${status}" data-day="${i + 1}" data-emoji="${topic.emoji}">
-                        <div class="roadmap-marker" onclick="openResourcePopup(${i + 1}, '${topic.name}', ${JSON.stringify(topic.resources).replace(/"/g, '&quot;')})">
+                    <div class="roadmap-node ${status}" data-day="${i + 1}" data-emoji="${topic.emoji}" data-topic="${topic.name}" data-resources='${resourcesJson}'>
+                        <div class="roadmap-marker">
                             ${markerIcon}
                         </div>
-                        <div class="roadmap-card" onclick="openResourcePopup(${i + 1}, '${topic.name}', ${JSON.stringify(topic.resources).replace(/"/g, '&quot;')})">
+                        <div class="roadmap-card">
                             <div class="timeline-header">
                                 <div class="timeline-day-info">
                                     <h4>Day ${i + 1}: ${topic.name}</h4>
@@ -5225,8 +5258,13 @@
                                     <span class="progress-text">${progress}%</span>
                                 </div>
                             </div>
-                            <div style="text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem; font-weight: 600;">
-                                <span style="color: #2563eb;">👆 Click to view ${topic.resources.length} recommended resources</span>
+                            <div class="resource-view-prompt">
+                                <button class="view-resources-btn">
+                                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.25rem;">
+                                        <path d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+                                    </svg>
+                                    View ${topic.resources.length} Resources
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -5420,6 +5458,44 @@
                     </div>
                 </div>
             `;
+            
+            // Attach event listeners to roadmap nodes after rendering
+            setTimeout(() => {
+                console.log('🎯 Attaching roadmap event listeners...');
+                attachRoadmapEventListeners();
+            }, 100);
+        }
+
+        // Attach click listeners to roadmap nodes
+        function attachRoadmapEventListeners() {
+            const roadmapNodes = document.querySelectorAll('.roadmap-node');
+            console.log(`✅ Found ${roadmapNodes.length} roadmap nodes to attach listeners`);
+            roadmapNodes.forEach(node => {
+                const marker = node.querySelector('.roadmap-marker');
+                const card = node.querySelector('.roadmap-card');
+                const dayNumber = parseInt(node.getAttribute('data-day'));
+                const topicName = node.getAttribute('data-topic');
+                const resourcesJson = node.getAttribute('data-resources');
+                
+                if (marker && card && resourcesJson) {
+                    const resources = JSON.parse(resourcesJson);
+                    
+                    // Add click handlers
+                    const clickHandler = (e) => {
+                        // Don't trigger if clicking checkbox
+                        if (!e.target.classList.contains('timeline-checkbox')) {
+                            openResourcePopup(dayNumber, topicName, resources);
+                        }
+                    };
+                    
+                    marker.addEventListener('click', clickHandler);
+                    card.addEventListener('click', clickHandler);
+                    
+                    // Add hover effect
+                    marker.style.cursor = 'pointer';
+                    card.style.cursor = 'pointer';
+                }
+            });
         }
 
         // Toggle day completion status
@@ -5446,6 +5522,13 @@
                 setTimeout(() => {
                     roadmapNode.style.animation = 'pulse 1.5s ease-in-out infinite';
                 }, 10);
+                
+                // Animate roadmap path progress
+                animateRoadmapPath(dayNumber);
+                
+                // Move in-progress to next day
+                moveToNextDay(dayNumber);
+                
             } else {
                 roadmapNode.classList.remove('completed');
                 roadmapNode.classList.add('not-started');
@@ -5456,6 +5539,9 @@
                 statusBadge.textContent = '⭕ Pending';
                 progressFill.style.width = '0%';
                 progressText.textContent = '0%';
+                
+                // Update roadmap path
+                animateRoadmapPath(dayNumber - 1);
             }
 
             // Save to localStorage
@@ -5467,6 +5553,74 @@
                 if (index > -1) completedDays.splice(index, 1);
             }
             localStorage.setItem('completedDays', JSON.stringify(completedDays));
+        }
+        
+        // Animate roadmap path fill
+        function animateRoadmapPath(completedUpToDay) {
+            const roadmapPath = document.querySelector('.roadmap-path');
+            if (!roadmapPath) return;
+            
+            const allNodes = document.querySelectorAll('.roadmap-node');
+            const totalNodes = allNodes.length;
+            
+            if (totalNodes === 0) return;
+            
+            // Calculate percentage: each node represents a segment
+            const percentComplete = (completedUpToDay / totalNodes) * 100;
+            
+            // Create animated gradient that fills up
+            roadmapPath.style.background = `linear-gradient(
+                to bottom,
+                #10b981 0%,
+                #10b981 ${percentComplete}%,
+                rgba(59, 130, 246, 0.3) ${percentComplete}%,
+                rgba(236, 72, 153, 0.3) 100%
+            )`;
+            
+            // Add glow effect at the current position
+            roadmapPath.style.filter = 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.6))';
+            roadmapPath.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        }
+        
+        // Move in-progress status to next day
+        function moveToNextDay(currentDay) {
+            const allNodes = document.querySelectorAll('.roadmap-node');
+            const nextDayNode = document.querySelector(`[data-day="${currentDay + 1}"]`);
+            
+            if (nextDayNode && nextDayNode.classList.contains('not-started')) {
+                // Remove in-progress from all nodes first
+                allNodes.forEach(node => {
+                    if (node.classList.contains('in-progress')) {
+                        node.classList.remove('in-progress');
+                        node.classList.add('not-started');
+                        const badge = node.querySelector('.status-badge');
+                        if (badge) {
+                            badge.className = 'status-badge not-started';
+                            badge.textContent = '⭕ Pending';
+                        }
+                    }
+                });
+                
+                // Set next day as in-progress
+                nextDayNode.classList.remove('not-started');
+                nextDayNode.classList.add('in-progress');
+                const nextBadge = nextDayNode.querySelector('.status-badge');
+                if (nextBadge) {
+                    nextBadge.className = 'status-badge in-progress';
+                    nextBadge.textContent = '⏳ In Progress';
+                }
+                
+                // Update progress for next day
+                const nextProgress = nextDayNode.querySelector('.progress-fill');
+                const nextProgressText = nextDayNode.querySelector('.progress-text');
+                if (nextProgress && nextProgressText) {
+                    nextProgress.style.width = '25%';
+                    nextProgressText.textContent = '25%';
+                }
+                
+                // Scroll to next day smoothly
+                nextDayNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
         // ===== ROADMAP RESOURCE POPUP FUNCTIONS =====

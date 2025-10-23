@@ -354,37 +354,161 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
     // Generate roadmap nodes
     let scheduleHtml = '';
     if (plan.schedule && Array.isArray(plan.schedule)) {
-        const topicEmojis = ['📖', '⚡', '🛠️', '🚀', '🏗️', '⚙️', '🎓', '🌟', '💡', '🔥'];
+        // Topic categories with rich details
+        const subjectAreas = {
+            'SEO': {
+                beginner: {
+                    topics: ['SEO Fundamentals', 'Keyword Research', 'On-Page SEO', 'Search Console Basics', 'SEO Metrics'],
+                    emoji: '📖',
+                    resources: [
+                        { title: 'SEO Beginner\'s Guide by Moz', type: 'Course', duration: '2h', icon: '�' },
+                        { title: 'Keywords Research Masterclass', type: 'Video', duration: '45m', icon: '�' },
+                        { title: 'On-Page SEO Guide 2025', type: 'Article', duration: '15m', icon: '�' },
+                        { title: 'Search Console Tutorial', type: 'Video', duration: '30m', icon: '🎥' }
+                    ]
+                },
+                intermediate: {
+                    topics: ['Technical SEO', 'Link Building', 'Content Strategy', 'Local SEO', 'Analytics Implementation'],
+                    emoji: '⚡',
+                    resources: [
+                        { title: 'Technical SEO Audit Course', type: 'Course', duration: '3h', icon: '📘' },
+                        { title: 'Advanced Link Building Strategies', type: 'Video', duration: '1h', icon: '🎥' },
+                        { title: 'SEO Content Framework', type: 'Article', duration: '25m', icon: '📄' },
+                        { title: 'Local SEO Implementation Guide', type: 'Video', duration: '45m', icon: '🎥' }
+                    ]
+                },
+                advanced: {
+                    topics: ['SEO Automation', 'JavaScript SEO', 'E-commerce SEO', 'International SEO', 'Core Web Vitals'],
+                    emoji: '🚀',
+                    resources: [
+                        { title: 'SEO Automation with Python', type: 'Course', duration: '4h', icon: '📘' },
+                        { title: 'JavaScript SEO Deep Dive', type: 'Video', duration: '90m', icon: '🎥' },
+                        { title: 'E-commerce SEO Strategy', type: 'Article', duration: '30m', icon: '📄' },
+                        { title: 'Core Web Vitals Optimization', type: 'Course', duration: '2h', icon: '📘' }
+                    ]
+                },
+                expert: {
+                    topics: ['SEO for AI & Voice Search', 'Advanced Schema Markup', 'Algorithm Updates', 'Enterprise SEO', 'SEO Leadership'],
+                    emoji: '🏆',
+                    resources: [
+                        { title: 'SEO for Voice & AI Interfaces', type: 'Course', duration: '4h', icon: '📘' },
+                        { title: 'Schema Markup Masterclass', type: 'Video', duration: '2h', icon: '🎥' },
+                        { title: 'Enterprise SEO Management', type: 'Article', duration: '40m', icon: '📄' },
+                        { title: 'SEO Team Leadership', type: 'Course', duration: '3h', icon: '📘' }
+                    ]
+                }
+            },
+            'Digital Marketing': {
+                beginner: {
+                    topics: ['Digital Marketing Intro', 'Social Media Basics', 'Email Marketing', 'Content Creation', 'Analytics Basics'],
+                    emoji: '📱',
+                    resources: [
+                        { title: 'Digital Marketing Fundamentals', type: 'Course', duration: '3h', icon: '📘' },
+                        { title: 'Social Media Platforms Overview', type: 'Video', duration: '1h', icon: '🎥' },
+                        { title: 'Email Marketing Best Practices', type: 'Article', duration: '20m', icon: '📄' }
+                    ]
+                },
+                intermediate: {
+                    topics: ['Paid Advertising', 'Content Strategy', 'Marketing Automation', 'Conversion Optimization', 'Data Analysis'],
+                    emoji: '📊',
+                    resources: [
+                        { title: 'PPC Campaign Management', type: 'Course', duration: '4h', icon: '📘' },
+                        { title: 'Content Marketing Strategy', type: 'Video', duration: '90m', icon: '🎥' },
+                        { title: 'CRO Techniques & Tools', type: 'Article', duration: '30m', icon: '📄' }
+                    ]
+                }
+            }
+        };
+        
+        // Default topic categories if subject doesn't match
+        const defaultTopics = {
+            beginner: {
+                topics: ['Fundamentals & Basics', 'Core Concepts', 'Essential Principles', 'Foundation Building', 'Key Terminology'],
+                emoji: '📖',
+                resources: [
+                    { title: 'Complete Beginner Course', type: 'Course', duration: '3h', icon: '📘' },
+                    { title: 'Quick Start Tutorial', type: 'Video', duration: '45m', icon: '🎥' },
+                    { title: 'Essential Guide 2025', type: 'Article', duration: '20m', icon: '📄' }
+                ]
+            },
+            intermediate: {
+                topics: ['Advanced Concepts', 'Practical Applications', 'Professional Techniques', 'Specialized Methods', 'Case Studies'],
+                emoji: '⚡',
+                resources: [
+                    { title: 'Intermediate Masterclass', type: 'Course', duration: '4h', icon: '📘' },
+                    { title: 'Practical Deep Dive', type: 'Video', duration: '1h', icon: '🎥' },
+                    { title: 'Real-World Implementation', type: 'Article', duration: '25m', icon: '📄' }
+                ]
+            },
+            advanced: {
+                topics: ['Expert Strategies', 'Advanced Implementation', 'Cutting-Edge Methods', 'Innovation & Research', 'Mastery Path'],
+                emoji: '🚀',
+                resources: [
+                    { title: 'Advanced Professional Course', type: 'Course', duration: '5h', icon: '📘' },
+                    { title: 'Expert Technical Guide', type: 'Video', duration: '90m', icon: '🎥' },
+                    { title: 'Research & Innovation Methods', type: 'Article', duration: '35m', icon: '📄' }
+                ]
+            }
+        };
+        
+        // All emojis for rotating through days
+        const topicEmojis = ['📖', '⚡', '🛠️', '🚀', '🏗️', '⚙️', '🎓', '🌟', '💡', '🔥', '📱', '📊', '🧠', '🔍', '📈'];
         
         scheduleHtml = plan.schedule.map((day, index) => {
+            // Determine subject category (SEO, Marketing, etc.)
+            const subject = plan.subject.toLowerCase();
+            let subjectCategory = 'default';
+            
+            // Find matching subject
+            for (const category in subjectAreas) {
+                if (subject.includes(category.toLowerCase())) {
+                    subjectCategory = category;
+                    break;
+                }
+            }
+            
+            // Determine level (beginner, intermediate, etc.) based on day number
+            let level = 'beginner';
+            if (index >= 5) level = 'advanced';
+            else if (index >= 2) level = 'intermediate';
+            
+            // Get appropriate topic set (either from subject areas or default)
+            const topicSet = subjectCategory !== 'default' 
+                ? subjectAreas[subjectCategory][level] || defaultTopics[level]
+                : defaultTopics[level];
+            
+            // Pick a specific topic from the set for this day
+            const topicIndex = index % topicSet.topics.length;
+            const mainTopic = topicSet.topics[topicIndex];
+            
+            // Generate enhanced topics HTML
             const topicsHtml = day.topics && day.topics.length > 0 
                 ? day.topics.map(topic => `<span class="topic-tag">• ${topic.topic} (${topic.hours}h)</span>`).join('')
-                : '<span class="topic-tag">• Study session</span>';
+                : `<span class="topic-tag">• ${mainTopic} (${day.hours}h)</span>`;
             
-            const emoji = topicEmojis[index % topicEmojis.length];
+            // Get emoji for this day - use topic set if available, otherwise rotate
+            const emoji = topicSet.emoji || topicEmojis[index % topicEmojis.length];
             const status = index === 0 ? 'in-progress' : 'not-started';
             const progress = index === 0 ? 25 : 0;
             
-            // Get main topic name for resources
-            const mainTopic = day.topics && day.topics.length > 0 ? day.topics[0].topic : 'Study Session';
-            
-            // Generate sample resources for this day
-            const resources = [
+            // Generate resources - use topic set resources if available, otherwise generate
+            const resources = topicSet.resources || [
                 { title: `${mainTopic} - Complete Course`, type: 'Course', duration: `${day.hours}h`, icon: '📘' },
-                { title: `${mainTopic} - Video Tutorial`, type: 'Video', duration: '45 mins', icon: '🎥' },
-                { title: `${mainTopic} - Practice Guide`, type: 'Article', duration: '20 mins', icon: '📄' }
+                { title: `${mainTopic} - Video Tutorial`, type: 'Video', duration: '45m', icon: '🎥' },
+                { title: `${mainTopic} - Practice Guide`, type: 'Article', duration: '20m', icon: '📄' }
             ];
             
             const markerIcon = status === 'completed' ? '✓' : emoji;
             const difficulty = index < 3 ? 'easy' : index < 5 ? 'medium' : 'hard';
             const difficultyIcon = difficulty === 'easy' ? '🟢' : difficulty === 'medium' ? '🟡' : '🔴';
+            const resourcesJson = JSON.stringify(resources);
             
             return `
-                <div class="roadmap-node ${status}" data-day="${day.day}" data-emoji="${emoji}">
-                    <div class="roadmap-marker" onclick="openResourcePopup(${day.day}, '${mainTopic}', ${JSON.stringify(resources).replace(/"/g, '&quot;')})">
+                <div class="roadmap-node ${status}" data-day="${day.day}" data-emoji="${emoji}" data-topic="${mainTopic}" data-resources='${resourcesJson}'>
+                    <div class="roadmap-marker">
                         ${markerIcon}
                     </div>
-                    <div class="roadmap-card" onclick="openResourcePopup(${day.day}, '${mainTopic}', ${JSON.stringify(resources).replace(/"/g, '&quot;')})">
+                    <div class="roadmap-card">
                         <div class="timeline-header">
                             <div class="timeline-day-info">
                                 <h4>Day ${day.day}: ${mainTopic}</h4>
@@ -434,8 +558,13 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                                 <span class="progress-text">${progress}%</span>
                             </div>
                         </div>
-                        <div style="text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem; font-weight: 600;">
-                            <span style="color: #2563eb;">👆 Click to view 3 recommended resources</span>
+                        <div class="resource-view-prompt">
+                            <button class="view-resources-btn">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.25rem;">
+                                    <path d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+                                </svg>
+                                View ${resources.length} Resources
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -592,8 +721,44 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
         </div>
     `;
     
+    // Attach event listeners to roadmap nodes after rendering
+    setTimeout(() => {
+        attachRoadmapEventListeners();
+    }, 100);
+    
     // Update progress tracker with new plan
     updateProgressWithNewPlan(plan);
+}
+
+// Attach click listeners to roadmap nodes
+function attachRoadmapEventListeners() {
+    const roadmapNodes = document.querySelectorAll('.roadmap-node');
+    roadmapNodes.forEach(node => {
+        const marker = node.querySelector('.roadmap-marker');
+        const card = node.querySelector('.roadmap-card');
+        const dayNumber = parseInt(node.getAttribute('data-day'));
+        const topicName = node.getAttribute('data-topic');
+        const resourcesJson = node.getAttribute('data-resources');
+        
+        if (marker && card && resourcesJson) {
+            const resources = JSON.parse(resourcesJson);
+            
+            // Add click handlers
+            const clickHandler = (e) => {
+                // Don't trigger if clicking checkbox
+                if (!e.target.classList.contains('timeline-checkbox')) {
+                    openResourcePopup(dayNumber, topicName, resources);
+                }
+            };
+            
+            marker.addEventListener('click', clickHandler);
+            card.addEventListener('click', clickHandler);
+            
+            // Add hover effect
+            marker.style.cursor = 'pointer';
+            card.style.cursor = 'pointer';
+        }
+    });
 }
 
 // Find Resources
@@ -1257,6 +1422,74 @@ function closeResourcePopup() {
         setTimeout(() => {
             overlay.remove();
         }, 300);
+    }
+}
+
+// Animate roadmap path fill
+function animateRoadmapPath(completedUpToDay) {
+    const roadmapPath = document.querySelector('.roadmap-path');
+    if (!roadmapPath) return;
+    
+    const allNodes = document.querySelectorAll('.roadmap-node');
+    const totalNodes = allNodes.length;
+    
+    if (totalNodes === 0) return;
+    
+    // Calculate percentage: each node represents a segment
+    const percentComplete = (completedUpToDay / totalNodes) * 100;
+    
+    // Create animated gradient that fills up
+    roadmapPath.style.background = `linear-gradient(
+        to bottom,
+        #10b981 0%,
+        #10b981 ${percentComplete}%,
+        rgba(59, 130, 246, 0.3) ${percentComplete}%,
+        rgba(236, 72, 153, 0.3) 100%
+    )`;
+    
+    // Add glow effect at the current position
+    roadmapPath.style.filter = 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.6))';
+    roadmapPath.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+}
+
+// Move in-progress status to next day
+function moveToNextDay(currentDay) {
+    const allNodes = document.querySelectorAll('.roadmap-node');
+    const nextDayNode = document.querySelector(`[data-day="${currentDay + 1}"]`);
+    
+    if (nextDayNode && nextDayNode.classList.contains('not-started')) {
+        // Remove in-progress from all nodes first
+        allNodes.forEach(node => {
+            if (node.classList.contains('in-progress')) {
+                node.classList.remove('in-progress');
+                node.classList.add('not-started');
+                const badge = node.querySelector('.status-badge');
+                if (badge) {
+                    badge.className = 'status-badge not-started';
+                    badge.textContent = '⭕ Pending';
+                }
+            }
+        });
+        
+        // Set next day as in-progress
+        nextDayNode.classList.remove('not-started');
+        nextDayNode.classList.add('in-progress');
+        const nextBadge = nextDayNode.querySelector('.status-badge');
+        if (nextBadge) {
+            nextBadge.className = 'status-badge in-progress';
+            nextBadge.textContent = '⏳ In Progress';
+        }
+        
+        // Update progress for next day
+        const nextProgress = nextDayNode.querySelector('.progress-fill');
+        const nextProgressText = nextDayNode.querySelector('.progress-text');
+        if (nextProgress && nextProgressText) {
+            nextProgress.style.width = '25%';
+            nextProgressText.textContent = '25%';
+        }
+        
+        // Scroll to next day smoothly
+        nextDayNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
