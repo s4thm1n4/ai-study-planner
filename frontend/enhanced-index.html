@@ -4124,7 +4124,7 @@
                                     </div>
 
                                     <div class="step-actions">
-                                        <button class="btn-next" onclick="goToOnboardingStep(2)" id="step1NextBtn" disabled>
+                                        <button class="btn-next" onclick="goToOnboardingStep(2)" id="step1NextBtn">
                                             Continue <i class="fas fa-arrow-right"></i>
                                         </button>
                                     </div>
@@ -4626,17 +4626,28 @@
 
         function updateStep1Button() {
             const btn = document.getElementById('step1NextBtn');
-            if (btn) {
-                btn.disabled = !onboardingData.subject;
+            const subjectInput = document.getElementById('onboardingSubject');
+            if (btn && subjectInput) {
+                const hasSubject = subjectInput.value.trim().length > 0;
+                btn.disabled = !hasSubject;
+                if (hasSubject) {
+                    onboardingData.subject = subjectInput.value.trim();
+                }
             }
         }
 
         function goToOnboardingStep(step) {
             // Validate before moving forward
             if (step > currentOnboardingStep) {
-                if (currentOnboardingStep === 1 && (!onboardingData.subject || onboardingData.subject.trim() === '')) {
-                    alert('Please enter a subject you want to learn!');
-                    return;
+                if (currentOnboardingStep === 1) {
+                    const subjectInput = document.getElementById('onboardingSubject');
+                    const subject = subjectInput ? subjectInput.value.trim() : '';
+                    if (!subject) {
+                        alert('Please enter a subject you want to learn!');
+                        if (subjectInput) subjectInput.focus();
+                        return;
+                    }
+                    onboardingData.subject = subject;
                 }
             }
 

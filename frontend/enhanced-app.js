@@ -116,6 +116,13 @@ function showAuthenticatedContent() {
         div.innerHTML = '';
     });
     
+    // Setup onboarding listeners (ensure they work after auth)
+    setTimeout(() => {
+        if (typeof setupOnboardingListeners === 'function') {
+            setupOnboardingListeners();
+        }
+    }, 200);
+    
     // Load subjects for dropdowns
     console.log('Loading subjects...');
     loadSubjects();
