@@ -7,10 +7,11 @@ import os
 import json
 import sqlite3
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import asyncio
 from dataclasses import dataclass
 import hashlib
+import re
 # Try to import intelligent topics generator
 try:
     from intelligent_topics import IntelligentTopicGenerator
@@ -320,6 +321,93 @@ class ScheduleCreatorAgent:
         print(f"[COURSEWORK] Final subject: '{final_subject}' {'(matched from database)' if best_match else '(user input processed)'}")
         
         return final_subject
+    
+    def validate_ethical_content(self, subject: str) -> Tuple[bool, str, str]:
+        """
+        Validate subject content against ethical guidelines
+        Returns: (is_valid, error_category, error_message)
+        """
+        print(f"\n[ETHICS] Validating subject: '{subject}'")
+        
+        subject_lower = subject.lower()
+        
+        # Comprehensive blocked keywords with categories
+        blocked_keywords = {
+            'violence': [
+                'suicide', 'suicidal', 'kill', 'killing', 'murder', 'assassin', 'assassination',
+                'bomb', 'bombing', 'explosive', 'weapon', 'weaponize', 'gun', 'firearm', 
+                'knife attack', 'stabbing', 'terrorist', 'terrorism', 'terror attack',
+                'mass shooting', 'serial killer', 'homicide', 'genocide', 'war crime',
+                'torture', 'execution', 'death penalty', 'vigilante'
+            ],
+            'illegal_activities': [
+                'black hat', 'blackhat', 'crack software', 'piracy', 'pirate software',
+                'steal', 'theft', 'rob', 'robbery', 'fraud', 'scam', 'scamming',
+                'phishing', 'malware creation', 'virus creation', 'ransomware',
+                'ddos attack', 'dos attack', 'exploit kit', 'zero-day exploit',
+                'counterfeit', 'forgery', 'money laundering', 'tax evasion',
+                'identity theft', 'credit card fraud', 'insider trading'
+            ],
+            'unauthorized_hacking': [
+                'hack bank', 'hack account', 'hack password', 'hack website',
+                'hack system', 'hack network', 'break into system', 'break into account',
+                'unauthorized access', 'bypass security', 'crack password',
+                'brute force attack', 'sql injection', 'xss attack', 'credential stuffing',
+                'session hijacking', 'man in the middle'
+            ],
+            'self_harm': [
+                'self-harm', 'self harm', 'cut myself', 'cutting myself', 'hurt myself',
+                'hurting myself', 'eating disorder', 'anorexia', 'bulimia', 'purging',
+                'overdose', 'intentional overdose', 'self-mutilation'
+            ],
+            'illegal_drugs': [
+                'meth production', 'meth manufacturing', 'cocaine production',
+                'heroin production', 'fentanyl synthesis', 'drug dealing',
+                'drug manufacture', 'drug trafficking', 'narcotics production',
+                'illegal substance', 'controlled substance production'
+            ],
+            'sexual_abuse': [
+                'child pornography', 'child porn', 'sexual assault', 'rape',
+                'child abuse', 'child exploitation', 'human trafficking',
+                'sex trafficking', 'sexual harassment', 'sexual predator'
+            ],
+            'hate_speech': [
+                'white supremacy', 'white supremacist', 'nazi', 'neo-nazi',
+                'hate group', 'ethnic cleansing', 'racial violence',
+                'hate crime', 'lynching', 'ku klux klan', 'kkk'
+            ],
+            'dangerous_materials': [
+                'poison production', 'poisoning', 'toxic substance', 'biohazard creation',
+                'radioactive material', 'chemical weapon', 'biological weapon',
+                'bioweapon', 'nerve agent', 'anthrax', 'ricin production'
+            ]
+        }
+        
+        # Check against all blocked keywords
+        for category, keywords in blocked_keywords.items():
+            for keyword in keywords:
+                if keyword in subject_lower:
+                    error_msg = f"Content related to {category.replace('_', ' ')} is not permitted"
+                    print(f"[ETHICS] ❌ BLOCKED: Category='{category}', Keyword='{keyword}'")
+                    print(f"[ETHICS] Subject '{subject}' violates ethical guidelines")
+                    return False, category, error_msg
+        
+        # Additional pattern-based checks using regex
+        dangerous_patterns = [
+            (r'how to (kill|murder|harm)', 'violence'),
+            (r'(build|make|create) (bomb|explosive|weapon)', 'violence'),
+            (r'hack (into|someone|something)', 'unauthorized_hacking'),
+            (r'(bypass|crack|break) (security|protection|drm)', 'illegal_activities'),
+        ]
+        
+        for pattern, category in dangerous_patterns:
+            if re.search(pattern, subject_lower):
+                error_msg = f"Content related to {category.replace('_', ' ')} is not permitted"
+                print(f"[ETHICS] ❌ BLOCKED: Pattern='{pattern}' matched")
+                return False, category, error_msg
+        
+        print(f"[ETHICS] ✅ Subject passed ethical validation")
+        return True, '', ''
     
     def load_subjects_database(self):
         """Load subjects database with estimated hours and topics"""

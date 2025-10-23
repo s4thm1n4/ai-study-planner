@@ -5310,10 +5310,92 @@
             generateAdvancedPlanFromOnboarding();
         };
 
+        // ===== ETHICAL CONTENT FILTER =====
+        function validateEthicalContent(subject) {
+            console.log('[ETHICS] Validating subject:', subject);
+            
+            const subjectLower = subject.toLowerCase();
+            
+            // Comprehensive list of blocked keywords
+            const blockedKeywords = {
+                violence: ['suicide', 'kill', 'murder', 'assassin', 'bomb', 'explosive', 'weapon', 'gun', 'knife', 'terrorist', 'terror', 'attack', 'mass shooting', 'serial killer', 'homicide', 'genocide', 'war crime'],
+                illegal: ['black hat', 'blackhat', 'crack', 'piracy', 'pirate', 'steal', 'theft', 'rob', 'fraud', 'scam', 'phishing', 'malware', 'virus', 'ransomware', 'ddos', 'exploit', 'zero-day', 'counterfeit', 'forgery'],
+                hacking: ['hack bank', 'hack account', 'hack password', 'hack website', 'hack system', 'break into', 'unauthorized access', 'bypass security', 'crack password'],
+                harmful: ['self-harm', 'self harm', 'cut myself', 'hurt myself', 'eating disorder', 'anorexia', 'bulimia', 'overdose'],
+                drugs: ['meth', 'cocaine', 'heroin', 'fentanyl', 'drug dealing', 'drug manufacture', 'illegal drug', 'narcotics'],
+                sexual: ['porn', 'sexual assault', 'rape', 'child abuse', 'trafficking'],
+                discrimination: ['white supremacy', 'nazi', 'genocide', 'hate group', 'ethnic cleansing'],
+                dangerous: ['poison', 'toxic', 'biohazard', 'radioactive', 'chemical weapon', 'biological weapon']
+            };
+
+            // Check against blocked keywords
+            for (const [category, keywords] of Object.entries(blockedKeywords)) {
+                for (const keyword of keywords) {
+                    if (subjectLower.includes(keyword)) {
+                        console.log(`[ETHICS] ❌ Blocked: Category "${category}", Keyword "${keyword}"`);
+                        
+                        // Show clear error message
+                        const errorMessage = `
+                            <div style="text-align: center; padding: 2rem;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+                                <h2 style="color: #dc2626; margin-bottom: 1rem;">Content Policy Violation</h2>
+                                <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 1.1rem;">
+                                    The topic you entered appears to be related to <strong>${category}</strong> content.
+                                </p>
+                                <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 1rem; margin: 1.5rem auto; max-width: 600px; text-align: left; border-radius: 0.5rem;">
+                                    <p style="margin: 0; color: #991b1b;">
+                                        <strong>Our AI Study Planner is designed for educational purposes only.</strong>
+                                        We cannot generate study plans for topics that may involve:
+                                    </p>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; color: #991b1b;">
+                                        <li>Violence or harm to self or others</li>
+                                        <li>Illegal activities or cybercrime</li>
+                                        <li>Dangerous or harmful substances</li>
+                                        <li>Discrimination or hate speech</li>
+                                    </ul>
+                                </div>
+                                <p style="color: #64748b; margin-bottom: 1rem;">
+                                    Please try a different educational topic such as:
+                                </p>
+                                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                                    <span style="background: #f0fdf4; color: #166534; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.9rem;">Mathematics</span>
+                                    <span style="background: #f0fdf4; color: #166534; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.9rem;">Science</span>
+                                    <span style="background: #f0fdf4; color: #166534; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.9rem;">Programming</span>
+                                    <span style="background: #f0fdf4; color: #166534; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.9rem;">Languages</span>
+                                    <span style="background: #f0fdf4; color: #166534; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.9rem;">Arts</span>
+                                </div>
+                                <button onclick="startNewPlan()" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; padding: 1rem 2rem; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                                    Try a Different Topic
+                                </button>
+                            </div>
+                        `;
+                        
+                        const resultsDiv = document.getElementById('advanced-results');
+                        resultsDiv.innerHTML = errorMessage;
+                        resultsDiv.classList.remove('hidden');
+                        
+                        return false;
+                    }
+                }
+            }
+            
+            console.log('[ETHICS] ✅ Content validation passed');
+            return true;
+        }
+
         function generateAdvancedPlanFromOnboarding() {
             // Validate we have a subject
             if (!onboardingData.subject || onboardingData.subject.trim() === '') {
                 alert('Please go back and enter a subject you want to learn!');
+                return;
+            }
+
+            // ETHICAL CONTENT CHECK
+            if (!validateEthicalContent(onboardingData.subject)) {
+                console.log('[ETHICS] Subject blocked at frontend validation');
+                // Hide onboarding and loading
+                document.getElementById('onboarding-assessment').style.display = 'none';
+                document.getElementById('advanced-loading').style.display = 'none';
                 return;
             }
 
