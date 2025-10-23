@@ -260,9 +260,27 @@ class ScheduleCreatorAgent:
     """Enhanced schedule creator with personalization and datasets"""
     
     def __init__(self):
+        self.genai_initialized = False
         if GENAI_AVAILABLE:
-            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-            self.model = genai.GenerativeModel('gemini-pro')
+            api_key = os.getenv("GEMINI_API_KEY")
+            print(f"[GEMINI DEBUG] API Available: {GENAI_AVAILABLE}")
+            print(f"[GEMINI DEBUG] API Key exists: {bool(api_key)}")
+            print(f"[GEMINI DEBUG] API Key length: {len(api_key) if api_key else 0}")
+            if api_key:
+                try:
+                    genai.configure(api_key=api_key)
+                    # Use the latest Gemini model
+                    self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
+                    self.genai_initialized = True
+                    print("[GEMINI DEBUG] ✅ Gemini API initialized successfully with gemini-1.5-flash-latest!")
+                except Exception as e:
+                    print(f"[GEMINI DEBUG] ❌ Failed to initialize Gemini: {e}")
+                    self.genai_initialized = False
+            else:
+                print("[GEMINI DEBUG] ❌ No API key found in environment")
+        else:
+            print("[GEMINI DEBUG] ❌ google.generativeai library not available")
+        
         self.load_subjects_database()
         # Initialize the intelligent topic generator
         if INTELLIGENT_TOPICS_AVAILABLE:
@@ -359,31 +377,73 @@ class ScheduleCreatorAgent:
                                    knowledge_level: str = "beginner") -> StudyPlan:
         """Create a personalized study schedule with NLP-processed subject input"""
         
+        print(f"\n{'='*80}")
+        print(f"[SCHEDULE DEBUG] Creating schedule for: {subject}")
+        print(f"[SCHEDULE DEBUG] Knowledge Level: {knowledge_level}")
+        print(f"[SCHEDULE DEBUG] Days: {total_days}, Hours/day: {available_hours_per_day}")
+        print(f"[SCHEDULE DEBUG] Gemini Initialized: {self.genai_initialized}")
+        print(f"[SCHEDULE DEBUG] Has model: {hasattr(self, 'model')}")
+        print(f"{'='*80}\n")
+        
         # COURSEWORK DEMONSTRATION: Apply NLP techniques to subject input
         processed_subject = self.process_subject_with_nlp(subject)
         
-        # Try to get subject information from database using processed subject
-        subject_info = self.subjects_db.get(processed_subject)
+        # PRIORITY 1: Try AI generation first (for dynamic, non-templated content)
+        subject_info = None
+        if self.genai_initialized and hasattr(self, 'model'):
+            print(f"[AI PRIORITY] ✅ Attempting full AI generation for {processed_subject} ({knowledge_level})")
+            try:
+                subject_info = self._generate_subject_info_with_ai(processed_subject, knowledge_level, total_days)
+                if subject_info:
+                    print(f"[AI PRIORITY] ✅ Successfully generated via Gemini API!")
+                    print(f"[AI PRIORITY] Topics generated: {len(subject_info.get('topics', []))}")
+                else:
+                    print(f"[AI PRIORITY] ⚠️ Gemini returned None")
+            except Exception as e:
+                print(f"[AI PRIORITY] ❌ Exception during AI generation: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print(f"[AI PRIORITY] ❌ Skipping AI generation - Gemini not initialized")
         
-        # Also try original subject if processed didn't match
+        # PRIORITY 2: Try database lookup (only if AI fails)
         if not subject_info:
-            subject_info = self.subjects_db.get(subject)
+            print(f"[DATABASE] Checking database for {processed_subject}")
+            subject_info = self.subjects_db.get(processed_subject)
+            
+            # Also try original subject if processed didn't match
+            if not subject_info:
+                subject_info = self.subjects_db.get(subject)
+            
+            # Update difficulty if found in database
+            if subject_info:
+                print(f"[DATABASE] ✅ Found in database!")
+                subject_info = subject_info.copy()  # Don't modify original
+                subject_info['difficulty'] = knowledge_level  # Use user's selected level
+            else:
+                print(f"[DATABASE] ❌ Not found in database")
         
-        # If not found, try fuzzy matching with keywords
+        # PRIORITY 3: Try fuzzy matching with keywords
         if not subject_info:
+            print(f"[FUZZY] Attempting fuzzy match for {processed_subject}")
             subject_info = self._find_similar_subject(subject)
+            if subject_info:
+                print(f"[FUZZY] ✅ Found fuzzy match!")
+                subject_info['difficulty'] = knowledge_level  # Override with user's level
+            else:
+                print(f"[FUZZY] ❌ No fuzzy match found")
         
-        # If still not found and AI is available, generate dynamic content
-        if not subject_info and GENAI_AVAILABLE:
-            subject_info = self._generate_subject_info_with_ai(subject, knowledge_level, total_days)
-        
-        # Fallback to generic structure if AI not available or fails
+        # PRIORITY 4: Fallback to AI-generated generic structure
         if not subject_info:
+            print(f"[FALLBACK] Using fallback generation for {processed_subject}")
             subject_info = {
                 "estimated_hours": max(10, available_hours_per_day * total_days),
-                "difficulty": knowledge_level,  # Use actual knowledge level
-                "topics": self._generate_dynamic_topics(subject, total_days)
+                "difficulty": knowledge_level,
+                "topics": self._generate_dynamic_topics(processed_subject, total_days)
             }
+        
+        # Ensure difficulty matches user selection
+        subject_info['difficulty'] = knowledge_level
         
         total_available_hours = available_hours_per_day * total_days
         estimated_hours = subject_info["estimated_hours"]
@@ -401,8 +461,8 @@ class ScheduleCreatorAgent:
         
         # Create detailed schedule
         schedule = self._generate_detailed_schedule(
-            subject, subject_info, final_hours, 
-            available_hours_per_day, total_days
+            processed_subject, subject_info, final_hours, 
+            available_hours_per_day, total_days, knowledge_level
         )
         
         # Prepare NLP demonstration data
@@ -410,12 +470,15 @@ class ScheduleCreatorAgent:
         display_subject = processed_subject if processed_subject else subject
         nlp_feedback = f"Processed from '{original_subject}'" if processed_subject and processed_subject != subject else None
         
+        print(f"[FINAL] ✅ Created plan: {display_subject} ({knowledge_level}) - {final_hours}h total, {available_hours_per_day}h/day")
+        print(f"[FINAL] Topics in schedule: {[t.get('topic', 'N/A') for day in schedule for t in day.get('topics', [])][:5]}")
+        
         return StudyPlan(
             user_id=user_id,
             subject=display_subject,
             total_hours=final_hours,
             daily_hours=available_hours_per_day,
-            difficulty=knowledge_level,  # Use user's selected knowledge level, not subject default
+            difficulty=knowledge_level,  # Use user's selected knowledge level
             start_date=datetime.now().isoformat(),
             schedule=schedule,
             resources=[],
@@ -424,14 +487,42 @@ class ScheduleCreatorAgent:
         )
     
     def _generate_detailed_schedule(self, subject: str, subject_info: Dict, 
-                                  total_hours: int, daily_hours: int, total_days: int) -> List[Dict]:
-        """Generate detailed daily schedule"""
+                                  total_hours: int, daily_hours: int, total_days: int,
+                                  knowledge_level: str = "intermediate") -> List[Dict]:
+        """Generate detailed daily schedule with difficulty-aware content"""
         topics = subject_info.get("topics", ["Introduction", "Main Concepts", "Practice"])
         hours_per_topic = max(1, total_hours // len(topics))
         
         schedule = []
         current_topic_index = 0
         remaining_topic_hours = hours_per_topic
+        
+        # Difficulty-based goal generation
+        goal_templates = {
+            'beginner': [
+                'Understand the basics of {}',
+                'Complete introductory exercises for {}',
+                'Learn fundamental concepts in {}',
+                'Practice basic {} skills',
+                'Review and solidify {} understanding'
+            ],
+            'intermediate': [
+                'Apply {} in practical scenarios',
+                'Build a project using {}',
+                'Implement {} techniques',
+                'Solve real-world problems with {}',
+                'Master {} best practices'
+            ],
+            'advanced': [
+                'Optimize {} for performance',
+                'Architect solutions with {}',
+                'Master advanced {} patterns',
+                'Innovate using {}',
+                'Contribute to {} at expert level'
+            ]
+        }
+        
+        goals = goal_templates.get(knowledge_level, goal_templates['intermediate'])
         
         for day in range(total_days):
             day_plan = {
@@ -454,6 +545,10 @@ class ScheduleCreatorAgent:
                     "type": "study"
                 })
                 
+                # Add difficulty-appropriate goals
+                goal_text = goals[day % len(goals)].format(current_topic)
+                day_plan["goals"].append(goal_text)
+                
                 hours_left_today -= hours_to_spend
                 remaining_topic_hours -= hours_to_spend
                 
@@ -467,48 +562,122 @@ class ScheduleCreatorAgent:
         return schedule
     
     def _generate_subject_info_with_ai(self, subject: str, knowledge_level: str, total_days: int) -> Dict:
-        """Generate subject information using AI when available"""
+        """Generate subject information using AI when available - FULLY AI-POWERED"""
+        print(f"\n[AI GEN] Starting Gemini API call...")
+        print(f"[AI GEN] Subject: {subject}, Level: {knowledge_level}, Days: {total_days}")
+        
         try:
+            # Enhanced prompt for better, difficulty-aware topic generation
             prompt = f"""
-            Create a comprehensive study plan structure for the subject: "{subject}"
+            You are an expert educational curriculum designer. Create a detailed learning roadmap for: "{subject}"
             
-            Requirements:
-            - Knowledge level: {knowledge_level}
-            - Total study days: {total_days}
-            - Provide estimated total hours needed
-            - Create specific, actionable topics that progress logically
-            - Determine appropriate difficulty level
+            STRICT REQUIREMENTS:
+            - Student Level: {knowledge_level} (CRITICAL: Adjust complexity accordingly!)
+            - Study Duration: {total_days} days
+            - Generate {min(total_days, 10)} specific, unique learning topics
             
-            Return a JSON structure with:
+            DIFFICULTY-BASED CUSTOMIZATION:
+            - If BEGINNER: Focus on fundamentals, basic concepts, introductory material, hands-on basics
+            - If INTERMEDIATE: Focus on practical applications, deeper concepts, integration, real projects
+            - If ADVANCED: Focus on optimization, architecture, advanced patterns, expert techniques, specialization
+            
+            TOPIC REQUIREMENTS:
+            - Each topic MUST be specific and actionable (not generic like "Introduction to X")
+            - Topics should build upon each other logically
+            - Include concrete skills, tools, or concepts to learn
+            - Vary the topic types: theory, practice, projects, tools, best practices
+            - NO repetitive patterns like "Introduction/Intermediate/Advanced" structure
+            
+            EXAMPLES OF GOOD TOPICS:
+            For "Python" (beginner): "Variables, Data Types and Basic Operations", "Control Flow with If-Else and Loops", "Functions and Code Reusability"
+            For "Machine Learning" (intermediate): "Feature Engineering and Data Preprocessing", "Building Classification Models with Scikit-learn", "Model Evaluation Metrics and Cross-Validation"
+            For "Web Development" (advanced): "Microservices Architecture and API Design", "Performance Optimization and Caching Strategies", "CI/CD Pipeline Implementation"
+            
+            Return ONLY valid JSON (no markdown, no extra text):
             {{
-                "estimated_hours": <number>,
-                "difficulty": "<beginner|intermediate|advanced>",
-                "topics": ["Topic 1", "Topic 2", "Topic 3", ...]
+                "estimated_hours": <realistic number based on {knowledge_level} level>,
+                "difficulty": "{knowledge_level}",
+                "topics": [
+                    "Specific Topic 1 with Clear Learning Objective",
+                    "Specific Topic 2 that Builds on Topic 1",
+                    "Specific Topic 3 with Practical Application",
+                    ...
+                ]
             }}
             
-            Make topics specific to {subject} and appropriate for {knowledge_level} level.
-            Create {min(total_days, 8)} main topics that can be studied progressively.
+            Make it creative, specific to {subject}, and perfectly suited for {knowledge_level} learners!
             """
             
+            print(f"[AI GEN] Sending request to Gemini API...")
             response = self.model.generate_content(prompt)
+            print(f"[AI GEN] ✅ Received response from Gemini API")
+            print(f"[AI GEN] ✅ Received response from Gemini API")
+            response_text = response.text.strip()
+            
+            print(f"[AI GEN] Response length: {len(response_text)} chars")
+            print(f"[AI GEN] First 200 chars: {response_text[:200]}")
+            
+            # Clean up markdown code blocks if present
+            import re
+            # Remove markdown code blocks
+            response_text = re.sub(r'```json\s*', '', response_text)
+            response_text = re.sub(r'```\s*', '', response_text)
+            response_text = response_text.strip()
+            
+            print(f"[AI GEN] After cleaning: {response_text[:200]}")
             
             # Try to parse JSON from response
-            import re
-            json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
+                print(f"[AI GEN] Found JSON match in response")
                 try:
-                    return json.loads(json_match.group())
-                except json.JSONDecodeError:
+                    parsed_data = json.loads(json_match.group())
+                    print(f"[AI GEN] ✅ Successfully parsed JSON!")
+                    
+                    # Validate and clean the topics
+                    if 'topics' in parsed_data and isinstance(parsed_data['topics'], list):
+                        print(f"[AI GEN] Found {len(parsed_data['topics'])} topics")
+                        # Ensure topics are unique and non-empty
+                        cleaned_topics = []
+                        seen_topics = set()
+                        
+                        for topic in parsed_data['topics']:
+                            topic_str = str(topic).strip()
+                            topic_lower = topic_str.lower()
+                            
+                            # Skip empty or duplicate topics
+                            if topic_str and topic_lower not in seen_topics:
+                                cleaned_topics.append(topic_str)
+                                seen_topics.add(topic_lower)
+                                print(f"[AI GEN]   ✓ Topic: {topic_str}")
+                        
+                        parsed_data['topics'] = cleaned_topics
+                        
+                        # Ensure we have the right difficulty
+                        if 'difficulty' not in parsed_data or not parsed_data['difficulty']:
+                            parsed_data['difficulty'] = knowledge_level
+                        
+                        print(f"[AI SUCCESS] ✅ Generated {len(cleaned_topics)} unique topics for {subject} ({knowledge_level})")
+                        return parsed_data
+                        
+                except json.JSONDecodeError as je:
+                    print(f"[AI GEN] ❌ JSON parsing failed: {je}")
                     pass
+            else:
+                print(f"[AI GEN] ⚠️ No JSON pattern found in response")
             
-            # If JSON parsing fails, create structured data from text
-            return self._extract_info_from_text(response.text, subject)
+            # If JSON parsing fails, try to extract structured data
+            print("[AI GEN] Falling back to text extraction")
+            return self._extract_info_from_text(response.text, subject, knowledge_level)
             
         except Exception as e:
-            print(f"AI generation failed: {e}")
+            print(f"[AI ERROR] ❌ Generation failed with exception: {e}")
+            import traceback
+            print(f"[AI ERROR] Traceback:")
+            traceback.print_exc()
             return None
     
-    def _extract_info_from_text(self, text: str, subject: str) -> Dict:
+    def _extract_info_from_text(self, text: str, subject: str, knowledge_level: str = "intermediate") -> Dict:
         """Extract structured information from AI response text"""
         import re
         lines = text.strip().split('\n')
@@ -516,63 +685,184 @@ class ScheduleCreatorAgent:
         
         for line in lines:
             line = line.strip()
-            if any(starter in line.lower() for starter in ['day', 'week', 'topic', 'chapter', 'learn', 'study']):
+            # Look for lines that seem like topics (numbered, bulleted, or starting with keywords)
+            if any(starter in line.lower() for starter in ['day', 'week', 'topic', 'chapter', 'learn', 'study', 'module', 'lesson']):
                 # Clean and extract topic
                 topic = re.sub(r'^[\d\.\-\*\s]*', '', line)  # Remove numbering
                 topic = re.sub(r':\s*.*$', '', topic)  # Remove descriptions after colon
-                if len(topic) > 3 and topic not in topics:
-                    topics.append(topic[:50])  # Limit length
+                topic = topic.strip('"\' ')  # Remove quotes
+                if len(topic) > 5 and topic not in topics and len(topic) < 100:
+                    topics.append(topic)
+            elif re.match(r'^[\d\.\-\*]\s+\w', line):  # Lines starting with numbers or bullets
+                topic = re.sub(r'^[\d\.\-\*\s]*', '', line)
+                topic = topic.strip('"\' ')
+                if len(topic) > 5 and topic not in topics and len(topic) < 100:
+                    topics.append(topic)
         
-        # If no topics found, generate based on subject
-        if not topics:
-            topics = self._generate_dynamic_topics(subject, 6)
+        # If no topics found, try to use AI topic generator
+        if not topics or len(topics) < 3:
+            print(f"[AI] Extracted {len(topics)} topics, generating more with AI...")
+            topics = self._generate_dynamic_topics(subject, 8)
+        
+        # Calculate hours based on difficulty
+        hours_per_topic = 3 if knowledge_level == "beginner" else 2.5 if knowledge_level == "intermediate" else 2
         
         return {
-            "estimated_hours": len(topics) * 3,  # 3 hours per topic
-            "difficulty": "intermediate",
-            "topics": topics[:8]  # Limit to 8 topics
+            "estimated_hours": int(len(topics) * hours_per_topic),
+            "difficulty": knowledge_level,
+            "topics": topics[:10]  # Limit to 10 topics
         }
     
     def _generate_dynamic_topics(self, subject: str, total_days: int) -> List[str]:
         """
-        AI-powered topic generation that intelligently creates appropriate 
-        learning topics for any subject without hardcoding.
+        AI-powered topic generation using Gemini API directly for fully dynamic content.
+        NO templates, NO hardcoding - pure AI generation based on subject.
         """
-        # Use the intelligent topic generator
-        num_topics = max(3, min(total_days, 8))  # Generate between 3-8 topics based on days
+        print(f"\n[DYNAMIC TOPICS] Starting generation for {subject}")
+        num_topics = max(3, min(total_days, 10))
+        print(f"[DYNAMIC TOPICS] Target: {num_topics} topics")
         
-        try:
-            # Generate contextually appropriate topics using AI
-            topics = self.topic_generator.generate_contextual_topics(subject, num_topics)
-            
-            # Ensure we have the right number of topics
-            if len(topics) < num_topics:
-                # Fill any gaps with basic topics
-                basic_topics = [
-                    f"Fundamentals of {subject}",
-                    f"Practical {subject} Applications", 
-                    f"Advanced {subject} Concepts",
-                    f"{subject} Best Practices",
-                    f"Professional {subject} Skills"
-                ]
+        # Try Gemini API first for fully AI-generated content
+        if self.genai_initialized and hasattr(self, 'model'):
+            print(f"[DYNAMIC TOPICS] ✅ Gemini available, attempting AI generation...")
+            try:
+                prompt = f"""
+                You are an expert curriculum designer. Generate {num_topics} specific, actionable learning topics for: "{subject}"
                 
-                for topic in basic_topics:
-                    if len(topics) < num_topics and topic not in topics:
-                        topics.append(topic)
-            
-            return topics[:num_topics]
-            
-        except Exception as e:
-            # Fallback to simple generic topics if AI generation fails
-            print(f"AI topic generation failed: {e}. Using fallback.")
-            return [
-                f"Introduction to {subject}",
-                f"{subject} Fundamentals",
-                f"Practical {subject} Skills", 
-                f"Advanced {subject} Techniques",
-                f"{subject} Applications",
-                f"Professional {subject} Development"
-            ][:num_topics]
+                CRITICAL RULES:
+                1. Each topic must be UNIQUE and SPECIFIC (not generic)
+                2. Topics should progressively build skills from foundational to advanced
+                3. Include concrete concepts, tools, or skills in each topic
+                4. Vary the format - don't use repetitive patterns like "Introduction/Intermediate/Advanced"
+                5. Make topics practical and directly applicable
+                
+                BAD Examples (too generic):
+                - Introduction to {subject}
+                - Intermediate {subject} Concepts
+                - Advanced {subject}
+                
+                GOOD Examples:
+                - For "Python": "Variables and Data Types in Practice", "Writing Reusable Functions and Modules", "Working with Lists and Dictionaries"
+                - For "Photography": "Understanding Exposure Triangle", "Composition Techniques and Rule of Thirds", "Working with Natural vs Artificial Light"
+                
+                Return ONLY a JSON array of topic strings, no extra text:
+                ["Topic 1", "Topic 2", "Topic 3", ...]
+                """
+                
+                print(f"[DYNAMIC TOPICS] Sending request to Gemini...")
+                response = self.model.generate_content(prompt)
+                response_text = response.text.strip()
+                
+                print(f"[DYNAMIC TOPICS] Response received: {len(response_text)} chars")
+                print(f"[DYNAMIC TOPICS] First 150 chars: {response_text[:150]}")
+                
+                # Clean markdown if present
+                import re
+                response_text = re.sub(r'```json\s*', '', response_text)
+                response_text = re.sub(r'```\s*', '', response_text)
+                response_text = response_text.strip()
+                
+                # Try to parse as JSON array
+                try:
+                    topics = json.loads(response_text)
+                    if isinstance(topics, list) and len(topics) >= 3:
+                        print(f"[DYNAMIC TOPICS] ✅ Parsed {len(topics)} topics from JSON array")
+                        # Clean and validate topics
+                        valid_topics = []
+                        seen = set()
+                        
+                        for topic in topics:
+                            topic_str = str(topic).strip()
+                            topic_lower = topic_str.lower()
+                            
+                            # Skip generic patterns
+                            generic_patterns = ['introduction to', 'intermediate', 'advanced', 'basics and getting']
+                            is_generic = any(pattern in topic_lower for pattern in generic_patterns)
+                            
+                            if (topic_str and len(topic_str) > 10 and 
+                                topic_lower not in seen and not is_generic):
+                                valid_topics.append(topic_str)
+                                seen.add(topic_lower)
+                                print(f"[DYNAMIC TOPICS]   ✓ {topic_str}")
+                            elif is_generic:
+                                print(f"[DYNAMIC TOPICS]   ✗ Rejected (too generic): {topic_str}")
+                        
+                        if len(valid_topics) >= 3:
+                            print(f"[AI SUCCESS] ✅ Generated {len(valid_topics)} dynamic topics via Gemini")
+                            return valid_topics[:num_topics]
+                        else:
+                            print(f"[DYNAMIC TOPICS] ⚠️ Only {len(valid_topics)} valid topics after filtering")
+                
+                except json.JSONDecodeError as je:
+                    print(f"[DYNAMIC TOPICS] ⚠️ JSON array parsing failed: {je}")
+                    # Try to extract topics from text
+                    lines = response_text.split('\n')
+                    topics = []
+                    for line in lines:
+                        line = line.strip()
+                        # Remove numbering and quotes
+                        topic = re.sub(r'^[\d\.\-\*\s\"\']', '', line).strip('"\' ,')
+                        if len(topic) > 10 and topic not in topics:
+                            topics.append(topic)
+                            print(f"[DYNAMIC TOPICS]   ✓ Extracted: {topic}")
+                    
+                    if len(topics) >= 3:
+                        print(f"[AI PARTIAL] ✅ Extracted {len(topics)} topics from Gemini response")
+                        return topics[:num_topics]
+                    else:
+                        print(f"[DYNAMIC TOPICS] ⚠️ Only extracted {len(topics)} topics")
+                    
+            except Exception as e:
+                print(f"[AI ERROR] ❌ Gemini topic generation failed: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print(f"[DYNAMIC TOPICS] ❌ Gemini not initialized (genai_initialized={self.genai_initialized}, has_model={hasattr(self, 'model')})")
+        
+        # Fallback: Use intelligent topic generator (non-template based)
+        if INTELLIGENT_TOPICS_AVAILABLE:
+            try:
+                print(f"[FALLBACK] Using intelligent topic generator for {subject}")
+                topics = self.topic_generator.generate_contextual_topics(subject, num_topics)
+                
+                # Filter out generic patterns
+                filtered_topics = []
+                for topic in topics:
+                    topic_lower = topic.lower()
+                    generic_patterns = ['introduction to', 'intermediate', 'basics and getting started']
+                    
+                    # If it's too generic, try to make it more specific
+                    if any(pattern in topic_lower for pattern in generic_patterns):
+                        # Skip overly generic topics
+                        print(f"[FALLBACK]   ✗ Filtered out: {topic}")
+                        continue
+                    
+                    filtered_topics.append(topic)
+                    print(f"[FALLBACK]   ✓ {topic}")
+                
+                # If we filtered out too many, use original
+                if len(filtered_topics) >= 3:
+                    print(f"[FALLBACK] ✅ Using {len(filtered_topics)} filtered topics")
+                    return filtered_topics[:num_topics]
+                else:
+                    print(f"[FALLBACK] ⚠️ Using {len(topics)} original topics (not enough after filtering)")
+                    return topics[:num_topics]
+                    
+            except Exception as e:
+                print(f"[FALLBACK ERROR] ❌ Intelligent generator failed: {e}")
+        
+        # Last resort fallback - but make it more specific
+        print(f"[LAST RESORT] ⚠️ Using basic fallback for {subject}")
+        return [
+            f"Core Fundamentals of {subject}",
+            f"Practical {subject} Skills and Techniques", 
+            f"Working with {subject} Tools and Resources",
+            f"Building {subject} Projects",
+            f"Advanced {subject} Concepts",
+            f"Professional {subject} Best Practices",
+            f"{subject} Problem-Solving Strategies",
+            f"Real-World {subject} Applications"
+        ][:num_topics]
     
     def _find_similar_subject(self, subject: str) -> Dict:
         """Find similar subjects using keyword matching and fuzzy search"""
