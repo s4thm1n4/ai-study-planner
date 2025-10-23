@@ -1406,6 +1406,733 @@
             margin: 1rem 0;
         }
 
+        /* Today's Plan Card Styles */
+        .todays-plan-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #6366f1;
+        }
+
+        .todays-plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .todays-plan-header h3 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 1.5rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.pending {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        .status-badge.in-progress {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .status-badge.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .todays-plan-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .todays-goal, .todays-tasks {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .todays-goal h4, .todays-tasks h4 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+            font-size: 1.125rem;
+        }
+
+        .todays-goal p {
+            margin: 0;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .task-list li:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-checkbox.checked {
+            background: #10b981;
+            border-color: #10b981;
+            position: relative;
+        }
+
+        .task-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .task-text {
+            flex: 1;
+            color: #374151;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        .todays-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .start-study-btn, .log-session-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .start-study-btn:hover, .log-session-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .log-session-btn {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+        }
+
+        .log-session-btn:hover {
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Study Plans Grid */
+        .study-plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .study-plan-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .study-plan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .study-plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .study-plan-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .study-plan-progress {
+            text-align: right;
+        }
+
+        .study-plan-percentage {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .study-plan-details {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .study-plan-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-details-btn {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-details-btn:hover {
+            background: #e5e7eb;
+        }
+
+        /* Study Log & Insights */
+        .study-log-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .weekly-overview {
+            margin-bottom: 2rem;
+        }
+
+        .week-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .study-calendar {
+            margin-top: 2rem;
+        }
+
+        .study-calendar h4 {
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .calendar-container {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #e5e7eb;
+        }
+
+        .calendar-day.studied {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .calendar-day.today {
+            border: 2px solid #6366f1;
+            background: #f0f9ff;
+        }
+
+        .calendar-day-header {
+            background: #e5e7eb;
+            color: #6b7280;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        /* Enhanced Achievements */
+        .achievements-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievements-section h3 {
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement.unlocked {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #fbbf24;
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .achievement.locked {
+            opacity: 0.6;
+        }
+
+        .achievement.unlocked::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        .achievement.unlocked .achievement-icon {
+            animation: celebrationBounce 0.8s ease-out;
+        }
+
+        .achievement-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Upcoming Achievements */
+        .upcoming-achievements {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #bae6fd;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .upcoming-achievements h4 {
+            color: #0ea5e9;
+            margin-bottom: 1rem;
+        }
+
+        .upcoming-achievement {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upcoming-progress {
+            flex: 1;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .upcoming-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9, #0284c7);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Quick Motivation */
+        .quick-motivation {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .quick-motivation h4 {
+            margin-bottom: 1rem;
+        }
+
+        .feeling-stuck-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .feeling-stuck-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* User Assessment Styles */
+        #user-assessment-container {
+            margin-bottom: 2rem;
+        }
+
+        .user-assessment-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .assessment-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .assessment-header h3 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step-number {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #6b7280;
+        }
+
+        .step.active .step-number {
+            background: #6366f1;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .assessment-step {
+            display: none;
+        }
+
+        .assessment-step.active {
+            display: block;
+        }
+
+        .step-content h4 {
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .nav-btn {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .next-btn {
+            background: #6366f1;
+            color: white;
+        }
+
+        .next-btn:hover {
+            background: #4f46e5;
+        }
+
+        .knowledge-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .knowledge-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .knowledge-btn:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        .knowledge-btn.selected {
+            border-color: #6366f1;
+            background: #f0f9ff;
+        }
+
+        .level-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .level-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            color: #1f2937;
+        }
+
+        .level-desc {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .challenge-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .challenge-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .challenge-option:hover {
+            background: #f1f5f9;
+        }
+
+        .challenge-option input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .difficulty-slider {
+            margin-top: 1rem;
+        }
+
+        .difficulty-slider input[type="range"] {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-description {
+            text-align: center;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* Responsive Design for New Components */
+        @media (max-width: 768px) {
+            .todays-plan-content {
+                grid-template-columns: 1fr;
+            }
+
+            .study-plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .week-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .calendar-grid {
+                gap: 0.25rem;
+            }
+
+            .calendar-day {
+                font-size: 0.75rem;
+            }
+
+            .step-progress {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .knowledge-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .challenge-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .quote-section {
             background: rgba(99, 102, 241, 0.1);
             padding: 1.5rem;
@@ -1517,7 +2244,121 @@
                         </div>
 
                         <!-- User Assessment Section -->
-                        <div id="user-assessment-container"></div>
+                        <div id="user-assessment-container">
+                            <!-- Fallback user assessment content -->
+                            <div class="user-assessment-section" id="fallback-assessment" style="display: none;">
+                                <div class="assessment-header">
+                                    <h3>📋 Tell Us About Yourself</h3>
+                                    <p>Help us create the perfect study plan by sharing a bit about your background and goals.</p>
+                                </div>
+                                
+                                <div class="step-progress">
+                                    <div class="step active" data-step="1">
+                                        <div class="step-number">1</div>
+                                        <div class="step-label">Plan Details</div>
+                                    </div>
+                                    <div class="step" data-step="2">
+                                        <div class="step-number">2</div>
+                                        <div class="step-label">Background</div>
+                                    </div>
+                                    <div class="step" data-step="3">
+                                        <div class="step-number">3</div>
+                                        <div class="step-label">Current Level</div>
+                                    </div>
+                                    <div class="step" data-step="4">
+                                        <div class="step-number">4</div>
+                                        <div class="step-label">Goals</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="assessment-step active" id="step-1">
+                                    <div class="step-content">
+                                        <h4>📚 What Do You Want to Learn?</h4>
+                                        
+                                        <div class="form-grid">
+                                            <div class="input-group">
+                                                <label for="advancedSubject">
+                                                    <i class="fas fa-book"></i> Subject
+                                                </label>
+                                                <input type="text" id="advancedSubject" placeholder="Enter the subject you want to learn..." list="advancedSubjectList">
+                                                <datalist id="advancedSubjectList">
+                                                    <option value="Mathematics">Mathematics</option>
+                                                    <option value="Physics">Physics</option>
+                                                    <option value="Chemistry">Chemistry</option>
+                                                    <option value="Biology">Biology</option>
+                                                    <option value="Computer Science">Computer Science</option>
+                                                    <option value="Programming">Programming</option>
+                                                    <option value="Data Science">Data Science</option>
+                                                    <option value="Machine Learning">Machine Learning</option>
+                                                    <option value="Web Development">Web Development</option>
+                                                    <option value="Mobile Development">Mobile Development</option>
+                                                    <option value="Digital Marketing">Digital Marketing</option>
+                                                    <option value="SEO">SEO</option>
+                                                    <option value="Content Writing">Content Writing</option>
+                                                    <option value="Graphic Design">Graphic Design</option>
+                                                    <option value="Business">Business</option>
+                                                    <option value="Finance">Finance</option>
+                                                    <option value="Economics">Economics</option>
+                                                    <option value="History">History</option>
+                                                    <option value="Literature">Literature</option>
+                                                    <option value="Languages">Languages</option>
+                                                    <option value="Psychology">Psychology</option>
+                                                </datalist>
+                                            </div>
+                                            
+                                            <div class="input-group">
+                                                <label for="dailyHours">
+                                                    <i class="fas fa-clock"></i> Daily Study Hours
+                                                </label>
+                                                <select id="dailyHours">
+                                                    <option value="1">1 hour</option>
+                                                    <option value="2" selected>2 hours</option>
+                                                    <option value="3">3 hours</option>
+                                                    <option value="4">4 hours</option>
+                                                    <option value="5">5+ hours</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="input-group">
+                                                <label for="totalDays">
+                                                    <i class="fas fa-calendar-alt"></i> Study Duration
+                                                </label>
+                                                <select id="totalDays">
+                                                    <option value="3">3 days</option>
+                                                    <option value="7" selected>1 week</option>
+                                                    <option value="14">2 weeks</option>
+                                                    <option value="30">1 month</option>
+                                                    <option value="60">2 months</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="input-group">
+                                                <label for="learningStyle">
+                                                    <i class="fas fa-brain"></i> Learning Style
+                                                </label>
+                                                <select id="learningStyle">
+                                                    <option value="mixed" selected>Mixed (All types)</option>
+                                                    <option value="visual">Visual Learner</option>
+                                                    <option value="auditory">Auditory Learner</option>
+                                                    <option value="reading">Reading/Writing</option>
+                                                    <option value="kinesthetic">Kinesthetic</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="step-navigation">
+                                        <button class="nav-btn next-btn" onclick="nextStep()">Next Step <i class="fas fa-arrow-right"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="step-navigation">
+                                    <button class="generate-btn" onclick="generateAdvancedPlan()">
+                                        <i class="fas fa-magic"></i> Generate My Personalized Study Plan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="loading" id="advanced-loading">
                             <div class="spinner"></div>
@@ -1615,49 +2456,116 @@
                             <div class="streak-message" id="streakMessage">Start your journey!</div>
                         </div>
 
-                        <!-- Overall Progress -->
-                        <div class="progress-overview">
-                            <div class="progress-card">
-                                <h3>📊 Current Study Plan</h3>
-                                <div id="currentPlanInfo">
-                                    <p>Create a study plan to start tracking!</p>
+                        <!-- Today's Plan - NEW ACTIONABLE COMPONENT -->
+                        <div class="todays-plan-card" id="todaysPlanCard" style="display: none;">
+                            <div class="todays-plan-header">
+                                <h3>🎯 Today's Plan</h3>
+                                <div class="todays-plan-status" id="todaysPlanStatus">
+                                    <span class="status-badge pending">Ready to Start</span>
                                 </div>
-                                
-                                <!-- Overall Progress Bar -->
-                                <div class="progress-container" id="overallProgressContainer" style="display: none;">
-                                    <div class="progress-header">
-                                        <span>Overall Progress</span>
-                                        <span class="progress-percentage" id="overallPercentage">0%</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-bar" id="overallProgressBar"></div>
-                                        <div class="progress-spark" id="overallSpark"></div>
-                                    </div>
+                            </div>
+                            <div class="todays-plan-content">
+                                <div class="todays-goal" id="todaysGoal">
+                                    <h4>Today's Goal</h4>
+                                    <p id="todaysGoalText">Loading your personalized study plan...</p>
+                                </div>
+                                <div class="todays-tasks" id="todaysTasks">
+                                    <h4>Today's Tasks</h4>
+                                    <ul class="task-list" id="taskList">
+                                        <!-- Tasks will be populated here -->
+                                    </ul>
+                                </div>
+                                <div class="todays-actions">
+                                    <button class="start-study-btn" id="startStudyBtn" onclick="startStudySession()">
+                                        <i class="fas fa-play"></i> Start Study Session
+                                    </button>
+                                    <button class="log-session-btn" id="logSessionBtn" onclick="logStudySession()" style="display: none;">
+                                        <i class="fas fa-clock"></i> Log Study Session
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Daily Tracking Grid -->
+                        <!-- Current Study Plans - ENHANCED WITH MULTIPLE PLANS -->
+                        <div class="study-plans-section" id="studyPlansSection">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h3 class="section-title">Current Study Plans</h3>
+                            </div>
+                            <div class="study-plans-grid" id="studyPlansGrid">
+                                <!-- Study plan cards will be generated here -->
+                            </div>
+                        </div>
+
+                        <!-- Study Log & Insights - NEW SECTION -->
+                        <div class="study-log-section" id="studyLogSection" style="display: none;">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <h3 class="section-title">Study Log & Insights</h3>
+                            </div>
+                            
+                            <!-- Weekly Overview -->
+                            <div class="weekly-overview">
+                                <div class="week-stats">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="weeklyHours">0h</div>
+                                        <div class="stat-label">This Week</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="mostStudiedTopic">-</div>
+                                        <div class="stat-label">Top Subject</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="averageSession">0h</div>
+                                        <div class="stat-label">Avg Session</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Study Calendar -->
+                            <div class="study-calendar">
+                                <h4>Study Calendar</h4>
+                                <div class="calendar-container" id="calendarContainer">
+                                    <!-- Calendar will be generated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Tracking Grid - ENHANCED -->
                         <div class="daily-tracking" id="dailyTrackingSection" style="display: none;">
-                            <h3>📅 Daily Progress</h3>
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-calendar-week"></i>
+                                </div>
+                                <h3 class="section-title">Weekly Progress</h3>
+                            </div>
                             <div class="daily-grid" id="dailyGrid">
                                 <!-- Daily boxes will be generated here -->
                             </div>
                             
-                            <!-- Quick Actions -->
+                            <!-- Enhanced Quick Actions -->
                             <div class="quick-actions">
-                                <button class="action-btn" onclick="markTodayComplete()">
-                                    <i class="fas fa-check"></i> Complete Today
+                                <button class="action-btn" onclick="logStudySession()">
+                                    <i class="fas fa-plus"></i> Log Study Session
                                 </button>
-                                <button class="action-btn secondary" onclick="resetProgress()">
-                                    <i class="fas fa-refresh"></i> Reset Progress
+                                <button class="action-btn secondary" onclick="resetCurrentWeek()">
+                                    <i class="fas fa-refresh"></i> Reset Current Week
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Achievements Section -->
+                        <!-- Enhanced Achievements Section -->
                         <div class="achievements-section" id="achievementsSection">
-                            <h3>🏆 Achievements</h3>
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <h3 class="section-title">Achievements</h3>
+                            </div>
                             <div class="achievements-grid" id="achievementsGrid">
                                 <div class="achievement locked" data-achievement="first-day">
                                     <div class="achievement-icon">🎯</div>
@@ -1679,6 +2587,43 @@
                                     <div class="achievement-name">Perfect Week</div>
                                     <div class="achievement-desc">100% completion for 7 days</div>
                                 </div>
+                                <div class="achievement locked" data-achievement="month-master">
+                                    <div class="achievement-icon">👑</div>
+                                    <div class="achievement-name">Month Master</div>
+                                    <div class="achievement-desc">Study for 30 days straight</div>
+                                </div>
+                                <div class="achievement locked" data-achievement="speed-learner">
+                                    <div class="achievement-icon">⚡</div>
+                                    <div class="achievement-name">Speed Learner</div>
+                                    <div class="achievement-desc">Complete a plan in record time</div>
+                                </div>
+                            </div>
+
+                            <!-- Upcoming Achievements -->
+                            <div class="upcoming-achievements" id="upcomingAchievements">
+                                <h4>🎯 Next Achievement to Unlock</h4>
+                                <div class="upcoming-achievement" id="nextAchievement">
+                                    <div class="achievement-icon">🎯</div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem;">First Day</div>
+                                        <div style="font-size: 0.875rem; color: #6b7280;">Complete your first study session</div>
+                                    </div>
+                                    <div style="width: 100px;">
+                                        <div class="upcoming-progress">
+                                            <div class="upcoming-progress-bar" style="width: 0%"></div>
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 0.25rem;">0/1</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Motivation -->
+                            <div class="quick-motivation">
+                                <h4>💪 Feeling Stuck?</h4>
+                                <p style="margin-bottom: 1rem; opacity: 0.9;">Get instant motivation and study tips!</p>
+                                <button class="feeling-stuck-btn" onclick="getQuickMotivation()">
+                                    <i class="fas fa-heart"></i> Get Motivated
+                                </button>
                             </div>
                         </div>
 

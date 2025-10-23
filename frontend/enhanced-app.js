@@ -9,23 +9,69 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing enhanced study planner...');
     initializeAuth();
     loadUserAssessment();
+    
+    // Ensure fallback assessment is visible by default
+    setTimeout(() => {
+        const assessmentContainer = document.getElementById('user-assessment-container');
+        const fallback = document.getElementById('fallback-assessment');
+        
+        if (assessmentContainer && fallback && assessmentContainer.innerHTML.trim() === '') {
+            console.log('Showing fallback assessment by default...');
+            fallback.style.display = 'block';
+        }
+    }, 1000);
 });
 
 // Load user assessment HTML into the container
 async function loadUserAssessment() {
     try {
+        console.log('Loading user assessment...');
         const response = await fetch('user-assessment.html');
         const html = await response.text();
-        document.getElementById('user-assessment-container').innerHTML = html;
+        const container = document.getElementById('user-assessment-container');
         
-        // Initialize user assessment after loading
-        if (window.userAssessment && typeof window.userAssessment.initialize === 'function') {
-            window.userAssessment.initialize();
+        if (container) {
+            container.innerHTML = html;
+            container.style.display = 'block'; // Ensure it's visible
+            console.log('User assessment loaded successfully');
+            
+            // Initialize user assessment after loading
+            setTimeout(() => {
+                if (window.userAssessment && typeof window.userAssessment.initialize === 'function') {
+                    window.userAssessment.initialize();
+                } else if (typeof initializeAssessment === 'function') {
+                    initializeAssessment();
+                }
+                console.log('User assessment initialized');
+            }, 100);
+        } else {
+            console.error('User assessment container not found');
         }
     } catch (error) {
         console.error('Error loading user assessment:', error);
-        // Fallback: Hide the container if loading fails
-        document.getElementById('user-assessment-container').style.display = 'none';
+        // Show the fallback assessment instead of hiding
+        const container = document.getElementById('user-assessment-container');
+        const fallback = document.getElementById('fallback-assessment');
+        
+        if (container && fallback) {
+            // Hide any existing content and show the fallback
+            container.innerHTML = '';
+            fallback.style.display = 'block';
+            console.log('Showing fallback user assessment');
+        } else {
+            // Ultimate fallback - show a simple message
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                        <p>User assessment is loading...</p>
+                        <button onclick="loadUserAssessment()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                            Retry Loading Assessment
+                        </button>
+                    </div>
+                `;
+            }
+        }
     }
 }
 
@@ -183,6 +229,24 @@ function switchTab(tabName) {
         selectedTab.classList.add('active');
         selectedContent.classList.add('active');
         console.log('Tab switched successfully to:', tabName);
+        
+        // Special handling for advanced planner tab
+        if (tabName === 'advanced') {
+            console.log('Advanced planner tab selected, ensuring user assessment is loaded...');
+            // Check if user assessment is already loaded
+            const assessmentContainer = document.getElementById('user-assessment-container');
+            const fallback = document.getElementById('fallback-assessment');
+            
+            if (assessmentContainer && assessmentContainer.innerHTML.trim() === '') {
+                console.log('User assessment not loaded, loading now...');
+                loadUserAssessment();
+            } else if (fallback && fallback.style.display === 'none') {
+                console.log('Showing fallback user assessment...');
+                fallback.style.display = 'block';
+            } else {
+                console.log('User assessment already loaded');
+            }
+        }
     } else {
         console.error('Tab switching failed for:', tabName);
     }
@@ -933,15 +997,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// PROGRESS TRACKER SYSTEM
+// ENHANCED PROGRESS TRACKER SYSTEM
 // ============================================
 
 let progressData = {
     currentPlan: null,
+    studyPlans: [], // Support for multiple plans
     dailyProgress: {},
+    studyLog: {}, // Detailed study log with hours and subjects
     streak: 0,
     achievements: [],
-    startDate: null
+    startDate: null,
+    todaysPlan: null, // Today's specific plan
+    studySession: null // Current study session
 };
 
 function initializeProgressTracker() {
@@ -992,7 +1060,7 @@ function saveProgressData() {
 function updateCurrentPlan(studyPlan) {
     if (!studyPlan) return;
     
-    progressData.currentPlan = {
+    const planData = {
         subject: studyPlan.subject,
         dailyHours: studyPlan.daily_hours,
         totalHours: studyPlan.total_hours,
@@ -1000,9 +1068,23 @@ function updateCurrentPlan(studyPlan) {
         startDate: new Date().toISOString().split('T')[0]
     };
     
+    // Set as current plan
+    progressData.currentPlan = planData;
+    
+    // Add to study plans if not already exists
+    const existingPlanIndex = progressData.studyPlans.findIndex(plan => 
+        plan.subject === studyPlan.subject && plan.startDate === planData.startDate
+    );
+    
+    if (existingPlanIndex === -1) {
+        progressData.studyPlans.push(planData);
+    } else {
+        progressData.studyPlans[existingPlanIndex] = planData;
+    }
+    
     // Initialize daily progress if starting new plan
     if (!progressData.startDate) {
-        progressData.startDate = progressData.currentPlan.startDate;
+        progressData.startDate = planData.startDate;
         progressData.dailyProgress = {};
     }
     
@@ -1010,6 +1092,7 @@ function updateCurrentPlan(studyPlan) {
     refreshProgressDisplay();
     
     console.log('Updated current plan:', progressData.currentPlan);
+    console.log('All study plans:', progressData.studyPlans);
 }
 
 function refreshProgressDisplay() {
@@ -1018,6 +1101,10 @@ function refreshProgressDisplay() {
     generateDailyGrid();
     updateStreakDisplay();
     updateAchievements();
+    updateStudyPlansDisplay();
+    updateStudyLogInsights();
+    updateUpcomingAchievements();
+    displayTodaysPlan();
 }
 
 function updateCurrentPlanInfo() {
@@ -1085,33 +1172,37 @@ function updateOverallProgress() {
 
 function generateDailyGrid() {
     const dailyGrid = document.getElementById('dailyGrid');
-    if (!dailyGrid || !progressData.currentPlan) return;
+    if (!dailyGrid) return;
     
-    const startDate = new Date(progressData.startDate);
-    const totalDays = Math.ceil(progressData.currentPlan.totalHours / progressData.currentPlan.dailyHours);
     const today = new Date();
+    const currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - today.getDay()); // Start of current week (Sunday)
     
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let gridHTML = '';
     
-    for (let i = 0; i < totalDays; i++) {
-        const currentDate = new Date(startDate);
-        currentDate.setDate(startDate.getDate() + i);
+    // Generate 7-day week view
+    for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(currentWeekStart);
+        currentDate.setDate(currentWeekStart.getDate() + i);
         const dateStr = currentDate.toISOString().split('T')[0];
-        const dayNum = i + 1;
+        const dayName = dayNames[i];
         
         const isToday = dateStr === today.toISOString().split('T')[0];
         const isCompleted = progressData.dailyProgress[dateStr] === true;
-        const isPast = currentDate < today && !isToday;
+        const hasStudyData = progressData.studyLog[dateStr];
         
-        const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const studyHours = hasStudyData ? progressData.studyLog[dateStr].hours : 0;
+        const studySubjects = hasStudyData ? progressData.studyLog[dateStr].subjects : [];
         
         gridHTML += `
             <div class="day-box ${isCompleted ? 'completed' : ''} ${isToday ? 'today' : ''}" 
                  onclick="toggleDayCompletion('${dateStr}')" 
-                 title="${dayName}, ${currentDate.toLocaleDateString()}">
-                <div class="day-number">Day ${dayNum}</div>
+                 title="${dayName}, ${currentDate.toLocaleDateString()}${studyHours > 0 ? ` - Studied ${studyHours}h` : ''}">
+                <div class="day-number">${currentDate.getDate()}</div>
                 <div class="day-label">${dayName}</div>
                 ${isCompleted ? '<div class="completion-indicator">✅</div>' : ''}
+                ${studyHours > 0 ? `<div style="font-size: 0.7rem; margin-top: 0.25rem; color: #10b981;">${studyHours}h</div>` : ''}
             </div>
         `;
     }
@@ -1383,6 +1474,509 @@ function resetProgress() {
 // Hook into study plan generation to update progress
 function updateProgressWithNewPlan(studyPlan) {
     updateCurrentPlan(studyPlan);
+    generateTodaysPlan(studyPlan);
+}
+
+// ============================================
+// TODAY'S PLAN FUNCTIONALITY
+// ============================================
+
+function generateTodaysPlan(studyPlan) {
+    if (!studyPlan || !studyPlan.schedule) return;
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Find today's schedule
+    const todaysSchedule = studyPlan.schedule.find(day => {
+        const dayDate = new Date(day.date);
+        return dayDate.toISOString().split('T')[0] === todayStr;
+    });
+    
+    if (!todaysSchedule) {
+        // If no specific day found, use the first day
+        todaysSchedule = studyPlan.schedule[0];
+    }
+    
+    progressData.todaysPlan = {
+        goal: `Study ${studyPlan.subject} for ${todaysSchedule.hours} hours`,
+        tasks: todaysSchedule.topics ? todaysSchedule.topics.map(topic => ({
+            text: `${topic.topic} (${topic.hours}h)`,
+            completed: false
+        })) : [
+            { text: `Review ${studyPlan.subject} fundamentals`, completed: false },
+            { text: `Practice exercises for ${todaysSchedule.hours}h`, completed: false },
+            { text: `Take notes and summarize key concepts`, completed: false }
+        ],
+        hours: todaysSchedule.hours,
+        subject: studyPlan.subject
+    };
+    
+    displayTodaysPlan();
+    saveProgressData();
+}
+
+function displayTodaysPlan() {
+    const todaysPlanCard = document.getElementById('todaysPlanCard');
+    const todaysGoalText = document.getElementById('todaysGoalText');
+    const taskList = document.getElementById('taskList');
+    const todaysPlanStatus = document.getElementById('todaysPlanStatus');
+    
+    if (!todaysPlanCard || !progressData.todaysPlan) return;
+    
+    todaysPlanCard.style.display = 'block';
+    
+    // Update goal
+    if (todaysGoalText) {
+        todaysGoalText.textContent = progressData.todaysPlan.goal;
+    }
+    
+    // Update tasks
+    if (taskList) {
+        taskList.innerHTML = progressData.todaysPlan.tasks.map((task, index) => `
+            <li>
+                <div class="task-checkbox ${task.completed ? 'checked' : ''}" 
+                     onclick="toggleTask(${index})"></div>
+                <span class="task-text ${task.completed ? 'completed' : ''}">${task.text}</span>
+            </li>
+        `).join('');
+    }
+    
+    // Update status
+    const completedTasks = progressData.todaysPlan.tasks.filter(task => task.completed).length;
+    const totalTasks = progressData.todaysPlan.tasks.length;
+    
+    if (todaysPlanStatus) {
+        if (completedTasks === totalTasks) {
+            todaysPlanStatus.innerHTML = '<span class="status-badge completed">Completed</span>';
+        } else if (completedTasks > 0) {
+            todaysPlanStatus.innerHTML = '<span class="status-badge in-progress">In Progress</span>';
+        } else {
+            todaysPlanStatus.innerHTML = '<span class="status-badge pending">Ready to Start</span>';
+        }
+    }
+}
+
+function toggleTask(taskIndex) {
+    if (!progressData.todaysPlan || !progressData.todaysPlan.tasks[taskIndex]) return;
+    
+    progressData.todaysPlan.tasks[taskIndex].completed = !progressData.todaysPlan.tasks[taskIndex].completed;
+    
+    displayTodaysPlan();
+    saveProgressData();
+    
+    // Check if all tasks completed
+    const allCompleted = progressData.todaysPlan.tasks.every(task => task.completed);
+    if (allCompleted) {
+        showCelebration('🎉 Day Complete!', 'You finished all your tasks for today!');
+        markTodayComplete();
+    }
+}
+
+function startStudySession() {
+    if (!progressData.todaysPlan) return;
+    
+    progressData.studySession = {
+        startTime: new Date(),
+        subject: progressData.todaysPlan.subject,
+        tasks: [...progressData.todaysPlan.tasks]
+    };
+    
+    // Update UI
+    const startBtn = document.getElementById('startStudyBtn');
+    const logBtn = document.getElementById('logSessionBtn');
+    
+    if (startBtn) startBtn.style.display = 'none';
+    if (logBtn) logBtn.style.display = 'flex';
+    
+    // Start timer (optional - could add a visual timer)
+    console.log('Study session started:', progressData.studySession);
+}
+
+function logStudySession() {
+    if (!progressData.studySession) {
+        // Manual logging
+        const hours = prompt('How many hours did you study today?', '2');
+        if (hours && !isNaN(hours)) {
+            logStudyHours(parseFloat(hours), progressData.currentPlan?.subject || 'General');
+        }
+        return;
+    }
+    
+    const endTime = new Date();
+    const duration = (endTime - progressData.studySession.startTime) / (1000 * 60 * 60); // hours
+    
+    logStudyHours(duration, progressData.studySession.subject);
+    
+    // Reset session
+    progressData.studySession = null;
+    
+    // Update UI
+    const startBtn = document.getElementById('startStudyBtn');
+    const logBtn = document.getElementById('logSessionBtn');
+    
+    if (startBtn) startBtn.style.display = 'flex';
+    if (logBtn) logBtn.style.display = 'none';
+}
+
+function logStudyHours(hours, subject) {
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (!progressData.studyLog[today]) {
+        progressData.studyLog[today] = { hours: 0, subjects: [] };
+    }
+    
+    progressData.studyLog[today].hours += hours;
+    if (!progressData.studyLog[today].subjects.includes(subject)) {
+        progressData.studyLog[today].subjects.push(subject);
+    }
+    
+    // Mark day as completed
+    progressData.dailyProgress[today] = true;
+    
+    saveProgressData();
+    refreshProgressDisplay();
+    updateStudyLogInsights();
+    
+    showCelebration('📚 Study Logged!', `Great job studying ${subject} for ${hours.toFixed(1)} hours!`);
+}
+
+// ============================================
+// MULTIPLE STUDY PLANS SUPPORT
+// ============================================
+
+function updateStudyPlansDisplay() {
+    const studyPlansGrid = document.getElementById('studyPlansGrid');
+    if (!studyPlansGrid) return;
+    
+    if (progressData.studyPlans.length === 0) {
+        studyPlansGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #6b7280;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+                <p>Create a study plan to start tracking your progress!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    studyPlansGrid.innerHTML = progressData.studyPlans.map((plan, index) => `
+        <div class="study-plan-card">
+            <div class="study-plan-header">
+                <h4 class="study-plan-title">${plan.subject}</h4>
+                <div class="study-plan-progress">
+                    <div class="study-plan-percentage">${calculatePlanProgress(plan)}%</div>
+                </div>
+            </div>
+            <div class="study-plan-details">
+                ${plan.dailyHours}h/day • ${plan.totalHours}h total • ${plan.difficulty}
+            </div>
+            <div class="study-plan-actions">
+                <button class="view-details-btn" onclick="viewPlanDetails(${index})">
+                    <i class="fas fa-eye"></i> View Details
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function calculatePlanProgress(plan) {
+    if (!plan.startDate) return 0;
+    
+    const startDate = new Date(plan.startDate);
+    const today = new Date();
+    const totalDays = Math.ceil(plan.totalHours / plan.dailyHours);
+    const daysPassed = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+    const completedDays = Object.values(progressData.dailyProgress).filter(Boolean).length;
+    
+    return Math.min(Math.round((completedDays / totalDays) * 100), 100);
+}
+
+function viewPlanDetails(planIndex) {
+    const plan = progressData.studyPlans[planIndex];
+    if (!plan) return;
+    
+    // This could open a detailed modal or navigate to a detailed view
+    alert(`Plan Details:\nSubject: ${plan.subject}\nProgress: ${calculatePlanProgress(plan)}%\nDaily Hours: ${plan.dailyHours}h\nTotal Hours: ${plan.totalHours}h`);
+}
+
+// ============================================
+// STUDY LOG & INSIGHTS
+// ============================================
+
+function updateStudyLogInsights() {
+    const studyLogSection = document.getElementById('studyLogSection');
+    const weeklyHours = document.getElementById('weeklyHours');
+    const mostStudiedTopic = document.getElementById('mostStudiedTopic');
+    const averageSession = document.getElementById('averageSession');
+    
+    if (!studyLogSection) return;
+    
+    // Show section if there's study data
+    const hasStudyData = Object.keys(progressData.studyLog).length > 0;
+    studyLogSection.style.display = hasStudyData ? 'block' : 'none';
+    
+    if (!hasStudyData) return;
+    
+    // Calculate weekly stats
+    const weekStats = calculateWeeklyStats();
+    
+    if (weeklyHours) {
+        weeklyHours.textContent = `${weekStats.totalHours}h`;
+    }
+    
+    if (mostStudiedTopic) {
+        mostStudiedTopic.textContent = weekStats.mostStudiedSubject || '-';
+    }
+    
+    if (averageSession) {
+        averageSession.textContent = `${weekStats.averageSession.toFixed(1)}h`;
+    }
+    
+    // Update calendar
+    generateStudyCalendar();
+}
+
+function calculateWeeklyStats() {
+    const today = new Date();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    
+    let totalHours = 0;
+    let sessionCount = 0;
+    const subjectCounts = {};
+    
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        if (progressData.studyLog[dateStr]) {
+            totalHours += progressData.studyLog[dateStr].hours;
+            sessionCount++;
+            
+            progressData.studyLog[dateStr].subjects.forEach(subject => {
+                subjectCounts[subject] = (subjectCounts[subject] || 0) + 1;
+            });
+        }
+    }
+    
+    const mostStudiedSubject = Object.keys(subjectCounts).reduce((a, b) => 
+        subjectCounts[a] > subjectCounts[b] ? a : b, null);
+    
+    return {
+        totalHours,
+        sessionCount,
+        averageSession: sessionCount > 0 ? totalHours / sessionCount : 0,
+        mostStudiedSubject
+    };
+}
+
+function generateStudyCalendar() {
+    const calendarContainer = document.getElementById('calendarContainer');
+    if (!calendarContainer) return;
+    
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDay = firstDay.getDay();
+    
+    // Generate calendar HTML
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    let calendarHTML = '<div class="calendar-grid">';
+    
+    // Add day headers
+    dayHeaders.forEach(day => {
+        calendarHTML += `<div class="calendar-day-header">${day}</div>`;
+    });
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startDay; i++) {
+        calendarHTML += '<div class="calendar-day"></div>';
+    }
+    
+    // Add days of month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateStr = date.toISOString().split('T')[0];
+        const isToday = dateStr === today.toISOString().split('T')[0];
+        const hasStudied = progressData.studyLog[dateStr];
+        
+        calendarHTML += `
+            <div class="calendar-day ${hasStudied ? 'studied' : ''} ${isToday ? 'today' : ''}" 
+                 onclick="showDayDetails('${dateStr}')" 
+                 title="${isToday ? 'Today' : ''} ${hasStudied ? `Studied ${progressData.studyLog[dateStr].hours}h` : ''}">
+                ${day}
+            </div>
+        `;
+    }
+    
+    calendarHTML += '</div>';
+    calendarContainer.innerHTML = calendarHTML;
+}
+
+function showDayDetails(dateStr) {
+    const studyData = progressData.studyLog[dateStr];
+    if (!studyData) {
+        alert(`No study data for ${dateStr}`);
+        return;
+    }
+    
+    const subjects = studyData.subjects.join(', ');
+    alert(`Study Session on ${dateStr}:\nHours: ${studyData.hours}h\nSubjects: ${subjects}`);
+}
+
+// ============================================
+// ENHANCED ACHIEVEMENTS & MOTIVATION
+// ============================================
+
+function updateUpcomingAchievements() {
+    const nextAchievement = document.getElementById('nextAchievement');
+    if (!nextAchievement) return;
+    
+    const upcomingAchievements = [
+        { id: 'first-day', name: 'First Day', desc: 'Complete your first study session', progress: 0, total: 1 },
+        { id: 'three-streak', name: 'Hot Streak', desc: 'Study for 3 days in a row', progress: calculateStreak(), total: 3 },
+        { id: 'week-warrior', name: 'Week Warrior', desc: 'Complete a full week', progress: Object.values(progressData.dailyProgress).filter(Boolean).length, total: 7 },
+        { id: 'month-master', name: 'Month Master', desc: 'Study for 30 days straight', progress: calculateStreak(), total: 30 }
+    ];
+    
+    // Find next unachieved goal
+    const nextGoal = upcomingAchievements.find(goal => 
+        !progressData.achievements.includes(goal.id) && goal.progress < goal.total
+    );
+    
+    if (nextGoal) {
+        const progressPercent = Math.min((nextGoal.progress / nextGoal.total) * 100, 100);
+        
+        nextAchievement.innerHTML = `
+            <div class="achievement-icon">${getAchievementIcon(nextGoal.id)}</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 0.25rem;">${nextGoal.name}</div>
+                <div style="font-size: 0.875rem; color: #6b7280;">${nextGoal.desc}</div>
+            </div>
+            <div style="width: 100px;">
+                <div class="upcoming-progress">
+                    <div class="upcoming-progress-bar" style="width: ${progressPercent}%"></div>
+                </div>
+                <div style="font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 0.25rem;">
+                    ${nextGoal.progress}/${nextGoal.total}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function getAchievementIcon(achievementId) {
+    const icons = {
+        'first-day': '🎯',
+        'three-streak': '🔥',
+        'week-warrior': '⚡',
+        'month-master': '👑',
+        'perfect-week': '💎',
+        'speed-learner': '⚡'
+    };
+    return icons[achievementId] || '🏆';
+}
+
+function getQuickMotivation() {
+    // Switch to motivation tab and trigger motivation
+    switchTab('motivation');
+    
+    // Auto-fill motivation input with common stuck scenarios
+    const motivationInput = document.getElementById('currentMood');
+    if (motivationInput) {
+        const stuckScenarios = [
+            "I'm feeling overwhelmed with my studies and need some motivation",
+            "I'm struggling to stay focused and could use some encouragement",
+            "I feel like I'm not making progress and need a boost",
+            "I'm having trouble staying motivated to study"
+        ];
+        
+        const randomScenario = stuckScenarios[Math.floor(Math.random() * stuckScenarios.length)];
+        motivationInput.value = randomScenario;
+        
+        // Auto-trigger motivation after a short delay
+        setTimeout(() => {
+            getMotivation();
+        }, 1000);
+    }
+}
+
+// ============================================
+// ENHANCED STREAK COUNTER
+// ============================================
+
+function updateStreakDisplay() {
+    const streak = calculateStreak();
+    progressData.streak = streak;
+    
+    const streakNumber = document.getElementById('streakNumber');
+    const streakMessage = document.getElementById('streakMessage');
+    
+    if (streakNumber) {
+        streakNumber.textContent = streak;
+    }
+    
+    if (streakMessage) {
+        let message = '';
+        let motivationalMessage = '';
+        
+        if (streak === 0) {
+            message = 'Start your journey!';
+            motivationalMessage = 'Every expert was once a beginner. Start today!';
+        } else if (streak === 1) {
+            message = 'Great start! Keep it up!';
+            motivationalMessage = 'You\'re building momentum! Keep the flame alive!';
+        } else if (streak < 7) {
+            message = `${streak} days strong! 🔥`;
+            motivationalMessage = 'Great job! You\'re developing a habit!';
+        } else if (streak < 30) {
+            message = `Amazing ${streak}-day streak! 🌟`;
+            motivationalMessage = 'You\'re on fire! This is impressive dedication!';
+        } else {
+            message = `Legendary ${streak}-day streak! 👑`;
+            motivationalMessage = 'You\'re a study legend! Keep inspiring others!';
+        }
+        
+        streakMessage.innerHTML = `
+            <div>${message}</div>
+            <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.25rem;">${motivationalMessage}</div>
+        `;
+    }
+    
+    saveProgressData();
+}
+
+// ============================================
+// ENHANCED PROGRESS TRACKER FUNCTIONS
+// ============================================
+
+function resetCurrentWeek() {
+    if (confirm('Are you sure you want to reset your current week\'s progress? This will clear all progress for this week.')) {
+        const today = new Date();
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        
+        // Clear this week's progress
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + i);
+            const dateStr = date.toISOString().split('T')[0];
+            delete progressData.dailyProgress[dateStr];
+            delete progressData.studyLog[dateStr];
+        }
+        
+        saveProgressData();
+        refreshProgressDisplay();
+        updateStudyLogInsights();
+        
+        alert('Current week\'s progress has been reset!');
+    }
 }
 
 // Add this function at the top of enhanced-app.js for debugging
