@@ -5122,6 +5122,43 @@
                         </div>
                     </div>
                 `;
+            }
+            
+            // Build the complete results HTML with roadmap
+            resultsDiv.innerHTML = `
+                <div class="results">
+                    <div class="results-header">
+                        <h3>🎯 Your Personalized ${planData.subject} Study Plan</h3>
+                    </div>
+                    <div class="results-content">
+                        <div class="plan-overview">
+                            <div class="plan-stat">
+                                <div class="plan-stat-value">${planData.subject}</div>
+                                <div class="plan-stat-label">Subject</div>
+                            </div>
+                            <div class="plan-stat">
+                                <div class="plan-stat-value">${planData.totalDays}</div>
+                                <div class="plan-stat-label">Total Days</div>
+                            </div>
+                            <div class="plan-stat">
+                                <div class="plan-stat-value">${planData.dailyHours}h</div>
+                                <div class="plan-stat-label">Daily Hours</div>
+                            </div>
+                            <div class="plan-stat">
+                                <div class="plan-stat-value">${planData.difficulty}</div>
+                                <div class="plan-stat-label">Level</div>
+                            </div>
+                        </div>
+                        
+                        <div class="schedule-roadmap-container">
+                            <div class="schedule-roadmap">
+                                <div class="roadmap-path"></div>
+                                ${scheduleHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
             
             // Attach event listeners to roadmap nodes after rendering
             setTimeout(() => {
