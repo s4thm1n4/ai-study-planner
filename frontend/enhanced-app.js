@@ -543,9 +543,11 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                             <div class="timeline-status">
                                 <input type="checkbox" 
                                        class="timeline-checkbox" 
-                                       onchange="toggleDayCompletion(${day.day}, this.checked)"
+                                       id="checkbox-day-${day.day}"
+                                       data-day="${day.day}"
+                                       onchange="toggleRoadmapDayCompletion(${day.day})"
                                        title="Mark as complete">
-                                <span class="status-badge ${status}">
+                                <span class="status-badge ${status}" id="status-day-${day.day}">
                                     ${status === 'completed' ? '✓ Done' : status === 'in-progress' ? '⏳ In Progress' : '⭕ Pending'}
                                 </span>
                             </div>
@@ -755,32 +757,179 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
     updateProgressWithNewPlan(plan);
 }
 
+// Simple function to toggle roadmap day completion
+function toggleRoadmapDayCompletion(dayNumber) {
+    console.log(`[COMPLETION] ========================================`);
+    console.log(`[COMPLETION] Toggle completion for Day ${dayNumber}`);
+    
+    const checkbox = document.getElementById(`checkbox-day-${dayNumber}`);
+    const statusBadge = document.getElementById(`status-day-${dayNumber}`);
+    const roadmapNode = document.querySelector(`[data-day="${dayNumber}"]`);
+    
+    console.log(`[COMPLETION] Checkbox: ${checkbox ? 'Found' : 'NOT FOUND'}`);
+    console.log(`[COMPLETION] Status Badge: ${statusBadge ? 'Found' : 'NOT FOUND'}`);
+    console.log(`[COMPLETION] Roadmap Node: ${roadmapNode ? 'Found' : 'NOT FOUND'}`);
+    
+    if (!checkbox || !statusBadge || !roadmapNode) {
+        console.error('[COMPLETION] ❌ Missing required elements!');
+        return;
+    }
+    
+    const isChecked = checkbox.checked;
+    console.log(`[COMPLETION] Checkbox is: ${isChecked ? 'CHECKED' : 'UNCHECKED'}`);
+    
+    if (isChecked) {
+        // Mark as completed
+        console.log('[COMPLETION] ✅ Marking as COMPLETED');
+        roadmapNode.classList.remove('not-started', 'in-progress');
+        roadmapNode.classList.add('completed');
+        
+        statusBadge.className = 'status-badge completed';
+        statusBadge.innerHTML = '✓ Done';
+        
+        // Update marker
+        const marker = roadmapNode.querySelector('.roadmap-marker');
+        if (marker) {
+            marker.innerHTML = '✓';
+            marker.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            marker.style.color = 'white';
+        }
+        
+        // Show celebration
+        showMiniCelebration(dayNumber);
+    } else {
+        // Mark as not started
+        console.log('[COMPLETION] ⭕ Marking as NOT STARTED');
+        roadmapNode.classList.remove('completed', 'in-progress');
+        roadmapNode.classList.add('not-started');
+        
+        statusBadge.className = 'status-badge not-started';
+        statusBadge.innerHTML = '⭕ Pending';
+        
+        // Restore original emoji
+        const emoji = roadmapNode.getAttribute('data-emoji');
+        const marker = roadmapNode.querySelector('.roadmap-marker');
+        if (marker && emoji) {
+            marker.innerHTML = emoji;
+            marker.style.background = '';
+            marker.style.color = '';
+        }
+    }
+    
+    console.log(`[COMPLETION] ========================================`);
+}
+
+// Mini celebration effect
+function showMiniCelebration(dayNumber) {
+    const roadmapNode = document.querySelector(`[data-day="${dayNumber}"]`);
+    if (!roadmapNode) return;
+    
+    // Add celebration class
+    roadmapNode.style.animation = 'celebrationBounce 0.6s ease-out';
+    
+    // Create confetti burst
+    const confettiColors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+    const card = roadmapNode.querySelector('.roadmap-card');
+    
+    if (card) {
+        for (let i = 0; i < 10; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'absolute';
+            confetti.style.width = '8px';
+            confetti.style.height = '8px';
+            confetti.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+            confetti.style.borderRadius = '50%';
+            confetti.style.left = '50%';
+            confetti.style.top = '50%';
+            confetti.style.pointerEvents = 'none';
+            confetti.style.zIndex = '9999';
+            
+            const angle = (Math.PI * 2 * i) / 10;
+            const velocity = 50 + Math.random() * 50;
+            const vx = Math.cos(angle) * velocity;
+            const vy = Math.sin(angle) * velocity;
+            
+            confetti.style.animation = `confettiBurst 0.8s ease-out forwards`;
+            confetti.style.setProperty('--vx', vx + 'px');
+            confetti.style.setProperty('--vy', vy + 'px');
+            
+            card.style.position = 'relative';
+            card.appendChild(confetti);
+            
+            setTimeout(() => confetti.remove(), 800);
+        }
+    }
+    
+    // Reset animation
+    setTimeout(() => {
+        roadmapNode.style.animation = '';
+    }, 600);
+}
+
 // Attach click listeners to roadmap nodes
 function attachRoadmapEventListeners() {
+    console.log('[ROADMAP DEBUG] ========================================');
+    console.log('[ROADMAP DEBUG] attachRoadmapEventListeners() called');
+    
     const roadmapNodes = document.querySelectorAll('.roadmap-node');
-    roadmapNodes.forEach(node => {
+    console.log(`[ROADMAP DEBUG] Found ${roadmapNodes.length} roadmap nodes`);
+    
+    roadmapNodes.forEach((node, index) => {
         const dayNumber = parseInt(node.getAttribute('data-day'));
         const topicName = node.getAttribute('data-topic');
         const resourcesJson = node.getAttribute('data-resources');
         
-        const clickHandler = (e) => {
-            // Don't trigger if clicking checkbox
-            if (e.target.classList.contains('timeline-checkbox')) {
-                return;
-            }
-            if (resourcesJson) {
-                const resources = JSON.parse(resourcesJson);
-                openResourcePopup(dayNumber, topicName, resources);
-            }
-        };
-
-        // Add listener to the whole card
-        const card = node.querySelector('.roadmap-card');
-        if (card) {
-            card.addEventListener('click', clickHandler);
-            card.style.cursor = 'pointer';
+        console.log(`[ROADMAP DEBUG] Node ${index + 1}: Day ${dayNumber}, Topic: ${topicName}`);
+        
+        // Find the "View Resources" button within this node
+        const viewResourcesBtn = node.querySelector('.view-resources-btn');
+        console.log(`[ROADMAP DEBUG] View Resources button found: ${!!viewResourcesBtn}`);
+        
+        if (viewResourcesBtn) {
+            // Remove any existing click listeners (prevent duplicates)
+            const newBtn = viewResourcesBtn.cloneNode(true);
+            viewResourcesBtn.parentNode.replaceChild(newBtn, viewResourcesBtn);
+            
+            console.log(`[ROADMAP DEBUG] ✅ Added click listener to Day ${dayNumber} button`);
+            
+            // Add click listener to the button only
+            newBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                
+                console.log('╔════════════════════════════════════════════════════╗');
+                console.log(`║ 🔍 VIEW RESOURCES CLICKED - Day ${dayNumber}`);
+                console.log(`║ Topic: ${topicName}`);
+                console.log('╚════════════════════════════════════════════════════╝');
+                
+                // Parse fallback resources for API failure case
+                let fallbackResources = [];
+                try {
+                    if (resourcesJson) {
+                        fallbackResources = JSON.parse(resourcesJson);
+                        console.log(`[ROADMAP] Parsed ${fallbackResources.length} fallback resources`);
+                    }
+                } catch (error) {
+                    console.error('[ROADMAP ERROR] Error parsing resources JSON:', error);
+                }
+                
+                // Call the popup function (which will fetch from API)
+                console.log('[ROADMAP] Calling openResourcePopup()...');
+                openResourcePopup(dayNumber, topicName, fallbackResources);
+            });
+            
+            // Make button look clickable
+            newBtn.style.cursor = 'pointer';
+            
+            // Visual feedback on hover
+            newBtn.addEventListener('mouseenter', () => {
+                console.log(`[ROADMAP] Mouse hovering over Day ${dayNumber} button`);
+            });
+        } else {
+            console.warn(`[ROADMAP WARN] ❌ No view-resources-btn found for Day ${dayNumber}`);
         }
     });
+    
+    console.log('[ROADMAP DEBUG] ========================================');
 }
 
 // Find Resources
@@ -1368,45 +1517,325 @@ function generateDailyGrid() {
     dailyGrid.innerHTML = gridHTML;
 }
 
-// ===== ROADMAP RESOURCE POPUP FUNCTIONS =====
+// ===== ROADMAP RESOURCE SIDE PANEL FUNCTIONS =====
 
-function openResourcePopup(dayNumber, topicName, resources) {
-    // Create overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'resource-popup-overlay';
-    overlay.onclick = closeResourcePopup;
+async function openResourcePopup(dayNumber, topicName, fallbackResources) {
+    console.log('╔════════════════════════════════════════════════════╗');
+    console.log('║           OPENING RESOURCE SIDE PANEL              ║');
+    console.log('╠════════════════════════════════════════════════════╣');
+    console.log(`║ Day Number: ${dayNumber}`);
+    console.log(`║ Topic: ${topicName}`);
+    console.log(`║ Fallback Resources: ${fallbackResources ? fallbackResources.length : 0}`);
+    console.log('╚════════════════════════════════════════════════════╝');
     
-    // Create flashcard
-    const flashcard = document.createElement('div');
-    flashcard.className = 'resource-flashcard';
-    flashcard.onclick = (e) => e.stopPropagation(); // Prevent closing when clicking inside
+    // Close any existing panel
+    closeResourcePopup();
     
-    // Generate resource items HTML
-    const resourceItemsHtml = resources.map((resource, index) => `
-        <div class="resource-item-flashcard" style="animation-delay: ${0.1 + index * 0.1}s">
-            <div class="resource-flashcard-icon">${resource.icon}</div>
-            <div class="resource-flashcard-content">
-                <h4>${resource.title}</h4>
-                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
-                    <span class="resource-type-badge">${resource.type}</span>
-                    <span style="color: #6b7280; font-size: 0.875rem;">⏱️ ${resource.duration}</span>
-                </div>
+    // Create side panel
+    const sidePanel = document.createElement('div');
+    sidePanel.className = 'resource-side-panel';
+    sidePanel.id = 'resource-side-panel';
+    
+    // Show loading state initially
+    sidePanel.innerHTML = `
+        <div class="side-panel-header">
+            <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem;">📚</span>
+                    Day ${dayNumber} Resources
+                </h3>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem;">${topicName}</p>
             </div>
-            <button class="resource-action-btn" onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(resource.title)}', '_blank')">
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.5rem;">
-                    <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-                    <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+            <button class="side-panel-close" onclick="closeResourcePopup()" title="Close">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                 </svg>
-                View Resource
             </button>
         </div>
-    `).join('');
+        <div class="side-panel-body" style="text-align: center; padding: 3rem 1rem;">
+            <div class="loading-spinner" style="margin: 0 auto 1rem;">
+                <div class="spinner"></div>
+            </div>
+            <p style="color: #6b7280; font-size: 0.9rem;">🔍 Searching IR system for best resources...</p>
+        </div>
+    `;
     
+    document.body.appendChild(sidePanel);
+    
+    console.log('[SIDE PANEL] Panel created and added to DOM');
+    
+    // Trigger slide-in animation
+    setTimeout(() => {
+        sidePanel.classList.add('open');
+    }, 10);
+    
+    // Fetch resources from IR system API
+    try {
+        console.log(`[API CALL] Fetching resources for: ${topicName}`);
+        console.log(`[API CALL] Making authenticated request to /api/find-resources`);
+        
+        const response = await makeAuthenticatedRequest('/api/find-resources', {
+            method: 'POST',
+            body: JSON.stringify({
+                subject: topicName,
+                resource_type: null,
+                limit: 5
+            })
+        });
+        
+        console.log(`[API RESPONSE] Status: ${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const resources = data.resources || [];
+        
+        console.log(`[API SUCCESS] ✅ Received ${resources.length} resources from API`);
+        console.log('[API SUCCESS] Resources:', resources);
+        console.log('[API DEBUG] Checking for fallback resources...');
+        
+        // Check if these are fallback resources
+        const isFallback = resources.length > 0 && resources[0].id && resources[0].id.startsWith('fallback_');
+        console.log(`[API DEBUG] Is fallback? ${isFallback}`);
+        
+        if (isFallback) {
+            console.warn('[API WARNING] ⚠️ API returned FALLBACK resources, not database matches!');
+            console.warn('[API WARNING] This means the IR system did not find matches in the database.');
+        }
+        
+        // Update side panel with resources
+        displayResourcesInSidePanel(sidePanel, dayNumber, topicName, resources, data.search_feedback, isFallback);
+        
+    } catch (error) {
+        console.error('[API ERROR] ❌ Error fetching resources:', error);
+        console.error('[API ERROR] Stack:', error.stack);
+        
+        // Fallback to static resources if API fails
+        console.log(`[FALLBACK] Using ${fallbackResources.length} static fallback resources`);
+        displayResourcesInSidePanel(sidePanel, dayNumber, topicName, fallbackResources, 'Showing suggested resources (API unavailable)', true);
+    }
+}
+
+function displayResourcesInSidePanel(sidePanel, dayNumber, topicName, resources, feedback, isFallback) {
+    // Generate resource items HTML from API data
+    let resourceItemsHtml = '';
+    
+    if (resources && resources.length > 0) {
+        resourceItemsHtml = resources.map((resource, index) => {
+            const relevanceScore = resource.similarity_score ? Math.round(resource.similarity_score * 100) : 0;
+            const resourceType = resource.resource_type || 'general';
+            const difficulty = resource.difficulty || 'N/A';
+            const url = resource.url || `https://www.google.com/search?q=${encodeURIComponent(topicName)}`;
+            
+            // Get icon based on resource type
+            const iconMap = {
+                'online_course': '📘',
+                'video': '🎥',
+                'video_series': '🎬',
+                'article': '📄',
+                'book': '📚',
+                'tutorial': '🎓',
+                'interactive': '🖱️',
+                'interactive_course': '💻',
+                'documentation': '📋',
+                'podcast': '🎧',
+                'general': '📖'
+            };
+            const icon = iconMap[resourceType] || '📖';
+            
+            // Difficulty colors
+            const difficultyColors = {
+                'beginner': '#10b981',
+                'intermediate': '#f59e0b',
+                'advanced': '#ef4444',
+                'expert': '#8b5cf6'
+            };
+            const difficultyColor = difficultyColors[difficulty.toLowerCase()] || '#6b7280';
+            
+            return `
+                <div class="side-panel-resource-item" style="animation-delay: ${index * 0.05}s">
+                    <div style="display: flex; align-items: start; gap: 1rem;">
+                        <div class="resource-icon-large">${icon}</div>
+                        <div style="flex: 1; min-width: 0;">
+                            <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #1f2937;">
+                                ${resource.title || 'Educational Resource'}
+                            </h4>
+                            <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; color: #6b7280; line-height: 1.5;">
+                                ${resource.description || 'Quality learning resource for ' + topicName}
+                            </p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+                                <span class="resource-badge" style="background: ${difficultyColor}22; color: ${difficultyColor}; border: 1px solid ${difficultyColor}44;">
+                                    ${resourceType.replace('_', ' ')}
+                                </span>
+                                <span class="resource-badge" style="background: ${difficultyColor}22; color: ${difficultyColor}; border: 1px solid ${difficultyColor}44;">
+                                    ${difficulty}
+                                </span>
+                                ${relevanceScore > 0 ? `
+                                    <span style="color: #10b981; font-size: 0.8125rem; font-weight: 600;">
+                                        ✓ ${relevanceScore}% match
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <a href="${url}" target="_blank" class="resource-link-btn">
+                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.375rem;">
+                                    <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                                    <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                                </svg>
+                                Open Resource
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } else {
+        // No resources found
+        resourceItemsHtml = `
+            <div style="text-align: center; padding: 3rem 1rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">🔍</div>
+                <p style="color: #6b7280; font-size: 1rem; margin-bottom: 0.5rem;">No specific resources found for this topic.</p>
+                <p style="color: #9ca3af; font-size: 0.875rem;">Try searching on educational platforms directly.</p>
+            </div>
+        `;
+    }
+    
+    // Warning banner if fallback resources
+    const fallbackWarning = isFallback ? `
+        <div style="background: linear-gradient(135deg, #f59e0b22 0%, #f59e0b11 100%); border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; margin-bottom: 1rem; border-radius: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <span style="font-size: 1.125rem;">⚠️</span>
+                <strong style="color: #92400e; font-size: 0.875rem;">IR System: No Database Matches</strong>
+            </div>
+            <p style="margin: 0; color: #78350f; font-size: 0.8125rem; line-height: 1.4;">
+                The Information Retrieval system couldn't find exact matches in the resource database for "${topicName}". 
+                Showing general educational platform links instead.
+            </p>
+        </div>
+    ` : '';
+    
+    // Update side panel content
+    sidePanel.innerHTML = `
+        <div class="side-panel-header">
+            <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem;">📚</span>
+                    Day ${dayNumber} Resources
+                </h3>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem;">${topicName}</p>
+                ${feedback && !isFallback ? `<p style="margin: 0.5rem 0 0 0; opacity: 0.7; font-size: 0.8125rem; font-style: italic; color: #10b981;">💡 ${feedback}</p>` : ''}
+            </div>
+            <button class="side-panel-close" onclick="closeResourcePopup()" title="Close">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="side-panel-body">
+            ${fallbackWarning}
+            <p style="color: #6b7280; margin-bottom: 1.25rem; font-size: 0.9rem; padding: 0 0.25rem;">
+                ${isFallback ? '🌐 Recommended educational platforms' : '🎯 Top-ranked resources from our IR system'}
+            </p>
+            <div class="side-panel-resources-list">
+                ${resourceItemsHtml}
+            </div>
+            <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                <p style="color: #9ca3af; font-size: 0.8125rem; margin: 0; line-height: 1.5;">
+                    ${isFallback ? '💡 Tip: These are search links to popular learning platforms' : '💡 Tip: Resources ranked by relevance using TF-IDF and cosine similarity'}
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+function closeResourcePopup() {
+    // Close side panel
+    const sidePanel = document.getElementById('resource-side-panel');
+    if (sidePanel) {
+        sidePanel.classList.remove('open');
+        setTimeout(() => {
+            sidePanel.remove();
+        }, 300);
+    }
+    
+    // Legacy: also close old popup overlay if exists
+    const overlay = document.querySelector('.resource-popup-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+        }, 300);
+    }
+}
+    // Generate resource items HTML from API data
+    let resourceItemsHtml = '';
+    
+    if (resources && resources.length > 0) {
+        resourceItemsHtml = resources.map((resource, index) => {
+            const relevanceScore = resource.similarity_score ? Math.round(resource.similarity_score * 100) : 0;
+            const resourceType = resource.resource_type || 'general';
+            const difficulty = resource.difficulty || 'N/A';
+            const url = resource.url || `https://www.google.com/search?q=${encodeURIComponent(topicName)}`;
+            
+            // Get icon based on resource type
+            const iconMap = {
+                'online_course': '📘',
+                'video': '🎥',
+                'article': '📄',
+                'book': '📚',
+                'tutorial': '🎓',
+                'interactive': '🖱️',
+                'documentation': '📋',
+                'podcast': '🎧',
+                'general': '📖'
+            };
+            const icon = iconMap[resourceType] || '📖';
+            
+            return `
+                <div class="resource-item-flashcard" style="animation-delay: ${0.1 + index * 0.1}s">
+                    <div class="resource-flashcard-icon">${icon}</div>
+                    <div class="resource-flashcard-content">
+                        <h4>${resource.title || 'Educational Resource'}</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0.5rem 0;">
+                            ${resource.description || 'Quality learning resource for ' + topicName}
+                        </p>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
+                            <span class="resource-type-badge">${resourceType.replace('_', ' ')}</span>
+                            <span class="resource-type-badge" style="background: ${difficulty === 'beginner' ? '#10b981' : difficulty === 'intermediate' ? '#f59e0b' : '#ef4444'}33;">
+                                ${difficulty}
+                            </span>
+                            ${relevanceScore > 0 ? `<span style="color: #10b981; font-size: 0.875rem;">✓ ${relevanceScore}% match</span>` : ''}
+                        </div>
+                    </div>
+                    <button class="resource-action-btn" onclick="window.open('${url}', '_blank')">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.5rem;">
+                            <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                            <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                        </svg>
+                        View Resource
+                    </button>
+                </div>
+            `;
+        }).join('');
+    } else {
+        // No resources found
+        resourceItemsHtml = `
+            <div style="text-align: center; padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">🔍</div>
+                <p style="color: #6b7280;">No specific resources found for this topic.</p>
+                <p style="color: #9ca3af; font-size: 0.875rem;">Try searching on educational platforms directly.</p>
+            </div>
+        `;
+    }
+    
+    // Update flashcard content
     flashcard.innerHTML = `
         <div class="flashcard-header">
             <div>
                 <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700;">📚 Day ${dayNumber} Resources</h3>
                 <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem;">${topicName}</p>
+                ${feedback ? `<p style="margin: 0.5rem 0 0 0; opacity: 0.7; font-size: 0.875rem; font-style: italic;">💡 ${feedback}</p>` : ''}
             </div>
             <button class="flashcard-close" onclick="closeResourcePopup()">
                 <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
@@ -1416,28 +1845,19 @@ function openResourcePopup(dayNumber, topicName, resources) {
         </div>
         <div class="flashcard-body">
             <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem;">
-                🎯 Recommended resources to help you master this topic. Click "View Resource" to explore!
+                🎯 Recommended resources from our IR system to help you master this topic!
             </p>
             <div class="flashcard-resources-list">
                 ${resourceItemsHtml}
             </div>
             <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
                 <p style="color: #9ca3af; font-size: 0.875rem; margin: 0;">
-                    💡 Tip: Complete these resources in order for the best learning experience
+                    💡 Tip: Resources are ranked by relevance using our IR system
                 </p>
             </div>
         </div>
     `;
-    
-    overlay.appendChild(flashcard);
-    document.body.appendChild(overlay);
-    
-    // Trigger animation
-    setTimeout(() => {
-        overlay.style.opacity = '1';
-        flashcard.style.animation = 'slideUpBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
-    }, 10);
-}
+
 
 function closeResourcePopup() {
     const overlay = document.querySelector('.resource-popup-overlay');
