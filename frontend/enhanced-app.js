@@ -103,6 +103,19 @@ function showAuthenticatedContent() {
         console.log('Updated user display:', userName);
     }
     
+    // Hide all loading divs initially
+    const loadingDivs = document.querySelectorAll('.loading');
+    loadingDivs.forEach(div => {
+        div.classList.remove('show');
+        div.style.display = 'none';
+    });
+    
+    // Clear any existing results
+    const resultsDivs = document.querySelectorAll('[id$="-results"]');
+    resultsDivs.forEach(div => {
+        div.innerHTML = '';
+    });
+    
     // Load subjects for dropdowns
     console.log('Loading subjects...');
     loadSubjects();
@@ -285,8 +298,11 @@ async function generateAdvancedPlan() {
     const generateBtn = document.querySelector('#advanced-tab .generate-btn');
     
     try {
+        // Clear any existing results first
+        if (resultsDiv) resultsDiv.innerHTML = '';
+        
         // Show enhanced loading state
-        showEnhancedLoading(loadingDiv, resultsDiv, 'Generating your personalized study plan...');
+        showEnhancedLoading(loadingDiv, resultsDiv, 'Our AI agents are creating your personalized study plan...');
         if (generateBtn) generateBtn.disabled = true;
         
         console.log('Generating advanced plan for:', { subject, dailyHours, totalDays, knowledgeLevel, learningStyle, selectedMood, userAssessmentData });
@@ -331,7 +347,10 @@ async function generateAdvancedPlan() {
         console.error('Error generating advanced plan:', error);
         showError('advanced-results', `Failed to generate advanced plan: ${error.message}`);
     } finally {
-        if (loadingDiv) loadingDiv.classList.remove('show');
+        if (loadingDiv) {
+            loadingDiv.classList.remove('show');
+            loadingDiv.style.display = 'none';
+        }
         if (generateBtn) generateBtn.disabled = false;
     }
 }
@@ -517,7 +536,6 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                             <div class="timeline-status">
                                 <input type="checkbox" 
                                        class="timeline-checkbox" 
-                                       onclick="event.stopPropagation()"
                                        onchange="toggleDayCompletion(${day.day}, this.checked)"
                                        title="Mark as complete">
                                 <span class="status-badge ${status}">
@@ -734,28 +752,25 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
 function attachRoadmapEventListeners() {
     const roadmapNodes = document.querySelectorAll('.roadmap-node');
     roadmapNodes.forEach(node => {
-        const marker = node.querySelector('.roadmap-marker');
-        const card = node.querySelector('.roadmap-card');
         const dayNumber = parseInt(node.getAttribute('data-day'));
         const topicName = node.getAttribute('data-topic');
         const resourcesJson = node.getAttribute('data-resources');
         
-        if (marker && card && resourcesJson) {
-            const resources = JSON.parse(resourcesJson);
-            
-            // Add click handlers
-            const clickHandler = (e) => {
-                // Don't trigger if clicking checkbox
-                if (!e.target.classList.contains('timeline-checkbox')) {
-                    openResourcePopup(dayNumber, topicName, resources);
-                }
-            };
-            
-            marker.addEventListener('click', clickHandler);
+        const clickHandler = (e) => {
+            // Don't trigger if clicking checkbox
+            if (e.target.classList.contains('timeline-checkbox')) {
+                return;
+            }
+            if (resourcesJson) {
+                const resources = JSON.parse(resourcesJson);
+                openResourcePopup(dayNumber, topicName, resources);
+            }
+        };
+
+        // Add listener to the whole card
+        const card = node.querySelector('.roadmap-card');
+        if (card) {
             card.addEventListener('click', clickHandler);
-            
-            // Add hover effect
-            marker.style.cursor = 'pointer';
             card.style.cursor = 'pointer';
         }
     });
@@ -810,7 +825,10 @@ async function findResources() {
         console.error('Error finding resources:', error);
         showError('resources-results', `Failed to find resources: ${error.message}`);
     } finally {
-        if (loadingDiv) loadingDiv.classList.remove('show');
+        if (loadingDiv) {
+            loadingDiv.classList.remove('show');
+            loadingDiv.style.display = 'none';
+        }
         if (generateBtn) generateBtn.disabled = false;
     }
 }
@@ -891,19 +909,15 @@ function displayResourceResults(resources, searchFeedback) {
 
 // Enhanced loading state function
 function showEnhancedLoading(loadingDiv, resultsDiv, message = 'Loading...') {
-    if (loadingDiv) loadingDiv.classList.add('show');
+    if (loadingDiv) {
+        loadingDiv.classList.add('show');
+        const loadingText = loadingDiv.querySelector('p');
+        if (loadingText) {
+            loadingText.textContent = message;
+        }
+    }
     if (resultsDiv) {
-        resultsDiv.innerHTML = `
-            <div class="results">
-                <div class="results-content">
-                    <div class="loading-card">
-                        <div class="loading-spinner"></div>
-                        <h3 style="margin: 0 0 0.5rem 0; color: #1f2937;">${message}</h3>
-                        <p style="margin: 0; color: #6b7280;">This may take a few moments...</p>
-                    </div>
-                </div>
-            </div>
-        `;
+        resultsDiv.innerHTML = '';
     }
 }
 
@@ -987,7 +1001,10 @@ async function getMotivation() {
         console.error('Error getting motivation:', error);
         showError('motivation-results', `Failed to get motivation: ${error.message}`);
     } finally {
-        if (loadingDiv) loadingDiv.classList.remove('show');
+        if (loadingDiv) {
+            loadingDiv.classList.remove('show');
+            loadingDiv.style.display = 'none';
+        }
         if (generateBtn) generateBtn.disabled = false;
     }
 }

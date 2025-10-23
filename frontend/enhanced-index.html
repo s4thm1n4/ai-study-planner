@@ -820,7 +820,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/>') repeat;
             opacity: 0.3;
         }
 
@@ -1060,32 +1060,60 @@
         .resource-view-prompt {
             text-align: center;
             margin-top: 1.25rem;
-            padding-top: 0.75rem;
-            border-top: 1px dashed rgba(107, 114, 128, 0.2);
+            padding-top: 1.25rem;
+            border-top: 1px dashed var(--border-color);
         }
         
-        .view-resources-btn {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        .view-resources-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: white;
-            border: none;
-            border-radius: 0.75rem;
-            padding: 0.6rem 1.25rem;
-            font-size: 0.9rem;
+            border-radius: 1.5rem;
+            padding: 0.75rem 1.5rem;
             font-weight: 600;
+            margin: 1rem auto 0.5rem;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
+            position: relative;
+            width: fit-content;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
         }
-        
-        .view-resources-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.1);
+
+        .view-resources-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
         }
-        
-        body.dark-mode .view-resources-btn {
-            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+
+        .button-pulse {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.7;
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        body.dark-mode .view-resources-button {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
         }
 
         .timeline-header {
@@ -1366,43 +1394,44 @@
         }
 
         .resource-item-flashcard {
-            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            background: var(--bg-secondary);
             border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 2px solid #e5e7eb;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
             transition: all 0.3s ease;
             cursor: pointer;
+            display: block;
+            text-decoration: none;
         }
 
         body.dark-mode .resource-item-flashcard {
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--card-bg) 100%);
-            border-color: var(--border-color);
+            background: var(--card-bg);
         }
 
         .resource-item-flashcard:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow);
             border-color: #2563eb;
         }
 
         .resource-item-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            align-items: center;
+            gap: 1rem;
         }
 
         .resource-item-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 1rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 0.75rem;
             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            margin-right: 1rem;
+            font-size: 1.25rem;
+            color: #1e40af;
         }
 
         .resource-item-info {
@@ -1410,64 +1439,27 @@
         }
 
         .resource-item-title {
-            font-weight: 700;
-            font-size: 1.125rem;
+            font-weight: 600;
+            font-size: 1rem;
             color: var(--text-primary);
-            margin: 0 0 0.375rem 0;
+            margin: 0 0 0.25rem 0;
         }
 
         .resource-item-desc {
             font-size: 0.875rem;
             color: var(--text-secondary);
             margin: 0;
-            line-height: 1.5;
-        }
-
-        .resource-item-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        body.dark-mode .resource-item-footer {
-            border-top-color: var(--border-color);
-        }
-
-        .resource-meta-tags {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .meta-tag {
-            padding: 0.25rem 0.625rem;
-            border-radius: 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: #e0e7ff;
-            color: #3730a3;
         }
 
         .resource-action-btn {
-            padding: 0.625rem 1.25rem;
-            border-radius: 0.75rem;
-            border: none;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-size: 1.25rem;
+            color: #9ca3af;
+            transition: all 0.3s ease;
         }
 
-        .resource-action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        .resource-item-flashcard:hover .resource-action-btn {
+            color: #2563eb;
+            transform: translateX(5px);
         }
 
         .resource-type-badge {
@@ -2084,7 +2076,7 @@
 
         .resource-item:hover {
             transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
         }
 
         .resource-header {
@@ -2193,7 +2185,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.5" fill="%23ffffff" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>') repeat;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.5" fill="%23ffffff" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)') repeat;
         }
 
         .motivation-content {
@@ -2601,6 +2593,56 @@
             100% { background-position: -200% 0; }
         }
 
+        /* ===== LOADING STYLES ===== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 1rem;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        body.dark-mode .loading {
+            background: var(--card-bg);
+        }
+
+        body.dark-mode .loading p {
+            color: var(--text-secondary);
+        }
+
+        body.dark-mode .spinner {
+            border-color: var(--border-color);
+            border-top-color: #6366f1;
+        }
+
         /* ===== COMPREHENSIVE DARK MODE STYLES ===== */
         body.dark-mode .timeline-content,
         body.dark-mode .resource-card-modern,
@@ -2994,240 +3036,6 @@
             font-size: 0.875rem;
         }
 
-        /* ===== LOADING SPINNER MODERN ===== */
-        .spinner-modern {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top-color: #2563eb;
-            border-radius: 50%;
-            animation: spinModern 0.8s linear infinite;
-        }
-
-        @keyframes spinModern {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9998;
-        }
-
-        .loading-overlay.hidden {
-            display: none;
-        }
-
-        .loading-text {
-            margin-top: 1rem;
-            color: #6b7280;
-            font-weight: 600;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .resource-item:nth-child(1) { animation-delay: 0.1s; }
-        .resource-item:nth-child(2) { animation-delay: 0.2s; }
-        .resource-item:nth-child(3) { animation-delay: 0.3s; }
-        .resource-item:nth-child(4) { animation-delay: 0.4s; }
-        .resource-item:nth-child(5) { animation-delay: 0.5s; }
-
-        /* Loading State Enhancements */
-        .loading-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 3rem;
-            text-align: center;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        /* Loading States */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 3rem;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Error States */
-        .error-message {
-            background: #fee;
-            border: 2px solid #fecaca;
-            border-left: 4px solid #ef4444;
-            color: #dc2626;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin: 1rem 0;
-        }
-
-        .error-message h4 {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Login Required State */
-        .login-required {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .login-required h2 {
-            font-size: 2rem;
-            color: #1f2937;
-            margin-bottom: 1rem;
-        }
-
-        .login-required p {
-            color: #6b7280;
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-        }
-
-        .login-required a {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 0.5rem;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .login-required a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .nav-container {
-                padding: 0 1rem;
-            }
-
-            .user-nav {
-                gap: 0.5rem;
-            }
-
-            .tabs {
-                flex-direction: column;
-            }
-
-            .tab-content {
-                padding: 2rem 1rem;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .welcome-section {
-                padding: 2rem 1rem;
-            }
-
-            .welcome-section h1 {
-                font-size: 2rem;
-            }
-        }
-
-        /* Motivation Section Specific */
-        .motivation-result {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 2px solid #bae6fd;
-            border-left: 4px solid #0ea5e9;
-            padding: 2rem;
-            border-radius: 1rem;
-            margin: 1rem 0;
-        }
-
-        .quote-section {
-            background: rgba(99, 102, 241, 0.1);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid #6366f1;
-        }
-
-        .quote-text {
-            font-style: italic;
-            font-size: 1.1rem;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-
-        .quote-author {
-            font-weight: 600;
-            color: #6366f1;
-        }
-
-        .tip-section {
-            background: rgba(16, 185, 129, 0.1);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            border-left: 4px solid #10b981;
-        }
-
-        .tip-section h4 {
-            color: #059669;
-            margin-bottom: 0.5rem;
-        }
-
         /* ===== MODERN ONBOARDING STYLES ===== */
         
         /* Progress Indicator */
@@ -3478,14 +3286,12 @@
             background: white;
             border: 2px solid #6366f1;
             color: #6366f1;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 1.75rem;
             border-radius: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            white-space: nowrap;
         }
 
         .btn-change-level:hover {
@@ -4757,7 +4563,7 @@
                         <!-- Celebration Overlay -->
                         <div class="celebration-overlay" id="celebrationOverlay">
                             <div class="confetti" id="confetti"></div>
-                            <div class="celebration-message" id="celebrationMessage">
+                                                       <div class="celebration-message" id="celebrationMessage">
                                 <div class="celebration-icon">🎉</div>
                                 <div class="celebration-text">Congratulations!</div>
                                 <div class="celebration-subtext">You're making great progress!</div>
@@ -5269,195 +5075,6 @@
                         </div>
                     </div>
                 `;
-            }
-
-            resultsDiv.innerHTML = `
-                <div class="results-container">
-                    <div class="results-header">
-                        <h3>🎯 Your Personalized Study Plan</h3>
-                        <p>Subject: <strong>${planData.subject}</strong> | Level: <strong>${planData.difficulty}</strong> | Duration: <strong>${planData.totalDays} days</strong></p>
-                    </div>
-
-                    <!-- Progress Tracking Dashboard -->
-                    <div class="progress-dashboard">
-                        <div class="progress-header">
-                            <h4>📊 Your Learning Progress</h4>
-                            <p>Track your journey and celebrate milestones</p>
-                        </div>
-
-                        <div class="progress-stats-grid">
-                            <div class="progress-stat-card">
-                                <span class="stat-icon">🎯</span>
-                                <p class="stat-value" id="daysCompleted">2</p>
-                                <p class="stat-label">Days Completed</p>
-                            </div>
-
-                            <div class="progress-stat-card">
-                                <span class="stat-icon">
-                                    <span class="streak-counter">
-                                        <span class="streak-flame">🔥</span>
-                                        <span id="streakCount" class="stat-value" style="font-size: 1.5rem;">3</span>
-                                    </span>
-                                </span>
-                                <p class="stat-label">Day Streak</p>
-                            </div>
-
-                            <div class="progress-stat-card">
-                                <span class="stat-icon">⏱️</span>
-                                <p class="stat-value" id="totalHours">${planData.dailyHours * 2}</p>
-                                <p class="stat-label">Hours Studied</p>
-                            </div>
-
-                            <div class="progress-stat-card">
-                                <span class="stat-icon">📈</span>
-                                <p class="stat-value" id="overallProgress">29%</p>
-                                <p class="stat-label">Overall Progress</p>
-                            </div>
-                        </div>
-
-                        <div class="achievements-section">
-                            <div class="achievements-header">
-                                <h5>🏆 Achievements</h5>
-                                <a href="#" class="view-all-link">View All →</a>
-                            </div>
-                            <div class="achievements-grid">
-                                <div class="achievement-badge">
-                                    <div class="achievement-icon">🎖️</div>
-                                    <p class="achievement-name">First Step</p>
-                                </div>
-                                <div class="achievement-badge">
-                                    <div class="achievement-icon">⚡</div>
-                                    <p class="achievement-name">Quick Learner</p>
-                                </div>
-                                <div class="achievement-badge">
-                                    <div class="achievement-icon">📚</div>
-                                    <p class="achievement-name">Bookworm</p>
-                                </div>
-                                <div class="achievement-badge locked">
-                                    <div class="achievement-icon">🔒</div>
-                                    <p class="achievement-name">Week Warrior</p>
-                                </div>
-                                <div class="achievement-badge locked">
-                                    <div class="achievement-icon">🔒</div>
-                                    <p class="achievement-name">Master Mind</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="progress-chart-container">
-                            <div class="progress-chart-header">
-                                <h5>📊 Weekly Activity</h5>
-                                <p>Your study hours this week</p>
-                            </div>
-                            <div class="weekly-chart">
-                                <div class="chart-bar active" style="height: 80%;" title="Monday: 4 hours">
-                                    <span class="chart-bar-value">4h</span>
-                                </div>
-                                <div class="chart-bar active" style="height: 65%;" title="Tuesday: 3 hours">
-                                    <span class="chart-bar-value">3h</span>
-                                </div>
-                                <div class="chart-bar active" style="height: 90%;" title="Wednesday: 4.5 hours">
-                                    <span class="chart-bar-value">4.5h</span>
-                                </div>
-                                <div class="chart-bar" style="height: 20%;" title="Thursday: 0 hours">
-                                    <span class="chart-bar-value">0h</span>
-                                </div>
-                                <div class="chart-bar" style="height: 20%;" title="Friday: 0 hours">
-                                    <span class="chart-bar-value">0h</span>
-                                </div>
-                                <div class="chart-bar" style="height: 20%;" title="Saturday: 0 hours">
-                                    <span class="chart-bar-value">0h</span>
-                                </div>
-                                <div class="chart-bar" style="height: 20%;" title="Sunday: 0 hours">
-                                    <span class="chart-bar-value">0h</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.9;">
-                                <span>Mon</span>
-                                <span>Tue</span>
-                                <span>Wed</span>
-                                <span>Thu</span>
-                                <span>Fri</span>
-                                <span>Sat</span>
-                                <span>Sun</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="schedule-roadmap-container">
-                        <h4 style="text-align: center; color: #1f2937; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700;">
-                            �️ Your Learning Roadmap
-                        </h4>
-                        <p style="text-align: center; color: #6b7280; margin-bottom: 3rem; font-size: 1rem;">
-                            Click on any day to explore recommended resources and learning materials
-                        </p>
-                        <div class="schedule-roadmap">
-                            <div class="roadmap-path"></div>
-                            ${scheduleHtml}
-                        </div>
-                    </div>
-
-                    <div class="resource-hub-container">
-                        <h4 style="text-align: center; color: #1f2937; margin-bottom: 1.5rem;">📚 Learning Resources Hub</h4>
-                        
-                        <div class="resource-filters">
-                            <div class="filter-section">
-                                <label class="filter-label">� Search Resources</label>
-                                <input type="text" 
-                                       class="search-bar" 
-                                       placeholder="Search by title, topic, or keyword..." 
-                                       onkeyup="filterResources()"
-                                       id="resourceSearch">
-                            </div>
-                            
-                            <div class="filter-section">
-                                <label class="filter-label">📂 Filter by Type</label>
-                                <div class="filter-buttons">
-                                    <button class="filter-btn active" data-type="all" onclick="filterByType('all')">
-                                        <span>All</span>
-                                    </button>
-                                    <button class="filter-btn" data-type="video" onclick="filterByType('video')">
-                                        <span>🎥 Videos</span>
-                                    </button>
-                                    <button class="filter-btn" data-type="course" onclick="filterByType('course')">
-                                        <span>📘 Courses</span>
-                                    </button>
-                                    <button class="filter-btn" data-type="article" onclick="filterByType('article')">
-                                        <span>📄 Articles</span>
-                                    </button>
-                                    <button class="filter-btn" data-type="book" onclick="filterByType('book')">
-                                        <span>📚 Books</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="filter-section">
-                                <label class="filter-label">⭐ Sort By</label>
-                                <div class="filter-buttons">
-                                    <button class="filter-btn active" onclick="sortResources('rating')">Highest Rated</button>
-                                    <button class="filter-btn" onclick="sortResources('duration')">Shortest First</button>
-                                    <button class="filter-btn" onclick="sortResources('newest')">Newest</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="resources-grid" id="resourcesGrid">
-                            ${generateResourceCards(planData.subject)}
-                        </div>
-
-                        <div class="no-resources" id="noResourcesMessage" style="display: none;">
-                            <div class="no-resources-icon">🔍</div>
-                            <p class="no-resources-text">No resources found matching your filters</p>
-                            <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 0.5rem;">Try adjusting your search or filters</p>
-                        </div>
-                    </div>
-
-                    <div class="motivation-card">
-                        <h4>💪 Motivation</h4>
-                        <p>"You're taking the first step towards mastering ${planData.subject}! Remember, consistency is key. Study for ${planData.dailyHours} hours daily and you'll see amazing progress!"</p>
-                    </div>
-                </div>
-            `;
             
             // Attach event listeners to roadmap nodes after rendering
             setTimeout(() => {
