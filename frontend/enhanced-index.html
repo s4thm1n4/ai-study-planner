@@ -1692,6 +1692,7 @@
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -1703,6 +1704,7 @@
             margin-bottom: 1rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -4405,6 +4407,21 @@
                         <div id="advanced-results"></div>
                     </div>
 
+                    <!-- Onboarding Functions - Define immediately for onclick handlers -->
+                    <script>
+                        // Quick stub definitions to prevent "not defined" errors
+                        // These will be properly overridden by the main script below
+                        if (typeof goToOnboardingStep === 'undefined') {
+                            window.goToOnboardingStep = function() { console.log('Waiting for main script...'); };
+                            window.selectQuizOption = function() { console.log('Waiting for main script...'); };
+                            window.analyzeAndShowLevel = function() { console.log('Waiting for main script...'); };
+                            window.toggleManualLevel = function() { console.log('Waiting for main script...'); };
+                            window.selectManualLevel = function() { console.log('Waiting for main script...'); };
+                            window.continueWithFree = function() { console.log('Waiting for main script...'); };
+                            window.showPremiumModal = function() { console.log('Waiting for main script...'); };
+                        }
+                    </script>
+
                     <!-- Resources Tab -->
                     <div id="resources-tab" class="tab-content">
                         <div class="tab-header">
@@ -4636,7 +4653,7 @@
             }
         }
 
-        function goToOnboardingStep(step) {
+        window.goToOnboardingStep = function(step) {
             // Validate before moving forward
             if (step > currentOnboardingStep) {
                 if (currentOnboardingStep === 1) {
@@ -4677,17 +4694,36 @@
                 newStep.classList.add('active');
             }
 
-            // Update quiz subject names if going to step 2
-            if (step === 2 && onboardingData.subject) {
-                document.getElementById('quizSubject1').textContent = onboardingData.subject;
-                document.getElementById('quizSubject2').textContent = onboardingData.subject;
+            // Handle step-specific initialization
+            if (step === 2) {
+                // Update quiz subject names
+                if (onboardingData.subject) {
+                    const subject1 = document.getElementById('quizSubject1');
+                    const subject2 = document.getElementById('quizSubject2');
+                    if (subject1) subject1.textContent = onboardingData.subject;
+                    if (subject2) subject2.textContent = onboardingData.subject;
+                }
+                
+                // Reset quiz to show first question
+                const q1 = document.getElementById('quiz-q1');
+                const q2 = document.getElementById('quiz-q2');
+                const q3 = document.getElementById('quiz-q3');
+                if (q1) q1.style.display = 'block';
+                if (q2) q2.style.display = 'none';
+                if (q3) q3.style.display = 'none';
+                
+                // Disable next button until all questions answered
+                const step2Btn = document.getElementById('step2NextBtn');
+                if (step2Btn && !onboardingData.q3) {
+                    step2Btn.disabled = true;
+                }
             }
 
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function selectQuizOption(questionNum, answer, element) {
+        window.selectQuizOption = function(questionNum, answer, element) {
             // Remove selection from all options in this question
             const parent = element.closest('.quiz-section');
             parent.querySelectorAll('.quiz-option').forEach(opt => {
@@ -4714,7 +4750,7 @@
             }, 300);
         }
 
-        function analyzeAndShowLevel() {
+        window.analyzeAndShowLevel = function() {
             // Show loading
             const loadingDiv = document.getElementById('advanced-loading');
             if (loadingDiv) {
@@ -4768,14 +4804,14 @@
             }, 1500);
         }
 
-        function toggleManualLevel() {
+        window.toggleManualLevel = function() {
             const section = document.getElementById('manualLevelSection');
             if (section) {
                 section.style.display = section.style.display === 'none' ? 'block' : 'none';
             }
-        }
+        };
 
-        function selectManualLevel(level, icon, levelText, description) {
+        window.selectManualLevel = function(level, icon, levelText, description) {
             // Remove selection from all
             document.querySelectorAll('.level-choice-card').forEach(card => {
                 card.classList.remove('selected');
@@ -4798,15 +4834,15 @@
             }, 800);
         }
 
-        function continueWithFree() {
+        window.continueWithFree = function() {
             // Save that user chose free plan
             localStorage.setItem('planType', 'free');
             
             // Generate the plan
             generateAdvancedPlanFromOnboarding();
-        }
+        };
 
-        function showPremiumModal() {
+        window.showPremiumModal = function() {
             alert('Premium Plan - $9.99/month\n\n' +
                   '✅ Unlimited study plans\n' +
                   '✅ Advanced AI tutor mode\n' +
@@ -4823,7 +4859,7 @@
             
             // Generate the plan
             generateAdvancedPlanFromOnboarding();
-        }
+        };
 
         function generateAdvancedPlanFromOnboarding() {
             // Validate we have a subject
@@ -6023,8 +6059,8 @@
         });
 
         // Modify the continue and premium functions to save the plan
-        const originalContinueWithFree = continueWithFree;
-        continueWithFree = function() {
+        const originalContinueWithFree = window.continueWithFree;
+        window.continueWithFree = function() {
             const planData = {
                 subject: onboardingData.subject,
                 dailyHours: parseInt(onboardingData.dailyHours),
@@ -6036,8 +6072,8 @@
             originalContinueWithFree();
         };
 
-        const originalShowPremiumModal = showPremiumModal;
-        showPremiumModal = function() {
+        const originalShowPremiumModal = window.showPremiumModal;
+        window.showPremiumModal = function() {
             const planData = {
                 subject: onboardingData.subject,
                 dailyHours: parseInt(onboardingData.dailyHours),
