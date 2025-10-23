@@ -717,6 +717,23 @@
     </footer>
 
     <script>
+        // Check if user is new (no onboarding completed)
+        window.addEventListener('DOMContentLoaded', () => {
+            const userData = localStorage.getItem('aiStudyPlannerUserData');
+            const skipOnboarding = sessionStorage.getItem('skipOnboarding');
+            
+            // If no user data and hasn't skipped, redirect to onboarding
+            if (!userData && !skipOnboarding) {
+                // Show a welcome modal or redirect directly
+                const shouldOnboard = confirm('Welcome! Would you like a personalized experience? We\'ll guide you through a quick 2-minute setup.');
+                if (shouldOnboard) {
+                    window.location.href = 'onboarding.html';
+                } else {
+                    sessionStorage.setItem('skipOnboarding', 'true');
+                }
+            }
+        });
+
         // Demo study plan generator (simplified version for homepage)
         async function generateDemoStudyPlan() {
             const goalInput = document.getElementById('demo-goal');

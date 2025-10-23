@@ -1437,6 +1437,921 @@
             color: #059669;
             margin-bottom: 0.5rem;
         }
+
+        /* ===== MODERN ONBOARDING STYLES ===== */
+        
+        /* Progress Indicator */
+        .onboarding-progress {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 1rem;
+        }
+
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .step-circle {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            transform: scale(1.1);
+        }
+
+        .progress-step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .progress-step.active .step-label {
+            color: #6366f1;
+        }
+
+        .progress-line {
+            height: 3px;
+            width: 80px;
+            background: #e5e7eb;
+            margin: 0 1rem;
+            position: relative;
+            top: -15px;
+        }
+
+        .progress-step.completed + .progress-line {
+            background: #10b981;
+        }
+
+        /* Onboarding Steps */
+        .onboarding-step {
+            display: none;
+            animation: fadeInSlide 0.4s ease;
+        }
+
+        .onboarding-step.active {
+            display: block;
+        }
+
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .step-icon {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .step-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        /* Quiz Styling */
+        .quiz-section {
+            margin: 2rem 0;
+        }
+
+        .quiz-question {
+            font-size: 1.1rem;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateX(4px);
+        }
+
+        .quiz-option.selected {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .option-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: #6366f1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .quiz-option.selected .option-badge {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+        }
+
+        .option-text {
+            flex: 1;
+            font-size: 0.975rem;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        /* AI Suggestion Card */
+        .ai-suggestion-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(16, 185, 129, 0.08));
+            border: 2px solid #6366f1;
+            border-radius: 1.25rem;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: #6366f1;
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .suggested-level {
+            margin-bottom: 1.5rem;
+        }
+
+        .level-icon-large {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .suggested-level h4 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggested-level p {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        .btn-change-level {
+            background: white;
+            border: 2px solid #6366f1;
+            color: #6366f1;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-change-level:hover {
+            background: #6366f1;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Manual Level Selection */
+        .level-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .level-choice-card {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-choice-card:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-choice-card.selected {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .level-choice-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .level-choice-title {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .level-choice-desc {
+            font-size: 0.825rem;
+            color: #6b7280;
+        }
+
+        /* Premium Inline Banner */
+        .premium-inline-banner {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin: 2rem 0;
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .premium-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .premium-inline-btn {
+            background: white;
+            color: #f59e0b;
+            border: none;
+            padding: 0.75rem 1.75rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .premium-inline-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Action Buttons */
+        .step-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2.5rem;
+            justify-content: center;
+        }
+
+        .btn-back,
+        .btn-next,
+        .btn-generate {
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-back:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        .btn-next,
+        .btn-generate {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-next:hover,
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-next:disabled,
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-generate:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Pricing Comparison Styles */
+        .pricing-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2.5rem 0;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 1.25rem;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .premium-card {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(16, 185, 129, 0.03));
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .pricing-header h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1f2937;
+            line-height: 1;
+        }
+
+        .price span {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .price-note {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .pricing-features {
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features .feature {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: #1f2937;
+        }
+
+        .pricing-features .feature.disabled {
+            color: #9ca3af;
+        }
+
+        .pricing-features .feature.disabled span {
+            text-decoration: line-through;
+        }
+
+        .pricing-features .feature i {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .pricing-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .free-btn {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .free-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        .premium-btn {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .premium-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .trust-badges {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .university-logos {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .uni-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* ===== STUDY PLANS SIDEBAR ===== */
+        
+        .study-plans-sidebar {
+            position: fixed;
+            top: 0;
+            right: -380px;
+            width: 380px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .study-plans-sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .sidebar-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-header h3 i {
+            color: #6366f1;
+        }
+
+        .sidebar-close {
+            background: #f3f4f6;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-close:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .sidebar-content {
+            padding: 1rem;
+        }
+
+        .no-plans {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9ca3af;
+        }
+
+        .no-plans i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-plans p {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-plans small {
+            font-size: 0.875rem;
+        }
+
+        .plan-card {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .plan-card:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.03);
+            transform: translateX(-4px);
+        }
+
+        .plan-card.active {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .plan-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+
+        .plan-subject {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 1.05rem;
+            flex: 1;
+        }
+
+        .plan-level {
+            background: #6366f1;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .plan-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.825rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .plan-date {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 0.5rem;
+        }
+
+        .plan-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .plan-action-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .load-btn {
+            background: #6366f1;
+            color: white;
+        }
+
+        .load-btn:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .delete-btn:hover {
+            background: #fee2e2;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border: none;
+            padding: 1rem 0.75rem;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            box-shadow: -2px 0 12px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .sidebar-toggle:hover {
+            transform: translateY(-50%) translateX(-4px);
+            box-shadow: -4px 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .sidebar-toggle.hidden {
+            right: 380px;
+        }
+
+        .sidebar-toggle i {
+            font-size: 1.25rem;
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Responsive Onboarding */
+        @media (max-width: 768px) {
+            .progress-steps {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .progress-step {
+                flex-shrink: 0;
+            }
+
+            .progress-line {
+                width: 30px;
+                height: 3px;
+                margin: 0 0.5rem;
+                top: -15px;
+            }
+
+            .step-card {
+                padding: 1.75rem 1.25rem;
+            }
+
+            .step-title {
+                font-size: 1.4rem;
+            }
+
+            .level-selection-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .premium-inline-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .step-actions {
+                flex-direction: column;
+            }
+
+            .btn-back,
+            .btn-next,
+            .btn-generate {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .pricing-comparison {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .popular-badge {
+                font-size: 0.7rem;
+                padding: 0.4rem 1rem;
+            }
+
+            .price {
+                font-size: 2.5rem;
+            }
+
+            /* Sidebar mobile adjustments */
+            .study-plans-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .sidebar-toggle {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.7rem;
+            }
+
+            .sidebar-toggle.hidden {
+                right: 100%;
+            }
+        }
     </style>
     
     <!-- User Assessment Styles -->
@@ -1469,6 +2384,32 @@
             </div>
         </div>
     </nav>
+
+    <!-- Study Plans Sidebar -->
+    <div class="study-plans-sidebar" id="studyPlansSidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-history"></i> My Study Plans</h3>
+            <button class="sidebar-close" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-content" id="sidebarPlansContent">
+            <div class="no-plans">
+                <i class="fas fa-folder-open"></i>
+                <p>No study plans yet</p>
+                <small>Create your first plan to get started!</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <i class="fas fa-history"></i>
+        <span>Plans</span>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -1512,12 +2453,364 @@
                     <!-- Advanced Planner Tab -->
                     <div id="advanced-tab" class="tab-content active">
                         <div class="tab-header">
-                            <h2>🚀 Advanced Study Planner</h2>
-                            <p>Create detailed, personalized study schedules with our multi-agent AI system tailored to your learning goals.</p>
+                            <h2>🚀 Create Your Personalized Study Plan</h2>
+                            <p>Answer a few quick questions and let our AI create the perfect learning journey for you.</p>
                         </div>
 
-                        <!-- User Assessment Section -->
-                        <div id="user-assessment-container"></div>
+                        <!-- Modern Onboarding Assessment -->
+                        <div id="onboarding-assessment">
+                            <!-- Progress Indicator -->
+                            <div class="onboarding-progress">
+                                <div class="progress-steps">
+                                    <div class="progress-step active" data-step="1">
+                                        <div class="step-circle">1</div>
+                                        <div class="step-label">Subject</div>
+                                    </div>
+                                    <div class="progress-line"></div>
+                                    <div class="progress-step" data-step="2">
+                                        <div class="step-circle">2</div>
+                                        <div class="step-label">Assessment</div>
+                                    </div>
+                                    <div class="progress-line"></div>
+                                    <div class="progress-step" data-step="3">
+                                        <div class="step-circle">3</div>
+                                        <div class="step-label">Level</div>
+                                    </div>
+                                    <div class="progress-line"></div>
+                                    <div class="progress-step" data-step="4">
+                                        <div class="step-circle">4</div>
+                                        <div class="step-label">Plan</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 1: Subject & Time -->
+                            <div class="onboarding-step active" id="onboarding-step-1">
+                                <div class="step-card">
+                                    <div class="step-icon">🎯</div>
+                                    <h3 class="step-title">What do you want to learn?</h3>
+                                    <p class="step-subtitle">Tell us your subject and available time</p>
+
+                                    <div class="form-grid" style="margin-top: 2rem;">
+                                        <div class="input-group">
+                                            <label for="onboardingSubject">
+                                                <i class="fas fa-book"></i> Subject or Topic
+                                            </label>
+                                            <input type="text" id="onboardingSubject" 
+                                                   placeholder="e.g., Machine Learning, Calculus, Spanish..." 
+                                                   list="onboardingSubjectList">
+                                            <datalist id="onboardingSubjectList">
+                                                <option value="Machine Learning">
+                                                <option value="Python Programming">
+                                                <option value="Data Science">
+                                                <option value="Web Development">
+                                                <option value="Calculus">
+                                                <option value="Organic Chemistry">
+                                                <option value="Spanish Language">
+                                                <option value="Digital Marketing">
+                                            </datalist>
+                                        </div>
+
+                                        <div class="input-group">
+                                            <label for="onboardingDailyHours">
+                                                <i class="fas fa-clock"></i> Daily Study Time
+                                            </label>
+                                            <select id="onboardingDailyHours">
+                                                <option value="1">1 hour</option>
+                                                <option value="2" selected>2 hours</option>
+                                                <option value="3">3 hours</option>
+                                                <option value="4">4 hours</option>
+                                                <option value="5">5+ hours</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="input-group">
+                                            <label for="onboardingTotalDays">
+                                                <i class="fas fa-calendar-alt"></i> Study Duration
+                                            </label>
+                                            <select id="onboardingTotalDays">
+                                                <option value="3">3 days</option>
+                                                <option value="7" selected>1 week</option>
+                                                <option value="14">2 weeks</option>
+                                                <option value="30">1 month</option>
+                                                <option value="60">2 months</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="step-actions">
+                                        <button class="btn-next" onclick="goToOnboardingStep(2)" id="step1NextBtn" disabled>
+                                            Continue <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Quick Assessment -->
+                            <div class="onboarding-step" id="onboarding-step-2">
+                                <div class="step-card">
+                                    <div class="step-icon">🧠</div>
+                                    <h3 class="step-title">Quick Knowledge Check</h3>
+                                    <p class="step-subtitle">Help us understand your current level (3 questions)</p>
+
+                                    <!-- Question 1 -->
+                                    <div class="quiz-section" id="quiz-q1">
+                                        <p class="quiz-question">
+                                            <strong>Question 1 of 3:</strong> Have you studied <span id="quizSubject1">this subject</span> before?
+                                        </p>
+                                        <div class="quiz-options">
+                                            <div class="quiz-option" onclick="selectQuizOption(1, 'never', this)">
+                                                <div class="option-badge">A</div>
+                                                <div class="option-text">Never - This is completely new to me</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(1, 'briefly', this)">
+                                                <div class="option-badge">B</div>
+                                                <div class="option-text">Briefly - I know a few basic concepts</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(1, 'somewhat', this)">
+                                                <div class="option-badge">C</div>
+                                                <div class="option-text">Somewhat - I have a basic foundation</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(1, 'well', this)">
+                                                <div class="option-badge">D</div>
+                                                <div class="option-text">Well - I'm comfortable with fundamentals</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Question 2 -->
+                                    <div class="quiz-section" id="quiz-q2" style="display: none;">
+                                        <p class="quiz-question">
+                                            <strong>Question 2 of 3:</strong> How confident are you in learning <span id="quizSubject2">this subject</span>?
+                                        </p>
+                                        <div class="quiz-options">
+                                            <div class="quiz-option" onclick="selectQuizOption(2, 'nervous', this)">
+                                                <div class="option-badge">A</div>
+                                                <div class="option-text">Nervous - This seems challenging</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(2, 'cautious', this)">
+                                                <div class="option-badge">B</div>
+                                                <div class="option-text">Cautious - I'll need guidance</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(2, 'confident', this)">
+                                                <div class="option-badge">C</div>
+                                                <div class="option-text">Confident - I can handle this</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(2, 'very-confident', this)">
+                                                <div class="option-badge">D</div>
+                                                <div class="option-text">Very Confident - Bring on the challenge!</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Question 3 -->
+                                    <div class="quiz-section" id="quiz-q3" style="display: none;">
+                                        <p class="quiz-question">
+                                            <strong>Question 3 of 3:</strong> What's your learning goal?
+                                        </p>
+                                        <div class="quiz-options">
+                                            <div class="quiz-option" onclick="selectQuizOption(3, 'basics', this)">
+                                                <div class="option-badge">A</div>
+                                                <div class="option-text">Master the basics and fundamentals</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(3, 'intermediate', this)">
+                                                <div class="option-badge">B</div>
+                                                <div class="option-text">Build intermediate-level knowledge</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(3, 'advanced', this)">
+                                                <div class="option-badge">C</div>
+                                                <div class="option-text">Achieve advanced proficiency</div>
+                                            </div>
+                                            <div class="quiz-option" onclick="selectQuizOption(3, 'expert', this)">
+                                                <div class="option-badge">D</div>
+                                                <div class="option-text">Become an expert in the field</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="step-actions">
+                                        <button class="btn-back" onclick="goToOnboardingStep(1)">
+                                            <i class="fas fa-arrow-left"></i> Back
+                                        </button>
+                                        <button class="btn-next" onclick="analyzeAndShowLevel()" id="step2NextBtn" disabled>
+                                            Analyze My Level <i class="fas fa-magic"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: AI Suggestion -->
+                            <div class="onboarding-step" id="onboarding-step-3">
+                                <div class="step-card">
+                                    <div class="step-icon">🤖</div>
+                                    <h3 class="step-title">AI Analysis Complete!</h3>
+                                    <p class="step-subtitle">Based on your responses, here's our recommendation</p>
+
+                                    <div class="ai-suggestion-card">
+                                        <div class="ai-badge">
+                                            <i class="fas fa-robot"></i> AI Recommended
+                                        </div>
+                                        <div class="suggested-level">
+                                            <div class="level-icon-large" id="suggestedLevelIcon">🌱</div>
+                                            <h4 id="suggestedLevelText">BEGINNER</h4>
+                                            <p id="suggestedLevelDesc">Perfect for those starting fresh with fundamentals</p>
+                                        </div>
+                                        <button class="btn-change-level" onclick="toggleManualLevel()">
+                                            <i class="fas fa-edit"></i> Change Level
+                                        </button>
+                                    </div>
+
+                                    <!-- Manual Level Selection -->
+                                    <div id="manualLevelSection" style="display: none;">
+                                        <p style="text-align: center; margin: 1.5rem 0 1rem; font-weight: 600; color: #6b7280;">
+                                            Choose your preferred level:
+                                        </p>
+                                        <div class="level-selection-grid">
+                                            <div class="level-choice-card" onclick="selectManualLevel('beginner', '🌱', 'Beginner', 'Start from scratch')">
+                                                <div class="level-choice-icon">🌱</div>
+                                                <div class="level-choice-title">Beginner</div>
+                                                <div class="level-choice-desc">Start from scratch</div>
+                                            </div>
+                                            <div class="level-choice-card" onclick="selectManualLevel('intermediate', '🌿', 'Intermediate', 'Build on basics')">
+                                                <div class="level-choice-icon">🌿</div>
+                                                <div class="level-choice-title">Intermediate</div>
+                                                <div class="level-choice-desc">Build on basics</div>
+                                            </div>
+                                            <div class="level-choice-card" onclick="selectManualLevel('advanced', '🌳', 'Advanced', 'Deep expertise')">
+                                                <div class="level-choice-icon">🌳</div>
+                                                <div class="level-choice-title">Advanced</div>
+                                                <div class="level-choice-desc">Deep expertise</div>
+                                            </div>
+                                            <div class="level-choice-card" onclick="selectManualLevel('expert', '🏔️', 'Expert', 'Master level')">
+                                                <div class="level-choice-icon">🏔️</div>
+                                                <div class="level-choice-title">Expert</div>
+                                                <div class="level-choice-desc">Master level</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="step-actions">
+                                        <button class="btn-back" onclick="goToOnboardingStep(2)">
+                                            <i class="fas fa-arrow-left"></i> Back
+                                        </button>
+                                        <button class="btn-next" onclick="goToOnboardingStep(4)">
+                                            Continue <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Premium Comparison -->
+                            <div class="onboarding-step" id="onboarding-step-4">
+                                <div class="step-card" style="max-width: 900px; margin: 0 auto;">
+                                    <div class="step-icon">💎</div>
+                                    <h3 class="step-title">Unlock Better Grades & Save Study Time</h3>
+                                    <p class="step-subtitle">Choose the plan that works best for you</p>
+
+                                    <div class="pricing-comparison">
+                                        <!-- Free Plan -->
+                                        <div class="pricing-card free-card">
+                                            <div class="pricing-header">
+                                                <h4>Free Plan</h4>
+                                                <div class="price">$0<span>/month</span></div>
+                                            </div>
+                                            <div class="pricing-features">
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>Basic study plans (3 days)</span>
+                                                </div>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>Limited resources (3 per topic)</span>
+                                                </div>
+                                                <div class="feature disabled">
+                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
+                                                    <span>Progress tracking</span>
+                                                </div>
+                                                <div class="feature disabled">
+                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
+                                                    <span>AI motivation coach</span>
+                                                </div>
+                                                <div class="feature disabled">
+                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
+                                                    <span>Calendar integration</span>
+                                                </div>
+                                                <div class="feature disabled">
+                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
+                                                    <span>Priority support</span>
+                                                </div>
+                                            </div>
+                                            <button class="pricing-btn free-btn" onclick="continueWithFree()">
+                                                Continue with Free
+                                            </button>
+                                        </div>
+
+                                        <!-- Premium Plan -->
+                                        <div class="pricing-card premium-card">
+                                            <div class="popular-badge">
+                                                <i class="fas fa-star"></i> MOST POPULAR
+                                            </div>
+                                            <div class="pricing-header">
+                                                <h4>Premium</h4>
+                                                <div class="price">$9.99<span>/month</span></div>
+                                                <div class="price-note">Save 57% with yearly plan</div>
+                                            </div>
+                                            <div class="pricing-features">
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span><strong>Unlimited</strong> study plans</span>
+                                                </div>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span><strong>Advanced</strong> AI tutor mode</span>
+                                                </div>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>Unlimited resources & materials</span>
+                                                </div>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>Progress analytics dashboard</span>
+                                                </div>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>AI motivation & coaching</span>
+                                                </div>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>Calendar sync & reminders</span>
+                                                </div>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>Priority support</span>
+                                                </div>
+                                            </div>
+                                            <button class="pricing-btn premium-btn" onclick="showPremiumModal()">
+                                                <i class="fas fa-crown"></i> Unlock Premium
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="trust-badges">
+                                        <p style="text-align: center; color: #6b7280; margin-bottom: 1rem;">
+                                            Trusted by students from top universities
+                                        </p>
+                                        <div class="university-logos">
+                                            <span class="uni-badge">🎓 Stanford</span>
+                                            <span class="uni-badge">🎓 Harvard</span>
+                                            <span class="uni-badge">🎓 MIT</span>
+                                            <span class="uni-badge">🎓 Yale</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="step-actions">
+                                        <button class="btn-back" onclick="goToOnboardingStep(3)">
+                                            <i class="fas fa-arrow-left"></i> Back
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="loading" id="advanced-loading">
                             <div class="spinner"></div>
@@ -1712,6 +3005,577 @@
             </div>
         </div>
     </footer>
+
+    <!-- Modern Onboarding JavaScript -->
+    <script>
+        // Onboarding State
+        let onboardingData = {
+            subject: '',
+            dailyHours: '2',
+            totalDays: '7',
+            q1: '',
+            q2: '',
+            q3: '',
+            suggestedLevel: '',
+            selectedLevel: ''
+        };
+
+        let currentOnboardingStep = 1;
+        let quizProgress = 0;
+
+        // Initialize onboarding
+        document.addEventListener('DOMContentLoaded', function() {
+            setupOnboardingListeners();
+        });
+
+        function setupOnboardingListeners() {
+            // Subject input
+            const subjectInput = document.getElementById('onboardingSubject');
+            if (subjectInput) {
+                subjectInput.addEventListener('input', (e) => {
+                    onboardingData.subject = e.target.value.trim();
+                    updateStep1Button();
+                });
+            }
+
+            // Daily hours select
+            const dailyHoursSelect = document.getElementById('onboardingDailyHours');
+            if (dailyHoursSelect) {
+                dailyHoursSelect.addEventListener('change', (e) => {
+                    onboardingData.dailyHours = e.target.value;
+                });
+            }
+
+            // Total days select
+            const totalDaysSelect = document.getElementById('onboardingTotalDays');
+            if (totalDaysSelect) {
+                totalDaysSelect.addEventListener('change', (e) => {
+                    onboardingData.totalDays = e.target.value;
+                });
+            }
+        }
+
+        function updateStep1Button() {
+            const btn = document.getElementById('step1NextBtn');
+            if (btn) {
+                btn.disabled = !onboardingData.subject;
+            }
+        }
+
+        function goToOnboardingStep(step) {
+            // Validate before moving forward
+            if (step > currentOnboardingStep) {
+                if (currentOnboardingStep === 1 && (!onboardingData.subject || onboardingData.subject.trim() === '')) {
+                    alert('Please enter a subject you want to learn!');
+                    return;
+                }
+            }
+
+            // Hide current step
+            const currentStep = document.getElementById(`onboarding-step-${currentOnboardingStep}`);
+            if (currentStep) {
+                currentStep.classList.remove('active');
+            }
+
+            // Update progress indicators
+            document.querySelectorAll('.progress-step').forEach((el, index) => {
+                if (index + 1 < step) {
+                    el.classList.add('completed');
+                    el.classList.remove('active');
+                } else if (index + 1 === step) {
+                    el.classList.add('active');
+                    el.classList.remove('completed');
+                } else {
+                    el.classList.remove('active', 'completed');
+                }
+            });
+
+            // Show new step
+            currentOnboardingStep = step;
+            const newStep = document.getElementById(`onboarding-step-${step}`);
+            if (newStep) {
+                newStep.classList.add('active');
+            }
+
+            // Update quiz subject names if going to step 2
+            if (step === 2 && onboardingData.subject) {
+                document.getElementById('quizSubject1').textContent = onboardingData.subject;
+                document.getElementById('quizSubject2').textContent = onboardingData.subject;
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectQuizOption(questionNum, answer, element) {
+            // Remove selection from all options in this question
+            const parent = element.closest('.quiz-section');
+            parent.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Add selection to clicked option
+            element.classList.add('selected');
+
+            // Store answer
+            onboardingData[`q${questionNum}`] = answer;
+
+            // Move to next question or enable button
+            setTimeout(() => {
+                if (questionNum === 1) {
+                    document.getElementById('quiz-q1').style.display = 'none';
+                    document.getElementById('quiz-q2').style.display = 'block';
+                } else if (questionNum === 2) {
+                    document.getElementById('quiz-q2').style.display = 'none';
+                    document.getElementById('quiz-q3').style.display = 'block';
+                } else if (questionNum === 3) {
+                    document.getElementById('step2NextBtn').disabled = false;
+                }
+            }, 300);
+        }
+
+        function analyzeAndShowLevel() {
+            // Show loading
+            const loadingDiv = document.getElementById('advanced-loading');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'block';
+            }
+
+            // Simulate AI analysis
+            setTimeout(() => {
+                // Determine level based on answers
+                let level = 'beginner';
+                let icon = '🌱';
+                let levelText = 'BEGINNER';
+                let description = 'Perfect for those starting fresh with fundamentals';
+
+                if (onboardingData.q1 === 'somewhat' || onboardingData.q1 === 'well') {
+                    if (onboardingData.q2 === 'confident' || onboardingData.q2 === 'very-confident') {
+                        if (onboardingData.q3 === 'advanced' || onboardingData.q3 === 'expert') {
+                            level = 'advanced';
+                            icon = '🌳';
+                            levelText = 'ADVANCED';
+                            description = 'You\'re ready for complex topics and deep dives';
+                        } else {
+                            level = 'intermediate';
+                            icon = '🌿';
+                            levelText = 'INTERMEDIATE';
+                            description = 'Build on your foundation with structured learning';
+                        }
+                    } else {
+                        level = 'intermediate';
+                        icon = '🌿';
+                        levelText = 'INTERMEDIATE';
+                        description = 'Strengthen your knowledge at a comfortable pace';
+                    }
+                }
+
+                onboardingData.suggestedLevel = level;
+                onboardingData.selectedLevel = level;
+
+                // Update UI
+                document.getElementById('suggestedLevelIcon').textContent = icon;
+                document.getElementById('suggestedLevelText').textContent = levelText;
+                document.getElementById('suggestedLevelDesc').textContent = description;
+
+                // Hide loading
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'none';
+                }
+
+                // Go to step 3
+                goToOnboardingStep(3);
+            }, 1500);
+        }
+
+        function toggleManualLevel() {
+            const section = document.getElementById('manualLevelSection');
+            if (section) {
+                section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function selectManualLevel(level, icon, levelText, description) {
+            // Remove selection from all
+            document.querySelectorAll('.level-choice-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selection to clicked
+            event.target.closest('.level-choice-card').classList.add('selected');
+
+            // Update data
+            onboardingData.selectedLevel = level;
+
+            // Update display
+            document.getElementById('suggestedLevelIcon').textContent = icon;
+            document.getElementById('suggestedLevelText').textContent = levelText.toUpperCase();
+            document.getElementById('suggestedLevelDesc').textContent = description;
+
+            // Hide manual section after a moment
+            setTimeout(() => {
+                document.getElementById('manualLevelSection').style.display = 'none';
+            }, 800);
+        }
+
+        function continueWithFree() {
+            // Save that user chose free plan
+            localStorage.setItem('planType', 'free');
+            
+            // Generate the plan
+            generateAdvancedPlanFromOnboarding();
+        }
+
+        function showPremiumModal() {
+            alert('Premium Plan - $9.99/month\n\n' +
+                  '✅ Unlimited study plans\n' +
+                  '✅ Advanced AI tutor mode\n' +
+                  '✅ Unlimited resources\n' +
+                  '✅ Progress analytics\n' +
+                  '✅ AI motivation coach\n' +
+                  '✅ Calendar integration\n' +
+                  '✅ Priority support\n\n' +
+                  'For this demo, all premium features are unlocked!\n\n' +
+                  'Click OK to continue with premium features enabled.');
+            
+            // Save that user chose premium (for demo)
+            localStorage.setItem('planType', 'premium');
+            
+            // Generate the plan
+            generateAdvancedPlanFromOnboarding();
+        }
+
+        function generateAdvancedPlanFromOnboarding() {
+            // Validate we have a subject
+            if (!onboardingData.subject || onboardingData.subject.trim() === '') {
+                alert('Please go back and enter a subject you want to learn!');
+                return;
+            }
+
+            // Create a mock user assessment data object that matches what enhanced-app.js expects
+            const mockAssessmentData = {
+                subjectOfInterest: onboardingData.subject,
+                dailyStudyHours: onboardingData.dailyHours,
+                studyDuration: onboardingData.totalDays,
+                knowledgeLevel: onboardingData.selectedLevel,
+                learningStyle: 'mixed',
+                currentMood: 'focused',
+                educationLevel: 'university',
+                studyPurpose: 'personal',
+                specificGoals: `Master ${onboardingData.subject}`,
+                preferredDifficulty: '3'
+            };
+
+            // Store in window for enhanced-app.js to access
+            window.userAssessment = {
+                getData: function() {
+                    return mockAssessmentData;
+                },
+                saveCurrentStep: function() {
+                    // No-op for onboarding flow
+                }
+            };
+
+            // Hide onboarding
+            document.getElementById('onboarding-assessment').style.display = 'none';
+
+            // Call the existing generateAdvancedPlan function
+            if (typeof generateAdvancedPlan === 'function') {
+                generateAdvancedPlan();
+            } else {
+                // Fallback to demo
+                generateAdvancedPlanDemo();
+            }
+        }
+
+        function generateAdvancedPlanDemo() {
+            const planData = {
+                subject: onboardingData.subject,
+                dailyHours: parseInt(onboardingData.dailyHours),
+                totalDays: parseInt(onboardingData.totalDays),
+                difficulty: onboardingData.selectedLevel
+            };
+
+            // Show loading
+            document.getElementById('advanced-loading').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('advanced-loading').style.display = 'none';
+                displayDemoAdvancedResults(planData);
+            }, 2000);
+        }
+
+        // Enhanced version of generateAdvancedPlan
+        async function generateAdvancedPlanFromData(planData) {
+            try {
+                // Use the existing API call structure
+                const response = await fetch('http://localhost:8000/advanced-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        subject: planData.subject,
+                        daily_hours: planData.dailyHours,
+                        total_days: planData.totalDays,
+                        difficulty: planData.difficulty,
+                        learning_style: 'mixed',
+                        current_knowledge: onboardingData.q1,
+                        goals: onboardingData.q3
+                    })
+                });
+
+                const data = await response.json();
+
+                // Hide loading
+                document.getElementById('advanced-loading').style.display = 'none';
+
+                // Display results using existing function
+                displayAdvancedResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('advanced-loading').style.display = 'none';
+                
+                // Show demo results
+                displayDemoAdvancedResults(planData);
+            }
+        }
+
+        function displayDemoAdvancedResults(planData) {
+            const resultsDiv = document.getElementById('advanced-results');
+            
+            let scheduleHtml = '';
+            for (let i = 1; i <= Math.min(planData.totalDays, 7); i++) {
+                scheduleHtml += `
+                    <div class="schedule-item">
+                        <h4>📅 Day ${i}</h4>
+                        <p><strong>Topic:</strong> ${planData.subject} - ${i === 1 ? 'Introduction & Fundamentals' : i === 2 ? 'Core Concepts' : i === 3 ? 'Practical Applications' : `Advanced Topic ${i-3}`}</p>
+                        <p><strong>Duration:</strong> ${planData.dailyHours} hours</p>
+                        <p><strong>Activities:</strong> Reading, Practice Exercises, Hands-on Projects</p>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="results-container">
+                    <div class="results-header">
+                        <h3>🎯 Your Personalized Study Plan</h3>
+                        <p>Subject: <strong>${planData.subject}</strong> | Level: <strong>${planData.difficulty}</strong></p>
+                    </div>
+                    
+                    <div class="schedule-container">
+                        <h4>📅 Study Schedule</h4>
+                        ${scheduleHtml}
+                    </div>
+
+                    <div class="resources-preview">
+                        <h4>📚 Recommended Resources</h4>
+                        <div class="resource-card">
+                            <p><strong>📖 Course:</strong> <a href="https://www.coursera.org/search?query=${encodeURIComponent(planData.subject)}" target="_blank">Best ${planData.subject} Course on Coursera</a></p>
+                        </div>
+                        <div class="resource-card">
+                            <p><strong>🎥 Tutorial:</strong> <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(planData.subject)}+tutorial" target="_blank">${planData.subject} Video Tutorials</a></p>
+                        </div>
+                    </div>
+
+                    <div class="motivation-card">
+                        <h4>💪 Motivation</h4>
+                        <p>"You're taking the first step towards mastering ${planData.subject}! Remember, consistency is key. Study for ${planData.dailyHours} hours daily and you'll see amazing progress!"</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== STUDY PLANS SIDEBAR FUNCTIONALITY =====
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('studyPlansSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggle = document.getElementById('sidebarToggle');
+
+            const isOpen = sidebar.classList.contains('open');
+
+            if (isOpen) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                toggle.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                toggle.classList.add('hidden');
+                loadSavedPlans();
+            }
+        }
+
+        function saveStudyPlan(planData) {
+            // Get existing plans
+            let plans = JSON.parse(localStorage.getItem('studyPlans') || '[]');
+
+            // Create plan object
+            const plan = {
+                id: Date.now(),
+                subject: planData.subject,
+                level: planData.difficulty || planData.selectedLevel || 'beginner',
+                dailyHours: planData.dailyHours,
+                totalDays: planData.totalDays,
+                createdAt: new Date().toISOString(),
+                planType: localStorage.getItem('planType') || 'free'
+            };
+
+            // Add to beginning of array (newest first)
+            plans.unshift(plan);
+
+            // Keep only last 10 plans
+            if (plans.length > 10) {
+                plans = plans.slice(0, 10);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('studyPlans', JSON.stringify(plans));
+
+            // Update sidebar
+            loadSavedPlans();
+        }
+
+        function loadSavedPlans() {
+            const plans = JSON.parse(localStorage.getItem('studyPlans') || '[]');
+            const container = document.getElementById('sidebarPlansContent');
+
+            if (plans.length === 0) {
+                container.innerHTML = `
+                    <div class="no-plans">
+                        <i class="fas fa-folder-open"></i>
+                        <p>No study plans yet</p>
+                        <small>Create your first plan to get started!</small>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            plans.forEach((plan, index) => {
+                const date = new Date(plan.createdAt);
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                const levelEmoji = {
+                    'beginner': '🌱',
+                    'intermediate': '🌿',
+                    'advanced': '🌳',
+                    'expert': '🏔️'
+                };
+
+                html += `
+                    <div class="plan-card" onclick="loadPlan(${plan.id})">
+                        <div class="plan-card-header">
+                            <div class="plan-subject">${levelEmoji[plan.level] || '📚'} ${plan.subject}</div>
+                            <div class="plan-level">${plan.level}</div>
+                        </div>
+                        <div class="plan-meta">
+                            <span><i class="fas fa-clock"></i> ${plan.dailyHours}h/day</span>
+                            <span><i class="fas fa-calendar"></i> ${plan.totalDays} days</span>
+                            <span><i class="fas fa-${plan.planType === 'premium' ? 'crown' : 'gift'}"></i> ${plan.planType}</span>
+                        </div>
+                        <div class="plan-date">
+                            <i class="fas fa-calendar-check"></i> ${dateStr} at ${timeStr}
+                        </div>
+                        <div class="plan-actions">
+                            <button class="plan-action-btn load-btn" onclick="event.stopPropagation(); loadPlan(${plan.id})">
+                                <i class="fas fa-play"></i> Load
+                            </button>
+                            <button class="plan-action-btn delete-btn" onclick="event.stopPropagation(); deletePlan(${plan.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function loadPlan(planId) {
+            const plans = JSON.parse(localStorage.getItem('studyPlans') || '[]');
+            const plan = plans.find(p => p.id === planId);
+
+            if (!plan) {
+                alert('Plan not found!');
+                return;
+            }
+
+            // Close sidebar
+            toggleSidebar();
+
+            // Populate onboarding form with saved data
+            const subjectInput = document.getElementById('onboardingSubject');
+            const dailyHoursSelect = document.getElementById('onboardingDailyHours');
+            const totalDaysSelect = document.getElementById('onboardingTotalDays');
+
+            if (subjectInput) subjectInput.value = plan.subject;
+            if (dailyHoursSelect) dailyHoursSelect.value = plan.dailyHours;
+            if (totalDaysSelect) totalDaysSelect.value = plan.totalDays;
+
+            // Update onboarding data
+            onboardingData.subject = plan.subject;
+            onboardingData.dailyHours = plan.dailyHours.toString();
+            onboardingData.totalDays = plan.totalDays.toString();
+            onboardingData.selectedLevel = plan.level;
+
+            // Enable step 1 next button
+            updateStep1Button();
+
+            // Show notification
+            alert(`📚 Loaded: ${plan.subject}\n\nLevel: ${plan.level}\n${plan.dailyHours}h/day for ${plan.totalDays} days\n\nClick "Continue" to proceed with this plan!`);
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deletePlan(planId) {
+            if (!confirm('Are you sure you want to delete this study plan?')) {
+                return;
+            }
+
+            let plans = JSON.parse(localStorage.getItem('studyPlans') || '[]');
+            plans = plans.filter(p => p.id !== planId);
+            localStorage.setItem('studyPlans', JSON.stringify(plans));
+
+            loadSavedPlans();
+        }
+
+        // Initialize sidebar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedPlans();
+        });
+
+        // Modify the continue and premium functions to save the plan
+        const originalContinueWithFree = continueWithFree;
+        continueWithFree = function() {
+            const planData = {
+                subject: onboardingData.subject,
+                dailyHours: parseInt(onboardingData.dailyHours),
+                totalDays: parseInt(onboardingData.totalDays),
+                difficulty: onboardingData.selectedLevel,
+                selectedLevel: onboardingData.selectedLevel
+            };
+            saveStudyPlan(planData);
+            originalContinueWithFree();
+        };
+
+        const originalShowPremiumModal = showPremiumModal;
+        showPremiumModal = function() {
+            const planData = {
+                subject: onboardingData.subject,
+                dailyHours: parseInt(onboardingData.dailyHours),
+                totalDays: parseInt(onboardingData.totalDays),
+                difficulty: onboardingData.selectedLevel,
+                selectedLevel: onboardingData.selectedLevel
+            };
+            saveStudyPlan(planData);
+            originalShowPremiumModal();
+        };
+    </script>
 
     <!-- User Assessment JavaScript -->
     <script src="user-assessment.js"></script>
