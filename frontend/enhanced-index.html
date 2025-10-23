@@ -1407,6 +1407,22 @@
             right: 0;
         }
 
+        /* Backdrop overlay for side panel */
+        .resource-panel-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 10001;
+            animation: fadeIn 0.3s ease;
+            cursor: pointer;
+        }
+
+        .resource-panel-backdrop.active {
+            display: block;
+        }
+
         .side-panel-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -1429,11 +1445,26 @@
             cursor: pointer;
             transition: all 0.2s;
             color: white;
+            position: relative;
         }
 
         .side-panel-close:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.1);
+        }
+
+        .side-panel-close:active {
+            transform: scale(0.95);
+        }
+
+        /* Make close button more prominent on mobile */
+        @media (max-width: 640px) {
+            .side-panel-close {
+                width: 44px;
+                height: 44px;
+                background: rgba(255, 255, 255, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.5);
+            }
         }
 
         .side-panel-body {
@@ -1518,6 +1549,34 @@
             .resource-side-panel {
                 width: 100%;
                 right: -100%;
+            }
+            
+            .resource-side-panel.open {
+                right: 0;
+            }
+        }
+
+        /* Mobile: Convert to centered modal on very small screens */
+        @media (max-width: 640px) {
+            .resource-side-panel {
+                right: auto;
+                left: 50%;
+                top: 50%;
+                bottom: auto;
+                transform: translate(-50%, -50%) scale(0.9);
+                width: calc(100% - 2rem);
+                max-width: 480px;
+                max-height: 85vh;
+                border-radius: 1.5rem;
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .resource-side-panel.open {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+                pointer-events: auto;
             }
         }
 

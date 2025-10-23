@@ -380,154 +380,49 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
     // Generate roadmap nodes
     let scheduleHtml = '';
     if (plan.schedule && Array.isArray(plan.schedule)) {
-        // Topic categories with rich details
-        const subjectAreas = {
-            'SEO': {
-                beginner: {
-                    topics: ['SEO Fundamentals', 'Keyword Research', 'On-Page SEO', 'Search Console Basics', 'SEO Metrics'],
-                    emoji: '📖',
-                    resources: [
-                        { title: 'SEO Beginner\'s Guide by Moz', type: 'Course', duration: '2h', icon: '�' },
-                        { title: 'Keywords Research Masterclass', type: 'Video', duration: '45m', icon: '�' },
-                        { title: 'On-Page SEO Guide 2025', type: 'Article', duration: '15m', icon: '�' },
-                        { title: 'Search Console Tutorial', type: 'Video', duration: '30m', icon: '🎥' }
-                    ]
-                },
-                intermediate: {
-                    topics: ['Technical SEO', 'Link Building', 'Content Strategy', 'Local SEO', 'Analytics Implementation'],
-                    emoji: '⚡',
-                    resources: [
-                        { title: 'Technical SEO Audit Course', type: 'Course', duration: '3h', icon: '📘' },
-                        { title: 'Advanced Link Building Strategies', type: 'Video', duration: '1h', icon: '🎥' },
-                        { title: 'SEO Content Framework', type: 'Article', duration: '25m', icon: '📄' },
-                        { title: 'Local SEO Implementation Guide', type: 'Video', duration: '45m', icon: '🎥' }
-                    ]
-                },
-                advanced: {
-                    topics: ['SEO Automation', 'JavaScript SEO', 'E-commerce SEO', 'International SEO', 'Core Web Vitals'],
-                    emoji: '🚀',
-                    resources: [
-                        { title: 'SEO Automation with Python', type: 'Course', duration: '4h', icon: '📘' },
-                        { title: 'JavaScript SEO Deep Dive', type: 'Video', duration: '90m', icon: '🎥' },
-                        { title: 'E-commerce SEO Strategy', type: 'Article', duration: '30m', icon: '📄' },
-                        { title: 'Core Web Vitals Optimization', type: 'Course', duration: '2h', icon: '📘' }
-                    ]
-                },
-                expert: {
-                    topics: ['SEO for AI & Voice Search', 'Advanced Schema Markup', 'Algorithm Updates', 'Enterprise SEO', 'SEO Leadership'],
-                    emoji: '🏆',
-                    resources: [
-                        { title: 'SEO for Voice & AI Interfaces', type: 'Course', duration: '4h', icon: '📘' },
-                        { title: 'Schema Markup Masterclass', type: 'Video', duration: '2h', icon: '🎥' },
-                        { title: 'Enterprise SEO Management', type: 'Article', duration: '40m', icon: '📄' },
-                        { title: 'SEO Team Leadership', type: 'Course', duration: '3h', icon: '📘' }
-                    ]
-                }
-            },
-            'Digital Marketing': {
-                beginner: {
-                    topics: ['Digital Marketing Intro', 'Social Media Basics', 'Email Marketing', 'Content Creation', 'Analytics Basics'],
-                    emoji: '📱',
-                    resources: [
-                        { title: 'Digital Marketing Fundamentals', type: 'Course', duration: '3h', icon: '📘' },
-                        { title: 'Social Media Platforms Overview', type: 'Video', duration: '1h', icon: '🎥' },
-                        { title: 'Email Marketing Best Practices', type: 'Article', duration: '20m', icon: '📄' }
-                    ]
-                },
-                intermediate: {
-                    topics: ['Paid Advertising', 'Content Strategy', 'Marketing Automation', 'Conversion Optimization', 'Data Analysis'],
-                    emoji: '📊',
-                    resources: [
-                        { title: 'PPC Campaign Management', type: 'Course', duration: '4h', icon: '📘' },
-                        { title: 'Content Marketing Strategy', type: 'Video', duration: '90m', icon: '🎥' },
-                        { title: 'CRO Techniques & Tools', type: 'Article', duration: '30m', icon: '📄' }
-                    ]
-                }
-            }
-        };
-        
-        // Default topic categories if subject doesn't match
-        const defaultTopics = {
-            beginner: {
-                topics: ['Fundamentals & Basics', 'Core Concepts', 'Essential Principles', 'Foundation Building', 'Key Terminology'],
-                emoji: '📖',
-                resources: [
-                    { title: 'Complete Beginner Course', type: 'Course', duration: '3h', icon: '📘' },
-                    { title: 'Quick Start Tutorial', type: 'Video', duration: '45m', icon: '🎥' },
-                    { title: 'Essential Guide 2025', type: 'Article', duration: '20m', icon: '📄' }
-                ]
-            },
-            intermediate: {
-                topics: ['Advanced Concepts', 'Practical Applications', 'Professional Techniques', 'Specialized Methods', 'Case Studies'],
-                emoji: '⚡',
-                resources: [
-                    { title: 'Intermediate Masterclass', type: 'Course', duration: '4h', icon: '📘' },
-                    { title: 'Practical Deep Dive', type: 'Video', duration: '1h', icon: '🎥' },
-                    { title: 'Real-World Implementation', type: 'Article', duration: '25m', icon: '📄' }
-                ]
-            },
-            advanced: {
-                topics: ['Expert Strategies', 'Advanced Implementation', 'Cutting-Edge Methods', 'Innovation & Research', 'Mastery Path'],
-                emoji: '🚀',
-                resources: [
-                    { title: 'Advanced Professional Course', type: 'Course', duration: '5h', icon: '📘' },
-                    { title: 'Expert Technical Guide', type: 'Video', duration: '90m', icon: '🎥' },
-                    { title: 'Research & Innovation Methods', type: 'Article', duration: '35m', icon: '📄' }
-                ]
-            }
-        };
-        
         // All emojis for rotating through days
-        const topicEmojis = ['📖', '⚡', '🛠️', '🚀', '🏗️', '⚙️', '🎓', '🌟', '💡', '🔥', '📱', '📊', '🧠', '🔍', '📈'];
+        const topicEmojis = ['📖', '⚡', '🛠️', '�', '🏗️', '⚙️', '🎓', '�', '💡', '🔥', '📱', '�', '🧠', '🔍', '📈'];
         
         scheduleHtml = plan.schedule.map((day, index) => {
-            // Determine subject category (SEO, Marketing, etc.)
-            const subject = plan.subject.toLowerCase();
-            let subjectCategory = 'default';
+            // Extract the actual topic from API response
+            let mainTopic = '';
+            let topicsHtml = '';
             
-            // Find matching subject
-            for (const category in subjectAreas) {
-                if (subject.includes(category.toLowerCase())) {
-                    subjectCategory = category;
-                    break;
-                }
+            // Use actual topics from API if available
+            if (day.topics && day.topics.length > 0) {
+                // Get the first topic as the main topic for the day title
+                mainTopic = day.topics[0].topic || `Day ${day.day} Topics`;
+                
+                // Log to verify we're using API data
+                console.log(`[ROADMAP] Day ${day.day}: Using API topic "${mainTopic}"`);
+                
+                // Generate topics HTML from API data
+                topicsHtml = day.topics.map(topic => 
+                    `<span class="topic-tag">• ${topic.topic} (${topic.hours}h)</span>`
+                ).join('');
+            } else {
+                // Fallback if no topics in API response
+                mainTopic = `${plan.subject} - Day ${day.day}`;
+                topicsHtml = `<span class="topic-tag">• Study Session (${day.hours}h)</span>`;
+                console.warn(`[ROADMAP] Day ${day.day}: No API topics, using fallback`);
             }
             
-            // Determine level (beginner, intermediate, etc.) based on day number
-            let level = 'beginner';
-            if (index >= 5) level = 'advanced';
-            else if (index >= 2) level = 'intermediate';
-            
-            // Get appropriate topic set (either from subject areas or default)
-            const topicSet = subjectCategory !== 'default' 
-                ? subjectAreas[subjectCategory][level] || defaultTopics[level]
-                : defaultTopics[level];
-            
-            // Pick a specific topic from the set for this day
-            const topicIndex = index % topicSet.topics.length;
-            const mainTopic = topicSet.topics[topicIndex];
-            
-            // Generate enhanced topics HTML
-            const topicsHtml = day.topics && day.topics.length > 0 
-                ? day.topics.map(topic => `<span class="topic-tag">• ${topic.topic} (${topic.hours}h)</span>`).join('')
-                : `<span class="topic-tag">• ${mainTopic} (${day.hours}h)</span>`;
-            
-            // Get emoji for this day - use topic set if available, otherwise rotate
-            const emoji = topicSet.emoji || topicEmojis[index % topicEmojis.length];
+            // Get emoji for this day - rotate through emojis
+            const emoji = topicEmojis[index % topicEmojis.length];
             const status = index === 0 ? 'in-progress' : 'not-started';
             const progress = index === 0 ? 25 : 0;
             
-            // Generate resources - use topic set resources if available, otherwise generate
-            const resources = topicSet.resources || [
-                { title: `${mainTopic} - Complete Course`, type: 'Course', duration: `${day.hours}h`, icon: '📘' },
-                { title: `${mainTopic} - Video Tutorial`, type: 'Video', duration: '45m', icon: '🎥' },
-                { title: `${mainTopic} - Practice Guide`, type: 'Article', duration: '20m', icon: '📄' }
+            // Simple fallback resources for data attribute (will be fetched from API when clicked)
+            const fallbackResources = [
+                { title: `${mainTopic} - Course`, type: 'Course', duration: `${day.hours}h`, icon: '📘' },
+                { title: `${mainTopic} - Tutorial`, type: 'Video', duration: '45m', icon: '🎥' },
+                { title: `${mainTopic} - Guide`, type: 'Article', duration: '20m', icon: '📄' }
             ];
             
             const markerIcon = status === 'completed' ? '✓' : emoji;
             const difficulty = index < 3 ? 'easy' : index < 5 ? 'medium' : 'hard';
             const difficultyIcon = difficulty === 'easy' ? '🟢' : difficulty === 'medium' ? '🟡' : '🔴';
-            const resourcesJson = JSON.stringify(resources);
+            const resourcesJson = JSON.stringify(fallbackResources);
             
             return `
                 <div class="roadmap-node ${status}" data-day="${day.day}" data-emoji="${emoji}" data-topic="${mainTopic}" data-resources='${resourcesJson}'>
@@ -590,7 +485,7 @@ function displayAdvancedResults(data, learningStyle = 'mixed') {
                                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.25rem;">
                                     <path d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
                                 </svg>
-                                View ${resources.length} Resources
+                                View Resources
                             </button>
                         </div>
                     </div>
@@ -1531,6 +1426,12 @@ async function openResourcePopup(dayNumber, topicName, fallbackResources) {
     // Close any existing panel
     closeResourcePopup();
     
+    // Create backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'resource-panel-backdrop';
+    backdrop.id = 'resource-panel-backdrop';
+    document.body.appendChild(backdrop);
+    
     // Create side panel
     const sidePanel = document.createElement('div');
     sidePanel.className = 'resource-side-panel';
@@ -1546,7 +1447,7 @@ async function openResourcePopup(dayNumber, topicName, fallbackResources) {
                 </h3>
                 <p style="margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem;">${topicName}</p>
             </div>
-            <button class="side-panel-close" onclick="closeResourcePopup()" title="Close">
+            <button class="side-panel-close" id="close-panel-btn" title="Close (ESC)">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                 </svg>
@@ -1564,10 +1465,36 @@ async function openResourcePopup(dayNumber, topicName, fallbackResources) {
     
     console.log('[SIDE PANEL] Panel created and added to DOM');
     
+    // Add event listeners for closing
+    backdrop.addEventListener('click', () => {
+        console.log('[BACKDROP] Backdrop clicked, closing...');
+        closeResourcePopup();
+    });
+    
+    const closeBtn = document.getElementById('close-panel-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('[CLOSE BTN] Close button clicked, closing...');
+            closeResourcePopup();
+        });
+    }
+    
     // Trigger slide-in animation
     setTimeout(() => {
+        backdrop.classList.add('active');
         sidePanel.classList.add('open');
     }, 10);
+    
+    // Add ESC key listener to close panel
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            console.log('[ESC] Escape key pressed, closing...');
+            closeResourcePopup();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
     
     // Fetch resources from IR system API
     try {
@@ -1701,19 +1628,8 @@ function displayResourcesInSidePanel(sidePanel, dayNumber, topicName, resources,
         `;
     }
     
-    // Warning banner if fallback resources
-    const fallbackWarning = isFallback ? `
-        <div style="background: linear-gradient(135deg, #f59e0b22 0%, #f59e0b11 100%); border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; margin-bottom: 1rem; border-radius: 0.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                <span style="font-size: 1.125rem;">⚠️</span>
-                <strong style="color: #92400e; font-size: 0.875rem;">IR System: No Database Matches</strong>
-            </div>
-            <p style="margin: 0; color: #78350f; font-size: 0.8125rem; line-height: 1.4;">
-                The Information Retrieval system couldn't find exact matches in the resource database for "${topicName}". 
-                Showing general educational platform links instead.
-            </p>
-        </div>
-    ` : '';
+    // Warning banner is removed - we don't need to show this to users
+    const fallbackWarning = '';
     
     // Update side panel content
     sidePanel.innerHTML = `
@@ -1725,8 +1641,9 @@ function displayResourcesInSidePanel(sidePanel, dayNumber, topicName, resources,
                 </h3>
                 <p style="margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem;">${topicName}</p>
                 ${feedback && !isFallback ? `<p style="margin: 0.5rem 0 0 0; opacity: 0.7; font-size: 0.8125rem; font-style: italic; color: #10b981;">💡 ${feedback}</p>` : ''}
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.6; font-size: 0.75rem;">Tip: Click outside or press ESC to close</p>
             </div>
-            <button class="side-panel-close" onclick="closeResourcePopup()" title="Close">
+            <button class="side-panel-close" id="close-panel-btn-final" title="Close">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                 </svg>
@@ -1747,121 +1664,47 @@ function displayResourcesInSidePanel(sidePanel, dayNumber, topicName, resources,
             </div>
         </div>
     `;
+    
+    // Re-attach close button event listener after innerHTML update
+    setTimeout(() => {
+        const closeBtnFinal = document.getElementById('close-panel-btn-final');
+        if (closeBtnFinal) {
+            closeBtnFinal.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('[CLOSE BTN FINAL] Close button clicked, closing...');
+                closeResourcePopup();
+            });
+        }
+    }, 50);
 }
 
 function closeResourcePopup() {
+    console.log('[CLOSE] Closing resource popup...');
+    
     // Close side panel
     const sidePanel = document.getElementById('resource-side-panel');
+    const backdrop = document.getElementById('resource-panel-backdrop');
+    
     if (sidePanel) {
+        console.log('[CLOSE] Found side panel, removing...');
         sidePanel.classList.remove('open');
         setTimeout(() => {
             sidePanel.remove();
         }, 300);
     }
     
+    if (backdrop) {
+        console.log('[CLOSE] Found backdrop, removing...');
+        backdrop.classList.remove('active');
+        setTimeout(() => {
+            backdrop.remove();
+        }, 300);
+    }
+    
     // Legacy: also close old popup overlay if exists
     const overlay = document.querySelector('.resource-popup-overlay');
     if (overlay) {
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            overlay.remove();
-        }, 300);
-    }
-}
-    // Generate resource items HTML from API data
-    let resourceItemsHtml = '';
-    
-    if (resources && resources.length > 0) {
-        resourceItemsHtml = resources.map((resource, index) => {
-            const relevanceScore = resource.similarity_score ? Math.round(resource.similarity_score * 100) : 0;
-            const resourceType = resource.resource_type || 'general';
-            const difficulty = resource.difficulty || 'N/A';
-            const url = resource.url || `https://www.google.com/search?q=${encodeURIComponent(topicName)}`;
-            
-            // Get icon based on resource type
-            const iconMap = {
-                'online_course': '📘',
-                'video': '🎥',
-                'article': '📄',
-                'book': '📚',
-                'tutorial': '🎓',
-                'interactive': '🖱️',
-                'documentation': '📋',
-                'podcast': '🎧',
-                'general': '📖'
-            };
-            const icon = iconMap[resourceType] || '📖';
-            
-            return `
-                <div class="resource-item-flashcard" style="animation-delay: ${0.1 + index * 0.1}s">
-                    <div class="resource-flashcard-icon">${icon}</div>
-                    <div class="resource-flashcard-content">
-                        <h4>${resource.title || 'Educational Resource'}</h4>
-                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0.5rem 0;">
-                            ${resource.description || 'Quality learning resource for ' + topicName}
-                        </p>
-                        <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
-                            <span class="resource-type-badge">${resourceType.replace('_', ' ')}</span>
-                            <span class="resource-type-badge" style="background: ${difficulty === 'beginner' ? '#10b981' : difficulty === 'intermediate' ? '#f59e0b' : '#ef4444'}33;">
-                                ${difficulty}
-                            </span>
-                            ${relevanceScore > 0 ? `<span style="color: #10b981; font-size: 0.875rem;">✓ ${relevanceScore}% match</span>` : ''}
-                        </div>
-                    </div>
-                    <button class="resource-action-btn" onclick="window.open('${url}', '_blank')">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.5rem;">
-                            <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-                            <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
-                        </svg>
-                        View Resource
-                    </button>
-                </div>
-            `;
-        }).join('');
-    } else {
-        // No resources found
-        resourceItemsHtml = `
-            <div style="text-align: center; padding: 2rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">🔍</div>
-                <p style="color: #6b7280;">No specific resources found for this topic.</p>
-                <p style="color: #9ca3af; font-size: 0.875rem;">Try searching on educational platforms directly.</p>
-            </div>
-        `;
-    }
-    
-    // Update flashcard content
-    flashcard.innerHTML = `
-        <div class="flashcard-header">
-            <div>
-                <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700;">📚 Day ${dayNumber} Resources</h3>
-                <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem;">${topicName}</p>
-                ${feedback ? `<p style="margin: 0.5rem 0 0 0; opacity: 0.7; font-size: 0.875rem; font-style: italic;">💡 ${feedback}</p>` : ''}
-            </div>
-            <button class="flashcard-close" onclick="closeResourcePopup()">
-                <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                </svg>
-            </button>
-        </div>
-        <div class="flashcard-body">
-            <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem;">
-                🎯 Recommended resources from our IR system to help you master this topic!
-            </p>
-            <div class="flashcard-resources-list">
-                ${resourceItemsHtml}
-            </div>
-            <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                <p style="color: #9ca3af; font-size: 0.875rem; margin: 0;">
-                    💡 Tip: Resources are ranked by relevance using our IR system
-                </p>
-            </div>
-        </div>
-    `;
-
-
-function closeResourcePopup() {
-    const overlay = document.querySelector('.resource-popup-overlay');
-    if (overlay) {
+        console.log('[CLOSE] Found legacy overlay, removing...');
         overlay.style.opacity = '0';
         setTimeout(() => {
             overlay.remove();

@@ -702,7 +702,7 @@ class ScheduleCreatorAgent:
         # If no topics found, try to use AI topic generator
         if not topics or len(topics) < 3:
             print(f"[AI] Extracted {len(topics)} topics, generating more with AI...")
-            topics = self._generate_dynamic_topics(subject, 8)
+            topics = self._generate_dynamic_topics(subject, 8, knowledge_level)
         
         # Calculate hours based on difficulty
         hours_per_topic = 3 if knowledge_level == "beginner" else 2.5 if knowledge_level == "intermediate" else 2
@@ -713,14 +713,62 @@ class ScheduleCreatorAgent:
             "topics": topics[:10]  # Limit to 10 topics
         }
     
-    def _generate_dynamic_topics(self, subject: str, total_days: int) -> List[str]:
+    def _generate_dynamic_topics(self, subject: str, total_days: int, knowledge_level: str = "intermediate") -> List[str]:
         """
         AI-powered topic generation using Gemini API directly for fully dynamic content.
-        NO templates, NO hardcoding - pure AI generation based on subject.
+        NO templates, NO hardcoding - pure AI generation based on subject and knowledge level.
         """
-        print(f"\n[DYNAMIC TOPICS] Starting generation for {subject}")
+        print(f"\n[DYNAMIC TOPICS] Starting generation for {subject} (Level: {knowledge_level})")
         num_topics = max(3, min(total_days, 10))
-        print(f"[DYNAMIC TOPICS] Target: {num_topics} topics")
+        print(f"[DYNAMIC TOPICS] Target: {num_topics} topics at {knowledge_level} level")
+        
+        # Level-specific instructions for Gemini
+        level_instructions = {
+            "beginner": """
+            BEGINNER LEVEL - Focus on:
+            - Fundamental concepts and basic terminology
+            - Step-by-step introductions
+            - Simple, easy-to-understand topics
+            - Building foundational knowledge
+            - Basic tools and getting started guides
+            
+            Examples for "SEO" beginner:
+            - "What is SEO and Why It Matters"
+            - "Understanding Search Engines Basics"
+            - "Introduction to Keywords and Search Intent"
+            - "Setting Up Google Search Console"
+            """,
+            "intermediate": """
+            INTERMEDIATE LEVEL - Focus on:
+            - Practical applications and real-world use
+            - Combining multiple concepts
+            - Hands-on implementation
+            - Problem-solving techniques
+            - Industry standard practices
+            
+            Examples for "SEO" intermediate:
+            - "Keyword Research Strategy and Tools"
+            - "On-Page Optimization Techniques"
+            - "Building Quality Backlinks"
+            - "Technical SEO Fundamentals"
+            """,
+            "advanced": """
+            ADVANCED LEVEL - Focus on:
+            - Expert-level strategies and optimization
+            - Complex integrations and architectures
+            - Performance tuning and scaling
+            - Advanced tools and automation
+            - Industry leadership and innovation
+            
+            Examples for "SEO" advanced:
+            - "Advanced Technical SEO Auditing"
+            - "JavaScript SEO and SPA Optimization"
+            - "Enterprise-Scale SEO Strategy"
+            - "AI-Powered SEO Automation"
+            """
+        }
+        
+        level_instruction = level_instructions.get(knowledge_level, level_instructions["intermediate"])
         
         # Try Gemini API first for fully AI-generated content
         if self.genai_initialized and hasattr(self, 'model'):
@@ -729,32 +777,38 @@ class ScheduleCreatorAgent:
                 prompt = f"""
                 You are an expert curriculum designer. Generate {num_topics} specific, actionable learning topics for: "{subject}"
                 
+                STUDENT LEVEL: {knowledge_level.upper()}
+                {level_instruction}
+                
                 CRITICAL RULES:
                 1. Each topic must be UNIQUE and SPECIFIC (not generic)
-                2. Topics should progressively build skills from foundational to advanced
+                2. Topics should be appropriate for {knowledge_level} level students
                 3. Include concrete concepts, tools, or skills in each topic
                 4. Vary the format - don't use repetitive patterns like "Introduction/Intermediate/Advanced"
                 5. Make topics practical and directly applicable
+                6. ENSURE topics match the complexity of {knowledge_level} level
                 
                 BAD Examples (too generic):
                 - Introduction to {subject}
                 - Intermediate {subject} Concepts
                 - Advanced {subject}
                 
-                GOOD Examples:
-                - For "Python": "Variables and Data Types in Practice", "Writing Reusable Functions and Modules", "Working with Lists and Dictionaries"
-                - For "Photography": "Understanding Exposure Triangle", "Composition Techniques and Rule of Thirds", "Working with Natural vs Artificial Light"
+                GOOD Examples depend on level:
+                - BEGINNER "Python": "What Are Variables and Data Types", "Your First Python Program", "Understanding Print and Input Functions"
+                - INTERMEDIATE "Python": "Writing Reusable Functions and Modules", "Working with Lists and Dictionaries", "File Handling and Data Processing"
+                - ADVANCED "Python": "Metaclasses and Decorators", "Async/Await and Concurrency", "Building Scalable Python Applications"
                 
                 Return ONLY a JSON array of topic strings, no extra text:
                 ["Topic 1", "Topic 2", "Topic 3", ...]
                 """
                 
                 print(f"[DYNAMIC TOPICS] Sending request to Gemini...")
+                print(f"[DYNAMIC TOPICS] 🎯 LEVEL: {knowledge_level.upper()} - This will determine topic complexity!")
                 response = self.model.generate_content(prompt)
                 response_text = response.text.strip()
                 
                 print(f"[DYNAMIC TOPICS] Response received: {len(response_text)} chars")
-                print(f"[DYNAMIC TOPICS] First 150 chars: {response_text[:150]}")
+                print(f"[DYNAMIC TOPICS] First 200 chars: {response_text[:200]}")
                 
                 # Clean markdown if present
                 import re
@@ -789,6 +843,9 @@ class ScheduleCreatorAgent:
                         
                         if len(valid_topics) >= 3:
                             print(f"[AI SUCCESS] ✅ Generated {len(valid_topics)} dynamic topics via Gemini")
+                            print(f"[AI SUCCESS] 🎯 Topics for {knowledge_level.upper()} level:")
+                            for i, topic in enumerate(valid_topics[:5], 1):
+                                print(f"[AI SUCCESS]    {i}. {topic}")
                             return valid_topics[:num_topics]
                         else:
                             print(f"[DYNAMIC TOPICS] ⚠️ Only {len(valid_topics)} valid topics after filtering")
@@ -819,49 +876,63 @@ class ScheduleCreatorAgent:
         else:
             print(f"[DYNAMIC TOPICS] ❌ Gemini not initialized (genai_initialized={self.genai_initialized}, has_model={hasattr(self, 'model')})")
         
-        # Fallback: Use intelligent topic generator (non-template based)
+        # Fallback: Use intelligent topic generator (non-template based) - ONLY AS LAST RESORT
         if INTELLIGENT_TOPICS_AVAILABLE:
             try:
-                print(f"[FALLBACK] Using intelligent topic generator for {subject}")
+                print(f"[FALLBACK] ⚠️ Using intelligent topic generator for {subject} (Gemini failed)")
                 topics = self.topic_generator.generate_contextual_topics(subject, num_topics)
                 
-                # Filter out generic patterns
+                # Aggressively filter out generic patterns - we don't want these!
                 filtered_topics = []
+                generic_patterns = [
+                    'introduction to', 
+                    'intermediate', 
+                    'basics and getting started',
+                    'practical', 
+                    'applications',
+                    'mastery',
+                    'advanced.*mastery',
+                    'practical.*applications',
+                    'getting started',
+                    'fundamentals and core concepts'
+                ]
+                
                 for topic in topics:
                     topic_lower = topic.lower()
-                    generic_patterns = ['introduction to', 'intermediate', 'basics and getting started']
                     
-                    # If it's too generic, try to make it more specific
-                    if any(pattern in topic_lower for pattern in generic_patterns):
-                        # Skip overly generic topics
-                        print(f"[FALLBACK]   ✗ Filtered out: {topic}")
+                    # Check if topic matches any generic pattern
+                    is_generic = any(pattern in topic_lower for pattern in generic_patterns)
+                    
+                    if is_generic:
+                        # Skip overly generic topics - we don't want these
+                        print(f"[FALLBACK]   ✗ Filtered out generic: {topic}")
                         continue
                     
                     filtered_topics.append(topic)
                     print(f"[FALLBACK]   ✓ {topic}")
                 
-                # If we filtered out too many, use original
+                # If we filtered out too many, DON'T use the generic ones - better to have fewer good topics
                 if len(filtered_topics) >= 3:
                     print(f"[FALLBACK] ✅ Using {len(filtered_topics)} filtered topics")
                     return filtered_topics[:num_topics]
                 else:
-                    print(f"[FALLBACK] ⚠️ Using {len(topics)} original topics (not enough after filtering)")
-                    return topics[:num_topics]
+                    print(f"[FALLBACK] ❌ Not enough quality topics after filtering ({len(filtered_topics)} topics)")
+                    # Don't return generic topics - fall through to last resort
                     
             except Exception as e:
                 print(f"[FALLBACK ERROR] ❌ Intelligent generator failed: {e}")
         
-        # Last resort fallback - but make it more specific
-        print(f"[LAST RESORT] ⚠️ Using basic fallback for {subject}")
+        # Last resort fallback - but make it more specific to the subject
+        print(f"[LAST RESORT] ⚠️ Using subject-specific fallback for {subject}")
         return [
-            f"Core Fundamentals of {subject}",
-            f"Practical {subject} Skills and Techniques", 
-            f"Working with {subject} Tools and Resources",
-            f"Building {subject} Projects",
-            f"Advanced {subject} Concepts",
-            f"Professional {subject} Best Practices",
-            f"{subject} Problem-Solving Strategies",
-            f"Real-World {subject} Applications"
+            f"Understanding {subject}: Core Principles",
+            f"{subject} Essential Skills Development", 
+            f"Working with {subject}: Tools and Methods",
+            f"Hands-on {subject} Practice and Projects",
+            f"Deep Dive into {subject} Concepts",
+            f"{subject} Professional Techniques",
+            f"{subject} Problem-Solving and Analysis",
+            f"Real-World {subject} Implementation"
         ][:num_topics]
     
     def _find_similar_subject(self, subject: str) -> Dict:
