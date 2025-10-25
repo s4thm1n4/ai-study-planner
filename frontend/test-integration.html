@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User Assessment Integration</title>
+    <link rel="stylesheet" href="user-assessment.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 User Assessment Integration Test</h1>
+        <p>This page tests the user assessment system integration</p>
+        
+        <div id="user-assessment-container"></div>
+        
+        <div class="test-results" id="test-results" style="display: none;">
+            <h3>Assessment Data Collected:</h3>
+            <pre id="assessment-data"></pre>
+        </div>
+        
+        <button onclick="showAssessmentData()" style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Show Assessment Data
+        </button>
+    </div>
+
+    <script src="user-assessment.js"></script>
+    <script>
+        // Initialize assessment when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.userAssessment) {
+                window.userAssessment.initialize();
+            }
+        });
+        
+        // Test function to show collected data
+        function showAssessmentData() {
+            if (window.userAssessment) {
+                const data = window.userAssessment.getData();
+                document.getElementById('assessment-data').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('test-results').style.display = 'block';
+            }
+        }
+        
+        // Mock generateAdvancedPlan function for testing
+        async function generateAdvancedPlan() {
+            console.log('🚀 Generate Advanced Plan called!');
+            
+            if (window.userAssessment) {
+                const data = window.userAssessment.getData();
+                console.log('Assessment data:', data);
+                
+                // Show the data
+                document.getElementById('assessment-data').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('test-results').style.display = 'block';
+                
+                alert('✅ Assessment complete! Check console and the data display below.');
+            } else {
+                alert('❌ User assessment not available');
+            }
+        }
+        
+        // Mock toggleCustomDuration function
+        function toggleCustomDuration() {
+            const totalDaysSelect = document.getElementById('totalDays');
+            const customDaysInput = document.getElementById('customDays');
+            
+            if (totalDaysSelect && customDaysInput) {
+                if (totalDaysSelect.value === 'custom') {
+                    customDaysInput.style.display = 'block';
+                    customDaysInput.required = true;
+                } else {
+                    customDaysInput.style.display = 'none';
+                    customDaysInput.required = false;
+                    customDaysInput.value = '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

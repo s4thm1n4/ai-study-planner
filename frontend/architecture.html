@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Planner - Technical Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            color: #1f2937;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .architecture {
+            background: white;
+            border-radius: 1rem;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+        }
+
+        .layer {
+            margin: 2rem 0;
+            padding: 2rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 1rem;
+            position: relative;
+            background: #fafafa;
+        }
+
+        .layer-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .layer-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .frontend-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .api-icon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .agent-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .ai-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .data-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        .layer-title {
+            flex-grow: 1;
+        }
+
+        .layer-title h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .layer-title p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .component {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .component:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .component h3 {
+            color: #374151;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .component-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            color: white;
+            background: #6366f1;
+        }
+
+        .component ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .component li {
+            margin: 0.5rem 0;
+            padding: 0.25rem 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .component li::before {
+            content: "▶";
+            color: #6366f1;
+            font-size: 0.7rem;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .flow-arrow::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #6366f1;
+        }
+
+        .flow-arrow span {
+            background: #6366f1;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .tech-details {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .tech-badge {
+            background: #6366f1;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .data-flow {
+            background: #f0f9ff;
+            border: 2px dashed #0ea5e9;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .data-flow h3 {
+            color: #0ea5e9;
+            margin-bottom: 1rem;
+        }
+
+        .flow-steps {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .flow-step h4 {
+            color: #1f2937;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-step p {
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #4338ca;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .components-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-steps {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="documentation.html" class="back-link">
+            ← Back to Documentation
+        </a>
+
+        <div class="header">
+            <h1>🏗️ Technical Architecture</h1>
+            <p>Detailed system design and component interaction flows</p>
+        </div>
+
+        <div class="architecture">
+            <!-- Frontend Layer -->
+            <div class="layer">
+                <div class="layer-header">
+                    <div class="layer-icon frontend-icon">🎨</div>
+                    <div class="layer-title">
+                        <h2>Frontend Presentation Layer</h2>
+                        <p>User interface and client-side processing</p>
+                    </div>
+                </div>
+                <div class="components-grid">
+                    <div class="component">
+                        <h3><div class="component-icon">📱</div>Responsive UI</h3>
+                        <ul>
+                            <li>HTML5 semantic structure</li>
+                            <li>CSS3 animations & transitions</li>
+                            <li>Mobile-first design</li>
+                            <li>Cross-browser compatibility</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">HTML5</span>
+                                <span class="tech-badge">CSS3</span>
+                                <span class="tech-badge">Flexbox/Grid</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">⚡</div>Interactive Features</h3>
+                        <ul>
+                            <li>JavaScript ES6+ modules</li>
+                            <li>Event-driven architecture</li>
+                            <li>Real-time mood selection</li>
+                            <li>Dynamic content updates</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">JavaScript</span>
+                                <span class="tech-badge">Async/Await</span>
+                                <span class="tech-badge">DOM APIs</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">📊</div>Visualizations</h3>
+                        <ul>
+                            <li>Progress tracking charts</li>
+                            <li>Streak counters</li>
+                            <li>Achievement systems</li>
+                            <li>Animated celebrations</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Chart.js</span>
+                                <span class="tech-badge">CSS Keyframes</span>
+                                <span class="tech-badge">SVG</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrow">
+                <span>HTTP/HTTPS Requests</span>
+            </div>
+
+            <!-- API Layer -->
+            <div class="layer">
+                <div class="layer-header">
+                    <div class="layer-icon api-icon">🌐</div>
+                    <div class="layer-title">
+                        <h2>API Gateway Layer</h2>
+                        <p>RESTful endpoints and request processing</p>
+                    </div>
+                </div>
+                <div class="components-grid">
+                    <div class="component">
+                        <h3><div class="component-icon">🔐</div>Security Module</h3>
+                        <ul>
+                            <li>JWT token authentication</li>
+                            <li>Request validation</li>
+                            <li>Rate limiting</li>
+                            <li>CORS configuration</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">FastAPI</span>
+                                <span class="tech-badge">JWT</span>
+                                <span class="tech-badge">Pydantic</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">🚦</div>Route Handlers</h3>
+                        <ul>
+                            <li>/api/plan - Study plan generation</li>
+                            <li>/api/resources - Content retrieval</li>
+                            <li>/api/motivation - Mood processing</li>
+                            <li>/api/progress - Tracking updates</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Async Routes</span>
+                                <span class="tech-badge">Type Hints</span>
+                                <span class="tech-badge">Error Handling</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">📋</div>Request Processing</h3>
+                        <ul>
+                            <li>Input sanitization</li>
+                            <li>Data validation</li>
+                            <li>Response formatting</li>
+                            <li>Error responses</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Pydantic Models</span>
+                                <span class="tech-badge">JSON Schemas</span>
+                                <span class="tech-badge">HTTP Status</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrow">
+                <span>Agent Coordination</span>
+            </div>
+
+            <!-- Multi-Agent System -->
+            <div class="layer">
+                <div class="layer-header">
+                    <div class="layer-icon agent-icon">🤖</div>
+                    <div class="layer-title">
+                        <h2>Multi-Agent System</h2>
+                        <p>Specialized AI agents for different tasks</p>
+                    </div>
+                </div>
+                <div class="components-grid">
+                    <div class="component">
+                        <h3><div class="component-icon">🛡️</div>Security Agent</h3>
+                        <ul>
+                            <li>Input validation & sanitization</li>
+                            <li>XSS prevention</li>
+                            <li>SQL injection protection</li>
+                            <li>Content safety checks</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">RegEx Validation</span>
+                                <span class="tech-badge">HTML Escaping</span>
+                                <span class="tech-badge">Content Filtering</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">📅</div>Schedule Agent</h3>
+                        <ul>
+                            <li>Personalized plan generation</li>
+                            <li>Learning style adaptation</li>
+                            <li>Time optimization</li>
+                            <li>Difficulty progression</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Algorithm Logic</span>
+                                <span class="tech-badge">JSON Templates</span>
+                                <span class="tech-badge">Time Calculations</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">🔍</div>Resource Agent</h3>
+                        <ul>
+                            <li>Content discovery</li>
+                            <li>Relevance scoring</li>
+                            <li>URL optimization</li>
+                            <li>Quality filtering</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Fuzzy Matching</span>
+                                <span class="tech-badge">JSON Datasets</span>
+                                <span class="tech-badge">Similarity Scoring</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">💝</div>Motivation Agent</h3>
+                        <ul>
+                            <li>Sentiment analysis</li>
+                            <li>Mood-based responses</li>
+                            <li>Personalized messaging</li>
+                            <li>Context awareness</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Sentiment AI</span>
+                                <span class="tech-badge">Mood Profiling</span>
+                                <span class="tech-badge">Dynamic Content</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrow">
+                <span>AI Processing Pipeline</span>
+            </div>
+
+            <!-- AI Processing -->
+            <div class="layer">
+                <div class="layer-header">
+                    <div class="layer-icon ai-icon">🧠</div>
+                    <div class="layer-title">
+                        <h2>AI Processing Layer</h2>
+                        <p>Natural language processing and machine learning</p>
+                    </div>
+                </div>
+                <div class="components-grid">
+                    <div class="component">
+                        <h3><div class="component-icon">📝</div>NLP Engine</h3>
+                        <ul>
+                            <li>Text lowercasing</li>
+                            <li>Punctuation removal</li>
+                            <li>Tokenization</li>
+                            <li>Stopword removal</li>
+                            <li>Stemming & Lemmatization</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Python Built-ins</span>
+                                <span class="tech-badge">RegEx</span>
+                                <span class="tech-badge">String Processing</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">🎭</div>Sentiment Analyzer</h3>
+                        <ul>
+                            <li>Multi-dimensional analysis</li>
+                            <li>Energy level detection</li>
+                            <li>Confidence scoring</li>
+                            <li>Stress level assessment</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Custom Algorithm</span>
+                                <span class="tech-badge">Pattern Matching</span>
+                                <span class="tech-badge">Scoring Logic</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">🎯</div>Recommendation Engine</h3>
+                        <ul>
+                            <li>Content matching</li>
+                            <li>Difficulty adaptation</li>
+                            <li>Learning path optimization</li>
+                            <li>Progress-based suggestions</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">Similarity Algorithms</span>
+                                <span class="tech-badge">Content Analysis</span>
+                                <span class="tech-badge">User Profiling</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrow">
+                <span>Data Persistence</span>
+            </div>
+
+            <!-- Data Layer -->
+            <div class="layer">
+                <div class="layer-header">
+                    <div class="layer-icon data-icon">💾</div>
+                    <div class="layer-title">
+                        <h2>Data Storage Layer</h2>
+                        <p>Persistent storage and data management</p>
+                    </div>
+                </div>
+                <div class="components-grid">
+                    <div class="component">
+                        <h3><div class="component-icon">🗄️</div>SQLite Database</h3>
+                        <ul>
+                            <li>User accounts & authentication</li>
+                            <li>Study plans & progress</li>
+                            <li>Session tracking</li>
+                            <li>Achievement records</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">SQLite</span>
+                                <span class="tech-badge">SQL Queries</span>
+                                <span class="tech-badge">ACID Compliance</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">📄</div>JSON Datasets</h3>
+                        <ul>
+                            <li>Educational resources</li>
+                            <li>Subject databases</li>
+                            <li>Motivation content</li>
+                            <li>Configuration data</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">JSON Files</span>
+                                <span class="tech-badge">File I/O</span>
+                                <span class="tech-badge">Data Validation</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <h3><div class="component-icon">🔄</div>Caching Layer</h3>
+                        <ul>
+                            <li>Frequent query results</li>
+                            <li>NLP processing cache</li>
+                            <li>User session data</li>
+                            <li>Resource metadata</li>
+                        </ul>
+                        <div class="tech-details">
+                            <div class="tech-stack">
+                                <span class="tech-badge">In-Memory Cache</span>
+                                <span class="tech-badge">Local Storage</span>
+                                <span class="tech-badge">TTL Management</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow Diagram -->
+        <div class="data-flow">
+            <h3>📊 Complete Data Flow Pipeline</h3>
+            <p>How information moves through the system from user input to personalized output</p>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <h4>1. User Input</h4>
+                    <p>Subject, hours, mood selection via frontend interface</p>
+                </div>
+                <div class="flow-step">
+                    <h4>2. API Processing</h4>
+                    <p>FastAPI validates and routes request to appropriate agents</p>
+                </div>
+                <div class="flow-step">
+                    <h4>3. Security Check</h4>
+                    <p>Input sanitization and validation by Security Agent</p>
+                </div>
+                <div class="flow-step">
+                    <h4>4. NLP Processing</h4>
+                    <p>Text analysis using 6 core NLP techniques</p>
+                </div>
+                <div class="flow-step">
+                    <h4>5. Agent Coordination</h4>
+                    <p>Multiple agents process different aspects simultaneously</p>
+                </div>
+                <div class="flow-step">
+                    <h4>6. Data Retrieval</h4>
+                    <p>Resources fetched and personalized content generated</p>
+                </div>
+                <div class="flow-step">
+                    <h4>7. Response Assembly</h4>
+                    <p>Coordinated results combined into unified response</p>
+                </div>
+                <div class="flow-step">
+                    <h4>8. UI Update</h4>
+                    <p>Frontend dynamically updates with personalized content</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Study Planner</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --background: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="2" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="2" fill="white" opacity="0.1"/></svg>');
+            opacity: 0.3;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            animation: fadeInUp 0.6s ease 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .action-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-content p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Current Plan Section */
+        .section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Coming Soon Message */
+        .coming-soon {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(16, 185, 129, 0.05));
+            border-radius: 16px;
+            border: 2px dashed var(--border);
+        }
+
+        .coming-soon-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .coming-soon h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .coming-soon p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Premium Upsell */
+        .premium-upsell {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .premium-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .premium-icon {
+            font-size: 2.5rem;
+        }
+
+        .premium-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .premium-features {
+            list-style: none;
+            margin: 1.5rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .premium-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .premium-features li i {
+            color: #fef3c7;
+        }
+
+        .btn-premium {
+            background: white;
+            color: var(--accent);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-premium:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="welcome-content">
+            <h1 class="welcome-title">🎉 Welcome, <span id="userName">Learner</span>!</h1>
+            <p class="welcome-subtitle">Your personalized study plan for <strong id="userSubject">your subject</strong> is ready</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card" onclick="window.location.href='enhanced-index.html'">
+                <div class="action-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="action-content">
+                    <h3>View Study Schedule</h3>
+                    <p>See your personalized plan</p>
+                </div>
+            </div>
+
+            <div class="action-card" onclick="window.location.href='enhanced-index.html#resources'">
+                <div class="action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="action-content">
+                    <h3>Find Resources</h3>
+                    <p>Curated learning materials</p>
+                </div>
+            </div>
+
+            <div class="action-card" onclick="alert('Progress tracking coming soon!')">
+                <div class="action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="action-content">
+                    <h3>Track Progress</h3>
+                    <p>Monitor your learning journey</p>
+                </div>
+            </div>
+
+            <div class="action-card" onclick="alert('AI Coach coming soon!')">
+                <div class="action-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="action-content">
+                    <h3>AI Coach</h3>
+                    <p>Get personalized motivation</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium Upsell -->
+        <div class="premium-upsell">
+            <div class="premium-header">
+                <span class="premium-icon">💎</span>
+                <div>
+                    <div class="premium-title">Upgrade to Premium</div>
+                    <p style="opacity: 0.95; margin: 0;">Unlock the full power of AI-driven learning</p>
+                </div>
+            </div>
+            <ul class="premium-features">
+                <li><i class="fas fa-check-circle"></i> Unlimited study plans</li>
+                <li><i class="fas fa-check-circle"></i> Advanced resource recommendations</li>
+                <li><i class="fas fa-check-circle"></i> Progress analytics dashboard</li>
+                <li><i class="fas fa-check-circle"></i> AI motivation coaching</li>
+                <li><i class="fas fa-check-circle"></i> Calendar sync & reminders</li>
+                <li><i class="fas fa-check-circle"></i> Priority support</li>
+            </ul>
+            <button class="btn-premium" onclick="showPricing()">
+                <i class="fas fa-crown"></i> Upgrade Now - $9.99/month
+            </button>
+        </div>
+
+        <!-- Current Plan Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">📅 Your Study Plan</h2>
+                <a href="enhanced-index.html" class="btn btn-primary">
+                    Start Learning <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="coming-soon">
+                <div class="coming-soon-icon">🚀</div>
+                <h3>Your Personalized Plan is Being Generated</h3>
+                <p>Our AI agents are analyzing your profile and creating the perfect study schedule for you.</p>
+                <button class="btn btn-primary" onclick="window.location.href='enhanced-index.html'">
+                    Generate Plan Now <i class="fas fa-magic"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Resources & Progress Grid -->
+        <div class="grid-2">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📚 Recommended Resources</h2>
+                </div>
+                <div class="coming-soon" style="padding: 2rem 1rem;">
+                    <div class="coming-soon-icon" style="font-size: 2.5rem;">🎯</div>
+                    <h3 style="font-size: 1.2rem;">Resources Ready</h3>
+                    <p style="margin-bottom: 1rem;">Curated materials for your level</p>
+                    <a href="enhanced-index.html#resources" class="btn btn-outline">
+                        View Resources
+                    </a>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📊 Progress Tracker</h2>
+                </div>
+                <div class="coming-soon" style="padding: 2rem 1rem;">
+                    <div class="coming-soon-icon" style="font-size: 2.5rem;">🔒</div>
+                    <h3 style="font-size: 1.2rem;">Premium Feature</h3>
+                    <p style="margin-bottom: 1rem;">Unlock progress tracking</p>
+                    <button class="btn btn-outline" onclick="showPricing()">
+                        Upgrade <i class="fas fa-crown"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load user data from localStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const userDataStr = localStorage.getItem('aiStudyPlannerUserData');
+            
+            if (userDataStr) {
+                const userData = JSON.parse(userDataStr);
+                
+                // Update UI with user data
+                if (userData.subject) {
+                    document.getElementById('userSubject').textContent = userData.subject;
+                }
+                
+                // Show welcome message if just completed onboarding
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('onboarding') === 'complete') {
+                    showWelcomeMessage();
+                }
+            } else {
+                // No user data, redirect to onboarding
+                window.location.href = 'onboarding.html';
+            }
+        });
+
+        function showWelcomeMessage() {
+            // You could show a toast/notification here
+            console.log('Welcome! Onboarding complete.');
+        }
+
+        function showPricing() {
+            alert('Premium Features:\n\n' +
+                  '✅ Unlimited study plans\n' +
+                  '✅ Advanced AI coaching\n' +
+                  '✅ Progress analytics\n' +
+                  '✅ Priority support\n' +
+                  '✅ Calendar integration\n\n' +
+                  'Only $9.99/month\n\n' +
+                  'For this demo, all features are available in free plan!');
+        }
+    </script>
+</body>
+</html>
