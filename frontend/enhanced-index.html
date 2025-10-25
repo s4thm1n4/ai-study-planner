@@ -200,6 +200,25 @@
             padding: 0 2rem;
         }
 
+        .theme-toggle {
+            background: none;
+            border: 2px solid #6366f1;
+            color: #6366f1;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: #6366f1;
+            color: white;
+        }
+
         .welcome-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -4371,8 +4390,8 @@
             
             <div class="user-nav">
                 <div class="nav-links">
-                    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
-                        <span id="darkModeIcon">🌙</span>
+                    <button id="themeToggle" class="theme-toggle" title="Switch to dark mode">
+                        <i class="fas fa-moon"></i>
                     </button>
                     <a href="index.html" class="nav-link">
                         <i class="fas fa-home"></i> Home
@@ -6921,5 +6940,40 @@
     <!-- User Assessment JavaScript -->
     <script src="user-assessment.js"></script>
     <script src="enhanced-app.js"></script>
+    <script>// Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // Load saved theme on page load
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.contains('dark-mode');
+            const newTheme = isDark ? 'light' : 'dark';
+            
+            if (newTheme === 'dark') {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+            
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            const icon = themeToggle.querySelector('i');
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun';
+                themeToggle.title = 'Switch to light mode';
+            } else {
+                icon.className = 'fas fa-moon';
+                themeToggle.title = 'Switch to dark mode';
+            }
+        }</script>
 </body>
 </html>
