@@ -722,12 +722,30 @@
             const userData = localStorage.getItem('aiStudyPlannerUserData');
             const skipOnboarding = sessionStorage.getItem('skipOnboarding');
             
+            // Check if user came from free plan onboarding
+            if (userData) {
+                const userDataObj = JSON.parse(userData);
+                if (userDataObj.subject) {
+                    // Auto-populate the demo input with their subject
+                    const demoInput = document.getElementById('demo-goal');
+                    if (demoInput) {
+                        demoInput.value = userDataObj.subject;
+                        // Scroll to the demo section if URL has hash
+                        if (window.location.hash === '#try-now') {
+                            setTimeout(() => {
+                                document.getElementById('try-now').scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                        }
+                    }
+                }
+            }
+            
             // If no user data and hasn't skipped, redirect to onboarding
             if (!userData && !skipOnboarding) {
                 // Show a welcome modal or redirect directly
                 const shouldOnboard = confirm('Welcome! Would you like a personalized experience? We\'ll guide you through a quick 2-minute setup.');
                 if (shouldOnboard) {
-                    window.location.href = 'onboarding.html';
+                    window.location.href = 'enhanced-index.html';
                 } else {
                     sessionStorage.setItem('skipOnboarding', 'true');
                 }

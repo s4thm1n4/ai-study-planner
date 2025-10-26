@@ -4715,37 +4715,38 @@
                                         <!-- Free Plan -->
                                         <div class="pricing-card free-card">
                                             <div class="pricing-header">
-                                                <h4>Free Plan</h4>
+                                                <h4>🆓 Free Plan</h4>
                                                 <div class="price">$0<span>/month</span></div>
+                                                <p class="price-note">Perfect for getting started</p>
                                             </div>
                                             <div class="pricing-features">
                                                 <div class="feature">
                                                     <i class="fas fa-check" style="color: #10b981;"></i>
-                                                    <span>Basic study plans (3 days)</span>
+                                                    <span>3-day study plans</span>
                                                 </div>
                                                 <div class="feature">
                                                     <i class="fas fa-check" style="color: #10b981;"></i>
-                                                    <span>Limited resources (3 per topic)</span>
+                                                    <span>Basic resources (3 per topic)</span>
                                                 </div>
-                                                <div class="feature disabled">
-                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
                                                     <span>Progress tracking</span>
                                                 </div>
-                                                <div class="feature disabled">
-                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
-                                                    <span>AI motivation coach</span>
+                                                <div class="feature">
+                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <span>AI study schedule</span>
                                                 </div>
                                                 <div class="feature disabled">
                                                     <i class="fas fa-times" style="color: #ef4444;"></i>
-                                                    <span>Calendar integration</span>
+                                                    <span>Advanced customization</span>
                                                 </div>
                                                 <div class="feature disabled">
                                                     <i class="fas fa-times" style="color: #ef4444;"></i>
-                                                    <span>Priority support</span>
+                                                    <span>Unlimited resources</span>
                                                 </div>
                                             </div>
                                             <button class="pricing-btn free-btn" onclick="continueWithFree()">
-                                                Continue with Free
+                                                <i class="fas fa-arrow-right"></i> Try Free Demo
                                             </button>
                                         </div>
 
@@ -4755,9 +4756,9 @@
                                                 <i class="fas fa-star"></i> MOST POPULAR
                                             </div>
                                             <div class="pricing-header">
-                                                <h4>Premium</h4>
-                                                <div class="price">$4.99<span>/month</span></div>
-                                                <div class="price-note">Save 60% with yearly plan</div>
+                                                <h4>⭐ Premium Plan</h4>
+                                                <div class="price">$9.99<span>/month</span></div>
+                                                <p class="price-note">Everything + Advanced Features</p>
                                             </div>
                                             <div class="pricing-features">
                                                 <div class="feature">
@@ -4790,7 +4791,7 @@
                                                 </div>
                                             </div>
                                             <button class="pricing-btn premium-btn" onclick="showPremiumModal()">
-                                                <i class="fas fa-crown"></i> Unlock Premium
+                                                <i class="fas fa-crown"></i> Customize Plan
                                             </button>
                                         </div>
                                     </div>
@@ -5468,12 +5469,29 @@
             // Save that user chose free plan
             localStorage.setItem('planType', 'free');
             
-            // Generate the plan
-            generateAdvancedPlanFromOnboarding();
+            // Save basic user data for the simple planner
+            const userData = {
+                name: 'User',
+                subject: onboardingData.subject,
+                dailyHours: onboardingData.dailyHours,
+                totalDays: onboardingData.totalDays,
+                level: onboardingData.selectedLevel,
+                assessmentComplete: true
+            };
+            localStorage.setItem('aiStudyPlannerUserData', JSON.stringify(userData));
+            
+            // Show success toast
+            showToast('success', 'Free Plan Selected', 'Redirecting to free demo...');
+            
+            // Redirect to homepage demo section after a short delay
+            setTimeout(() => {
+                window.location.href = 'index.html#try-now';
+            }, 1500);
         };
 
         window.showPremiumModal = function() {
-            alert('Premium Plan - $4.99/month\n\n' +
+            // Show premium confirmation
+            const confirmed = confirm('Premium Plan - $9.99/month\n\n' +
                   '✅ Unlimited study plans\n' +
                   '✅ Advanced AI tutor mode\n' +
                   '✅ Unlimited resources\n' +
@@ -5484,10 +5502,12 @@
                   'For this demo, all premium features are unlocked!\n\n' +
                   'Click OK to continue with premium features enabled.');
             
+            if (!confirmed) return;
+            
             // Save that user chose premium (for demo)
             localStorage.setItem('planType', 'premium');
             
-            // Generate the plan
+            // Generate the advanced plan (proceed to customization)
             generateAdvancedPlanFromOnboarding();
         };
 
