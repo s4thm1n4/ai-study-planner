@@ -937,6 +937,40 @@ class ResourceFinderAgent:
             print("[DEBUG] NLP processor not available for ResourceFinderAgent")
             self.nlp_processor = None
     
+    def _is_appropriate_subject(self, subject: str) -> bool:
+        """Check if the subject is appropriate for educational content"""
+        inappropriate_words = [
+            # Violence and harmful content
+            'violence', 'violent', 'kill', 'murder', 'death', 'suicide', 'self-harm',
+            'weapon', 'bomb', 'gun', 'knife', 'terrorism', 'terrorist',
+            # Adult content
+            'adult', 'sex', 'sexual', 'porn', 'pornography', 'nude', 'naked',
+            'erotic', 'xxx', 'mature content',
+            # Hate speech and discrimination
+            'hate', 'racist', 'racism', 'discrimination', 'harassment', 'abuse',
+            'bullying', 'extremist', 'nazi', 'fascist',
+            # Illegal activities
+            'illegal', 'criminal', 'crime', 'drugs', 'cocaine', 'heroin', 'marijuana',
+            'steal', 'theft', 'fraud', 'scam', 'piracy', 'hacking', 'hack',
+            # Inappropriate slang and profanity
+            'damn', 'hell', 'shit', 'fuck', 'bitch', 'ass', 'crap',
+            # Gambling and addiction
+            'gambling', 'casino', 'bet', 'addiction', 'alcoholism'
+        ]
+        
+        subject_lower = subject.lower()
+        
+        # Check for inappropriate words
+        for word in inappropriate_words:
+            if word in subject_lower:
+                return False
+        
+        # Check if it's just numbers or special characters
+        if not any(c.isalpha() for c in subject_lower):
+            return False
+            
+        return True
+
     def load_resources_database(self):
         """Load educational resources database"""
         try:
@@ -974,6 +1008,22 @@ class ResourceFinderAgent:
     def find_best_resources(self, subject: str, difficulty: str = "beginner", 
                           resource_type: str = None, limit: int = 3, learning_style: str = "mixed") -> List[Dict]:
         """Find best resources using simple matching and generate fallbacks"""
+        
+        # Validate subject appropriateness first
+        if not self._is_appropriate_subject(subject):
+            return [{
+                "id": "error_1",
+                "title": "Invalid Subject",
+                "subject": "Content Policy",
+                "resource_type": "notice",
+                "difficulty": "info",
+                "url": "#",
+                "description": "Please enter an appropriate educational subject. We're here to help you learn legitimate academic topics.",
+                "similarity_score": 0.0,
+                "source": "Content Filter",
+                "tags": ["content-policy", "education"]
+            }]
+        
         best_resources = []
         
         # First, try to find resources in the database

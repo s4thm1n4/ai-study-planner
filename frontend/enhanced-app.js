@@ -4,6 +4,31 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 let currentUser = null;
 let authToken = null;
 
+// Content validation function
+function isAppropriateSubject(subject) {
+    const inappropriateWords = [
+        // Violence and harmful content
+        'violence', 'violent', 'kill', 'murder', 'death', 'suicide', 'self-harm',
+        'weapon', 'bomb', 'gun', 'knife', 'terrorism', 'terrorist',
+        // Adult content
+        'adult', 'sex', 'sexual', 'porn', 'pornography', 'nude', 'naked',
+        'erotic', 'xxx', 'mature content',
+        // Hate speech and discrimination
+        'hate', 'racist', 'racism', 'discrimination', 'harassment', 'abuse',
+        'bullying', 'extremist', 'nazi', 'fascist',
+        // Illegal activities
+        'illegal', 'criminal', 'crime', 'drugs', 'cocaine', 'heroin', 'marijuana',
+        'steal', 'theft', 'fraud', 'scam', 'piracy', 'hacking', 'hack',
+        // Inappropriate slang and profanity
+        'damn', 'hell', 'shit', 'fuck', 'bitch', 'ass', 'crap',
+        // Gambling and addiction
+        'gambling', 'casino', 'bet', 'addiction', 'alcoholism'
+    ];
+    
+    const lowerSubject = subject.toLowerCase();
+    return !inappropriateWords.some(word => lowerSubject.includes(word));
+}
+
 // Initialize authentication on page load - SINGLE EVENT LISTENER
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing enhanced study planner...');
@@ -839,6 +864,12 @@ async function findResources() {
     
     if (subject.length < 2) {
         showError('resources-results', 'Please enter a more specific subject (at least 2 characters).');
+        return;
+    }
+    
+    // Check for inappropriate content
+    if (!isAppropriateSubject(subject)) {
+        showError('resources-results', 'Please enter an appropriate educational subject. We\'re here to help you learn legitimate academic topics.');
         return;
     }
     

@@ -282,6 +282,15 @@ async def find_resources(
         
         print(f"[DEBUG] Found {len(resources)} resources")
         
+        # Check if content filter returned error message
+        if (len(resources) == 1 and 
+            resources[0].get("id") == "error_1" and 
+            resources[0].get("title") == "Invalid Subject"):
+            raise HTTPException(
+                status_code=400, 
+                detail="Please enter an appropriate educational subject. We're here to help you learn legitimate academic topics."
+            )
+        
         return {
             "resources": resources,
             "original_query": request.subject,
