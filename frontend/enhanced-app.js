@@ -21,15 +21,17 @@ function validateEthicalContent(subject) {
             'death penalty', 'vigilante', 'lynch', 'poison', 'poisoning', 'strangle'
         ],
         'Illegal Hacking & Cybercrime': [
-            'black hat', 'blackhat', 'crack software', 'cracking', 'piracy', 'pirate software',
-            'warez', 'keygen', 'crack password', 'password cracker', 'brute force attack',
-            'hack bank', 'hack account', 'hack website', 'hack system', 'hack network',
-            'break into system', 'break into account', 'unauthorized access', 'bypass security',
-            'exploit kit', 'zero-day exploit', 'malware creation', 'virus creation',
-            'ransomware', 'create virus', 'ddos attack', 'dos attack', 'botnet',
-            'phishing kit', 'credential stuffing', 'session hijacking', 'sql injection',
-            'xss attack', 'man in the middle', 'keylogger', 'trojan', 'backdoor',
-            'rootkit', 'spyware', 'adware creation'
+            'hacking', 'hack', 'hacker', 'black hat', 'blackhat', 'crack software', 'cracking', 
+            'piracy', 'pirate software', 'warez', 'keygen', 'crack password', 'password cracker', 
+            'brute force attack', 'hack bank', 'hack account', 'hack website', 'hack system', 
+            'hack network', 'break into system', 'break into account', 'unauthorized access', 
+            'bypass security', 'exploit kit', 'zero-day exploit', 'malware creation', 
+            'virus creation', 'ransomware', 'create virus', 'ddos attack', 'dos attack', 
+            'botnet', 'phishing kit', 'credential stuffing', 'session hijacking', 
+            'sql injection', 'xss attack', 'man in the middle', 'keylogger', 'trojan', 
+            'backdoor', 'rootkit', 'spyware', 'adware creation', 'penetration testing', 
+            'pen testing', 'exploit development', 'social engineering', 'wifi hacking',
+            'network intrusion', 'system penetration', 'vulnerability exploitation'
         ],
         'Illegal Activities & Fraud': [
             'steal', 'stealing', 'theft', 'rob', 'robbery', 'burglary', 'fraud',
@@ -105,15 +107,17 @@ function validateEthicalContentForMotivation(input) {
             'death penalty', 'vigilante', 'lynch', 'poison', 'poisoning', 'strangle'
         ],
         'Illegal Hacking & Cybercrime': [
-            'black hat', 'blackhat', 'crack software', 'cracking', 'piracy', 'pirate software',
-            'warez', 'keygen', 'crack password', 'password cracker', 'brute force attack',
-            'hack bank', 'hack account', 'hack website', 'hack system', 'hack network',
-            'break into system', 'break into account', 'unauthorized access', 'bypass security',
-            'exploit kit', 'zero-day exploit', 'malware creation', 'virus creation',
-            'ransomware', 'create virus', 'ddos attack', 'dos attack', 'botnet',
-            'phishing kit', 'credential stuffing', 'session hijacking', 'sql injection',
-            'xss attack', 'man in the middle', 'keylogger', 'trojan', 'backdoor',
-            'rootkit', 'spyware', 'adware creation'
+            'hacking', 'hack', 'hacker', 'black hat', 'blackhat', 'crack software', 'cracking', 
+            'piracy', 'pirate software', 'warez', 'keygen', 'crack password', 'password cracker', 
+            'brute force attack', 'hack bank', 'hack account', 'hack website', 'hack system', 
+            'hack network', 'break into system', 'break into account', 'unauthorized access', 
+            'bypass security', 'exploit kit', 'zero-day exploit', 'malware creation', 
+            'virus creation', 'ransomware', 'create virus', 'ddos attack', 'dos attack', 
+            'botnet', 'phishing kit', 'credential stuffing', 'session hijacking', 
+            'sql injection', 'xss attack', 'man in the middle', 'keylogger', 'trojan', 
+            'backdoor', 'rootkit', 'spyware', 'adware creation', 'penetration testing', 
+            'pen testing', 'exploit development', 'social engineering', 'wifi hacking',
+            'network intrusion', 'system penetration', 'vulnerability exploitation'
         ],
         'Illegal Activities & Fraud': [
             'steal', 'stealing', 'theft', 'rob', 'robbery', 'burglary', 'fraud',
@@ -204,7 +208,7 @@ function showEthicalViolationError(category, keyword, context = 'resources') {
                 </p>
                 <p style="margin: 0; color: #991b1b; line-height: 1.6;">
                     We cannot ${context === 'motivation' ? 'provide motivation or guidance' : 'find or recommend resources'} for topics involving violence, illegal activities, 
-                    self-harm, discrimination, or any content that could cause harm.
+                    malicious hacking, self-harm, discrimination, or any content that could cause harm to individuals or systems.
                 </p>
             </div>
             
@@ -221,12 +225,12 @@ function showEthicalViolationError(category, keyword, context = 'resources') {
                         <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Need confidence boost"</span>
                         <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Preparing for exams"</span>
                     ` : `
-                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Data Science</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Cybersecurity Ethics</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Network Security</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Data Protection</span>
                         <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Programming</span>
                         <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Mathematics</span>
-                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Science</span>
-                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Languages</span>
-                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Design</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Computer Science</span>
                     `}
                 </div>
             </div>
@@ -556,6 +560,12 @@ async function generateAdvancedPlan() {
     const totalDays = parseInt(userAssessmentData.studyDuration || '7');
     const knowledgeLevel = userAssessmentData.knowledgeLevel || 'beginner';
     const learningStyle = userAssessmentData.learningStyle || 'mixed';
+    
+    // Validate ethical content before generating plan
+    if (!validateEthicalContent(subject)) {
+        console.log('[ETHICS] ❌ Plan generation blocked for ethical reasons');
+        return; // Exit early if content violates policies
+    }
     const selectedMood = userAssessmentData.currentMood || 'neutral';
     
     if (!subject) {
