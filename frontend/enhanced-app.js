@@ -18,7 +18,7 @@ function validateEthicalContent(subject) {
             'gun', 'firearm', 'rifle', 'pistol', 'knife attack', 'stabbing', 'stab',
             'terrorist', 'terrorism', 'terror attack', 'mass shooting', 'school shooting',
             'serial killer', 'homicide', 'genocide', 'war crime', 'torture', 'execution',
-            'death penalty', 'vigilante', 'lynch', 'poison', 'poisoning', 'strangle'
+            'death penalty', 'vigilante', 'lynch', 'poison', 'poisoning', 'strangle', 'die'
         ],
         'Illegal Hacking & Cybercrime': [
             'hacking', 'hack', 'hacker', 'black hat', 'blackhat', 'crack software', 'cracking', 
@@ -92,19 +92,35 @@ function validateEthicalContent(subject) {
 }
 
 function validateEthicalContentForMotivation(input) {
-    console.log('[ETHICS] Validating motivation input:', input);
+    console.log('[ETHICS MOTIVATION] Validating motivation input:', input);
     
     const inputLower = input.toLowerCase();
     
-    // Same blocked keywords as resources, but with motivation context
-    const blockedKeywords = {
+    // First check for mental health crisis indicators
+    const crisisKeywords = [
+        'want to die', 'i want to die', 'wanna die', 'want to kill myself', 'kill myself',
+        'end my life', 'suicide', 'suicidal', 'hurt myself', 'harm myself', 'cut myself',
+        'cutting myself', 'self harm', 'self-harm', 'overdose', 'jump off', 'hang myself',
+        'no point living', 'life is meaningless', 'better off dead', 'end it all', 'die'
+    ];
+    
+    for (const keyword of crisisKeywords) {
+        if (inputLower.includes(keyword)) {
+            console.log(`[MENTAL HEALTH] ⚠️ Crisis indicator detected: "${keyword}"`);
+            showMentalHealthSupportMessage();
+            return false;
+        }
+    }
+    
+    // Check for harmful content that needs educational redirection
+    const harmfulKeywords = {
         'Violence & Harm': [
-            'suicide', 'suicidal', 'kill', 'killing', 'murder', 'murderer', 'assassin', 
-            'assassination', 'bomb', 'bombing', 'explosive', 'weapon', 'weaponize', 
-            'gun', 'firearm', 'rifle', 'pistol', 'knife attack', 'stabbing', 'stab',
-            'terrorist', 'terrorism', 'terror attack', 'mass shooting', 'school shooting',
-            'serial killer', 'homicide', 'genocide', 'war crime', 'torture', 'execution',
-            'death penalty', 'vigilante', 'lynch', 'poison', 'poisoning', 'strangle'
+            'murder', 'murderer', 'assassin', 'assassination', 'bomb', 'bombing', 'explosive', 
+            'weapon', 'weaponize', 'gun', 'firearm', 'rifle', 'pistol', 'knife attack', 
+            'stabbing', 'stab', 'terrorist', 'terrorism', 'terror attack', 'mass shooting', 
+            'school shooting', 'serial killer', 'homicide', 'genocide', 'war crime', 
+            'torture', 'execution', 'death penalty', 'vigilante', 'lynch', 'poison', 
+            'poisoning', 'strangle'
         ],
         'Illegal Hacking & Cybercrime': [
             'hacking', 'hack', 'hacker', 'black hat', 'blackhat', 'crack software', 'cracking', 
@@ -161,10 +177,10 @@ function validateEthicalContentForMotivation(input) {
     };
 
     // Check against all blocked keywords
-    for (const [category, keywords] of Object.entries(blockedKeywords)) {
+    for (const [category, keywords] of Object.entries(harmfulKeywords)) {
         for (const keyword of keywords) {
             if (inputLower.includes(keyword)) {
-                console.log(`[ETHICS] ❌ BLOCKED - Category: "${category}", Keyword: "${keyword}"`);
+                console.log(`[ETHICS MOTIVATION] ❌ BLOCKED - Category: "${category}", Keyword: "${keyword}"`);
                 
                 // Show detailed error message with motivation context
                 showEthicalViolationError(category, keyword, 'motivation');
@@ -173,8 +189,302 @@ function validateEthicalContentForMotivation(input) {
         }
     }
     
-    console.log('[ETHICS] ✅ Motivation content validation passed');
+    console.log('[ETHICS MOTIVATION] ✅ Motivation content validation passed');
     return true;
+}
+
+function showMentalHealthSupportMessage() {
+    console.log('[MENTAL HEALTH] 🆘 Showing crisis support message');
+    
+    // Create supportive modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 1rem;
+        overflow-y: auto;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 1.5rem; max-width: 700px; width: 100%; padding: 2.5rem; box-shadow: 0 25px 80px rgba(0,0,0,0.4); color: white; text-align: center; position: relative; max-height: 90vh; overflow-y: auto;">
+            <button class="mental-health-close-btn" 
+                    style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2); border: none; color: white; width: 2.5rem; height: 2.5rem; border-radius: 50%; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: all 0.3s ease; z-index: 10001;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                ✕
+            </button>
+            <div style="margin-bottom: 2rem;">
+                <div style="font-size: 5rem; margin-bottom: 1rem;">🤗</div>
+                <h2 style="color: white; margin: 0 0 1rem 0; font-size: 2rem; font-weight: 700;">Your Life Matters</h2>
+                <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 1.1rem; line-height: 1.6;">
+                    I'm here to support your learning journey, but I'm concerned about you right now.
+                </p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); border-radius: 1rem; padding: 1.5rem; margin: 2rem 0; backdrop-filter: blur(10px);">
+                <h3 style="color: white; margin: 0 0 1rem 0; font-size: 1.3rem;">💙 Please Get Help Right Away</h3>
+                <div style="display: grid; gap: 0.75rem; text-align: left;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.75rem;">
+                        <strong style="color: #ffd700;">� Talk to a Doctor or Counselor:</strong><br>
+                        <small style="color: rgba(255,255,255,0.8);">Visit your local hospital, clinic, or call a mental health professional</small>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.75rem;">
+                        <strong style="color: #ffd700;">� Reach Out to Someone You Trust:</strong><br>
+                        <small style="color: rgba(255,255,255,0.8);">Call a family member, friend, teacher, or someone who cares about you</small>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.75rem;">
+                        <strong style="color: #ffd700;">� Contact a Crisis Helpline:</strong><br>
+                        <small style="color: rgba(255,255,255,0.8);">Search online for crisis support services in your area</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); border-radius: 1rem; padding: 1.5rem; margin: 2rem 0;">
+                <h3 style="color: white; margin: 0 0 1rem 0; font-size: 1.2rem;">✨ Let's Focus on Positive Learning</h3>
+                <p style="color: rgba(255,255,255,0.9); margin: 0 0 1rem 0; line-height: 1.6;">
+                    After you get the support you need, I'd love to help you with:
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                    <span style="background: rgba(255,255,255,0.15); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.9rem;">📚 Study Techniques</span>
+                    <span style="background: rgba(255,255,255,0.15); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.9rem;">🎯 Goal Setting</span>
+                    <span style="background: rgba(255,255,255,0.15); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.9rem;">💪 Building Confidence</span>
+                    <span style="background: rgba(255,255,255,0.15); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.9rem;">🌱 Personal Growth</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove(); document.getElementById('currentMood').value = ''; document.getElementById('currentMood').placeholder = 'Tell me about your learning goals or study challenges...';" 
+                        style="background: linear-gradient(135deg, #51cf66, #40c057); 
+                               color: white; 
+                               border: none; 
+                               padding: 1rem 2.5rem; 
+                               border-radius: 0.75rem; 
+                               font-size: 1.1rem; 
+                               font-weight: 700; 
+                               cursor: pointer;
+                               box-shadow: 0 4px 15px rgba(81, 207, 102, 0.4);
+                               transition: all 0.3s ease;">
+                    I'll Get Help First
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add hover effects to buttons
+    const buttons = modal.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', () => {
+            button.style.transform = 'translateY(-2px)';
+            button.style.boxShadow = button.style.boxShadow.replace('0.4', '0.6');
+        });
+        button.addEventListener('mouseleave', () => {
+            button.style.transform = 'translateY(0)';
+            button.style.boxShadow = button.style.boxShadow.replace('0.6', '0.4');
+        });
+    });
+    
+    document.body.appendChild(modal);
+    
+    // Add close button functionality
+    const closeBtn = modal.querySelector('.mental-health-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.remove();
+        });
+    }
+    
+    // Prevent closing on backdrop click for this critical message
+    modal.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+}
+
+function containsSevereNegativeFeelings(input) {
+    console.log('[MOTIVATION DEBUG] Checking for severe negative feelings in:', input);
+    const inputLower = input.toLowerCase();
+    // Only catch severe emotional distress that needs special intervention
+    const severeNegativeKeywords = [
+        'hopeless', 'worthless', 'feel stupid', 'not smart enough', 'i\'m stupid',
+        'giving up', 'want to quit', 'hate myself', 'hate studying', 'hate school',
+        'impossible', 'can\'t do it', 'too hard for me', 'i\'m a failure', 'failure',
+        'behind everyone', 'not good enough', 'never succeed', 'waste of time'
+    ];
+    
+    const result = severeNegativeKeywords.some(keyword => inputLower.includes(keyword));
+    console.log('[MOTIVATION DEBUG] Severe negative feelings detected:', result);
+    return result;
+}
+
+function showSupportiveMotivationResponse(mood) {
+    console.log('[MOTIVATION] 🤗 Providing supportive response for:', mood);
+    
+    // Create supportive motivation modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 1rem;
+        overflow-y: auto;
+    `;
+    
+    // Generate personalized supportive message based on mood
+    const supportiveMessage = generateSupportiveMessage(mood);
+    
+    modal.innerHTML = `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 1.5rem; max-width: 600px; width: 100%; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); color: white; position: relative; max-height: 90vh; overflow-y: auto;">
+            <button class="supportive-close-btn" 
+                    style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2); border: none; color: white; width: 2.5rem; height: 2.5rem; border-radius: 50%; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: all 0.3s ease; z-index: 10001;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                ✕
+            </button>
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="font-size: 4rem; margin-bottom: 0.5rem;">🤗</div>
+                <h2 style="color: white; margin: 0 0 0.5rem 0; font-size: 1.75rem;">I Hear You</h2>
+                <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 1rem;">Your feelings are valid and you're not alone</p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); border-radius: 1rem; padding: 1.5rem; margin: 1.5rem 0; backdrop-filter: blur(10px);">
+                <h3 style="color: white; margin: 0 0 1rem 0; font-size: 1.2rem;">💙 Here's What I Want You to Know:</h3>
+                <p style="margin: 0; color: rgba(255,255,255,0.95); line-height: 1.7; font-size: 1.05rem;">
+                    ${supportiveMessage}
+                </p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); border-radius: 1rem; padding: 1.5rem; margin: 1.5rem 0;">
+                <h3 style="color: white; margin: 0 0 1rem 0; font-size: 1.1rem;">✨ Small Steps You Can Take Right Now:</h3>
+                <div style="display: grid; gap: 0.75rem;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.75rem;">
+                        <strong style="color: #ffd700;">🌬️ Take 3 Deep Breaths:</strong><br>
+                        <small style="color: rgba(255,255,255,0.8);">Breathe in for 4, hold for 4, out for 6. You've got this.</small>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.75rem;">
+                        <strong style="color: #ffd700;">📝 Start Super Small:</strong><br>
+                        <small style="color: rgba(255,255,255,0.8);">Just 5-10 minutes of study. Progress beats perfection.</small>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.75rem;">
+                        <strong style="color: #ffd700;">🎯 Focus on Learning, Not Grades:</strong><br>
+                        <small style="color: rgba(255,255,255,0.8);">Every attempt teaches you something valuable.</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove(); document.getElementById('currentMood').value = 'I\'m feeling motivated and ready to study!';" 
+                        style="background: linear-gradient(135deg, #51cf66, #40c057); 
+                               color: white; 
+                               border: none; 
+                               padding: 1rem 2rem; 
+                               border-radius: 0.75rem; 
+                               font-size: 1rem; 
+                               font-weight: 700; 
+                               cursor: pointer;
+                               box-shadow: 0 4px 15px rgba(81, 207, 102, 0.4);
+                               transition: all 0.3s ease;
+                               margin-right: 1rem;">
+                    I'm Ready to Try
+                </button>
+                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove(); document.getElementById('currentMood').value = 'I need some motivation for my studies';" 
+                        style="background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+                               color: white; 
+                               border: none; 
+                               padding: 1rem 2rem; 
+                               border-radius: 0.75rem; 
+                               font-size: 1rem; 
+                               font-weight: 700; 
+                               cursor: pointer;
+                               box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+                               transition: all 0.3s ease;">
+                    Get Regular Motivation
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add hover effects to buttons
+    const buttons = modal.querySelectorAll('button:not(.supportive-close-btn)');
+    buttons.forEach((button, index) => {
+        button.addEventListener('mouseenter', () => {
+            button.style.transform = 'translateY(-2px)';
+            if (index === 0) {
+                button.style.boxShadow = '0 6px 20px rgba(81, 207, 102, 0.5)';
+            } else {
+                button.style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.5)';
+            }
+        });
+        button.addEventListener('mouseleave', () => {
+            button.style.transform = 'translateY(0)';
+            if (index === 0) {
+                button.style.boxShadow = '0 4px 15px rgba(81, 207, 102, 0.4)';
+            } else {
+                button.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.4)';
+            }
+        });
+    });
+    
+    document.body.appendChild(modal);
+    
+    // Add close button functionality
+    const closeBtn = modal.querySelector('.supportive-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.remove();
+        });
+    }
+    
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+function generateSupportiveMessage(mood) {
+    const moodLower = mood.toLowerCase();
+    
+    if (moodLower.includes('overwhelmed') || moodLower.includes('too much')) {
+        return "Feeling overwhelmed is completely normal, especially when learning something new. Your brain is processing a lot right now, and that's actually a sign that you're growing! Remember, you don't have to learn everything at once. Break it down into tiny, manageable pieces.";
+    }
+    
+    if (moodLower.includes('struggling') || moodLower.includes('difficult') || moodLower.includes('hard')) {
+        return "Struggling means you're at the edge of your comfort zone - that's exactly where growth happens! Every expert was once a beginner who felt exactly like you do now. The fact that you're here, seeking help, shows incredible courage and determination.";
+    }
+    
+    if (moodLower.includes('stupid') || moodLower.includes('not smart') || moodLower.includes('failure')) {
+        return "Stop right there! You are NOT stupid or a failure. Intelligence isn't fixed - it grows with effort and practice. Every mistake is data, every confusion is a question waiting to be answered. You're brave for trying, and that's what matters most.";
+    }
+    
+    if (moodLower.includes('procrastinating') || moodLower.includes('lazy') || moodLower.includes('unmotivated')) {
+        return "Procrastination isn't about being lazy - it's often about fear, perfectionism, or feeling overwhelmed. You're human, and this is normal! The best cure for procrastination is action, even if it's tiny. Just opening your book is progress.";
+    }
+    
+    if (moodLower.includes('anxious') || moodLower.includes('worried') || moodLower.includes('nervous')) {
+        return "Anxiety shows that you care deeply about your success, and that's actually beautiful! But don't let it paralyze you. Remember: you've overcome challenges before, and you have the strength to do it again. Take it one breath, one question, one step at a time.";
+    }
+    
+    if (moodLower.includes('tired') || moodLower.includes('exhausted') || moodLower.includes('burnt out')) {
+        return "Your tiredness is valid - learning takes energy! But sometimes what feels like mental exhaustion is actually mental muscle being built. Take breaks when you need them, be gentle with yourself, and remember that rest is part of the learning process.";
+    }
+    
+    // Default supportive message
+    return "Whatever you're feeling right now is valid and understandable. Learning can be challenging, but you're stronger than you know. Every small step forward is progress, and I believe in your ability to grow and succeed. You've got this! 💪";
 }
 
 function showEthicalViolationError(category, keyword, context = 'resources') {
@@ -192,10 +502,17 @@ function showEthicalViolationError(category, keyword, context = 'resources') {
         justify-content: center;
         z-index: 10000;
         padding: 1rem;
+        overflow-y: auto;
     `;
     
     modal.innerHTML = `
-        <div style="background: white; border-radius: 1rem; max-width: 600px; width: 100%; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div style="background: white; border-radius: 1rem; max-width: 600px; width: 100%; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto;">
+            <button class="ethical-violation-close-btn" 
+                    style="position: absolute; top: 1rem; right: 1rem; background: #f3f4f6; border: none; color: #6b7280; width: 2.5rem; height: 2.5rem; border-radius: 50%; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: all 0.3s ease; z-index: 10001;"
+                    onmouseover="this.style.background='#e5e7eb'; this.style.color='#374151'"
+                    onmouseout="this.style.background='#f3f4f6'; this.style.color='#6b7280'">
+                ✕
+            </button>
             <div style="text-align: center; margin-bottom: 1.5rem;">
                 <div style="font-size: 4rem; margin-bottom: 0.5rem;">⚠️</div>
                 <h2 style="color: #dc2626; margin: 0 0 0.5rem 0; font-size: 1.75rem;">Content Policy Violation</h2>
@@ -265,6 +582,16 @@ function showEthicalViolationError(category, keyword, context = 'resources') {
     });
     
     document.body.appendChild(modal);
+    
+    // Add close button functionality
+    const closeBtn = modal.querySelector('.ethical-violation-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.remove();
+            const targetInput = document.getElementById(context === 'motivation' ? 'currentMood' : 'resourceSubject');
+            if (targetInput) targetInput.focus();
+        });
+    }
     
     // Close on backdrop click
     modal.addEventListener('click', (e) => {
@@ -1299,10 +1626,14 @@ function getLearningStyleDisplay(style) {
 async function getMotivation() {
     const mood = document.getElementById('currentMood')?.value?.trim();
     
+    console.log('[MOTIVATION DEBUG] Starting getMotivation with mood:', mood);
+    
     if (!mood) {
         showError('motivation-results', 'Please share how you\'re feeling about your studies!');
         return;
     }
+    
+    console.log('[MOTIVATION DEBUG] Mood input validated, proceeding with ethical check');
     
     // ETHICAL CONTENT VALIDATION - Check motivation input for harmful content
     if (!validateEthicalContentForMotivation(mood)) {
@@ -1310,11 +1641,26 @@ async function getMotivation() {
         return; // Stop here, don't proceed with motivation request
     }
     
+    console.log('[MOTIVATION DEBUG] Ethical validation passed, checking for severe negative feelings');
+    
+    // Check for severe negative feelings that need extra supportive response
+    if (containsSevereNegativeFeelings(mood)) {
+        console.log('[MOTIVATION] 💙 Detected severe negative feelings, providing extra support');
+        showSupportiveMotivationResponse(mood);
+        return; // Handle with specialized supportive response
+    }
+    
+    console.log('[MOTIVATION DEBUG] All validations passed, proceeding with normal motivation generation');
+
     const loadingDiv = document.getElementById('motivation-loading');
     const resultsDiv = document.getElementById('motivation-results');
     const generateBtn = document.querySelector('#motivation-tab .generate-btn');
     
-    try {
+    console.log('[MOTIVATION DEBUG] Elements found:', {
+        loadingDiv: !!loadingDiv,
+        resultsDiv: !!resultsDiv,
+        generateBtn: !!generateBtn
+    });    try {
         // Show enhanced loading state
         showEnhancedLoading(loadingDiv, resultsDiv, 'Getting your daily motivation boost...');
         if (generateBtn) generateBtn.disabled = true;
@@ -1354,11 +1700,38 @@ function displayMotivationResults(data) {
     const resultsDiv = document.getElementById('motivation-results');
     if (!resultsDiv) return;
     
-    console.log('Displaying enhanced motivation results:', data);
+    console.log('[MOTIVATION DEBUG] Displaying enhanced motivation results:', data);
     
     // Handle enhanced motivation response structure
     const motivation = data.motivation || data;
     const moodAnalysis = motivation.mood_analysis || {};
+    
+    // If no valid motivation data, show fallback message
+    if (!motivation || (typeof motivation === 'object' && Object.keys(motivation).length === 0)) {
+        console.log('[MOTIVATION DEBUG] No valid motivation data, showing fallback');
+        resultsDiv.innerHTML = `
+            <div class="results">
+                <div class="results-header">
+                    <h3>💪 Your Motivation</h3>
+                </div>
+                <div class="results-content">
+                    <div class="motivation-card" style="margin-bottom: 2rem;">
+                        <div class="motivation-content">
+                            <div class="motivation-quote">"Success is not final, failure is not fatal: it is the courage to continue that counts."</div>
+                            <div class="motivation-author">— Winston Churchill</div>
+                        </div>
+                    </div>
+                    <div class="resource-item" style="border-left-color: #f59e0b;">
+                        <div class="resource-header">
+                            <h4 class="resource-title">💪 Keep Going!</h4>
+                        </div>
+                        <p class="resource-description">Every step forward is progress. Stay focused on your goals and trust the process. You've got this!</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
     
     resultsDiv.innerHTML = `
         <div class="results">
