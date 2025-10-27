@@ -731,7 +731,7 @@
 
                 <div class="agent-card">
                     <div class="agent-number">4</div>
-                    <h3>🔒 Security Coordinator Agent</h3>
+                    <h3>🔒 Coordinator Agent</h3>
                     <p>Manages authentication, data security, and coordinates between all agents to ensure seamless and secure operation.</p>
                 </div>
             </div>
@@ -763,7 +763,7 @@
 
             <div class="unlock-more">
                 <p><strong>🚀 Want more advanced features?</strong></p>
-                <p>Register for free to unlock personalized schedules, detailed resource recommendations, progress tracking, and motivational coaching!</p>
+                <p>Get premium to unlock personalized schedules, detailed resource recommendations, progress tracking, and motivational coaching!</p>
                 <a href="secure-auth.html" class="btn-primary" style="display: inline-block; margin-top: 1rem;">
                     Create Free Account
                 </a>
@@ -785,12 +785,30 @@
             const userData = localStorage.getItem('aiStudyPlannerUserData');
             const skipOnboarding = sessionStorage.getItem('skipOnboarding');
             
+            // Check if user came from free plan onboarding
+            if (userData) {
+                const userDataObj = JSON.parse(userData);
+                if (userDataObj.subject) {
+                    // Auto-populate the demo input with their subject
+                    const demoInput = document.getElementById('demo-goal');
+                    if (demoInput) {
+                        demoInput.value = userDataObj.subject;
+                        // Scroll to the demo section if URL has hash
+                        if (window.location.hash === '#try-now') {
+                            setTimeout(() => {
+                                document.getElementById('try-now').scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                        }
+                    }
+                }
+            }
+            
             // If no user data and hasn't skipped, redirect to onboarding
             if (!userData && !skipOnboarding) {
                 // Show a welcome modal or redirect directly
                 const shouldOnboard = confirm('Welcome! Would you like a personalized experience? We\'ll guide you through a quick 2-minute setup.');
                 if (shouldOnboard) {
-                    window.location.href = 'onboarding.html';
+                    window.location.href = 'enhanced-index.html';
                 } else {
                     sessionStorage.setItem('skipOnboarding', 'true');
                 }
