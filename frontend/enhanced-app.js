@@ -4,6 +4,274 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 let currentUser = null;
 let authToken = null;
 
+// ===== ETHICAL CONTENT VALIDATION =====
+function validateEthicalContent(subject) {
+    console.log('[ETHICS] Validating subject:', subject);
+    
+    const subjectLower = subject.toLowerCase();
+    
+    // Comprehensive blocked keywords list
+    const blockedKeywords = {
+        'Violence & Harm': [
+            'suicide', 'suicidal', 'kill', 'killing', 'murder', 'murderer', 'assassin', 
+            'assassination', 'bomb', 'bombing', 'explosive', 'weapon', 'weaponize', 
+            'gun', 'firearm', 'rifle', 'pistol', 'knife attack', 'stabbing', 'stab',
+            'terrorist', 'terrorism', 'terror attack', 'mass shooting', 'school shooting',
+            'serial killer', 'homicide', 'genocide', 'war crime', 'torture', 'execution',
+            'death penalty', 'vigilante', 'lynch', 'poison', 'poisoning', 'strangle'
+        ],
+        'Illegal Hacking & Cybercrime': [
+            'black hat', 'blackhat', 'crack software', 'cracking', 'piracy', 'pirate software',
+            'warez', 'keygen', 'crack password', 'password cracker', 'brute force attack',
+            'hack bank', 'hack account', 'hack website', 'hack system', 'hack network',
+            'break into system', 'break into account', 'unauthorized access', 'bypass security',
+            'exploit kit', 'zero-day exploit', 'malware creation', 'virus creation',
+            'ransomware', 'create virus', 'ddos attack', 'dos attack', 'botnet',
+            'phishing kit', 'credential stuffing', 'session hijacking', 'sql injection',
+            'xss attack', 'man in the middle', 'keylogger', 'trojan', 'backdoor',
+            'rootkit', 'spyware', 'adware creation'
+        ],
+        'Illegal Activities & Fraud': [
+            'steal', 'stealing', 'theft', 'rob', 'robbery', 'burglary', 'fraud',
+            'scam', 'scamming', 'ponzi scheme', 'pyramid scheme', 'identity theft',
+            'credit card fraud', 'fake id', 'counterfeit', 'forgery', 'money laundering',
+            'tax evasion', 'insider trading', 'embezzlement', 'bribery', 'corruption',
+            'smuggling', 'trafficking', 'illegal trade'
+        ],
+        'Drugs & Illegal Substances': [
+            'meth', 'methamphetamine', 'meth production', 'meth lab', 'cocaine',
+            'cocaine production', 'heroin', 'heroin production', 'fentanyl', 'fentanyl synthesis',
+            'drug dealing', 'drug manufacturing', 'drug production', 'drug trafficking',
+            'illegal drugs', 'narcotics production', 'lsd production', 'mdma production',
+            'ecstasy production', 'crack cocaine', 'opium', 'cannabis cultivation illegal'
+        ],
+        'Self-Harm & Dangerous Behavior': [
+            'self-harm', 'self harm', 'cut myself', 'cutting myself', 'hurt myself',
+            'hurting myself', 'self-mutilation', 'self injury', 'eating disorder',
+            'anorexia tips', 'bulimia tips', 'purging', 'pro ana', 'pro mia',
+            'suicide method', 'how to die', 'overdose intentionally', 'jump off',
+            'hang myself', 'end my life'
+        ],
+        'Sexual Abuse & Exploitation': [
+            'child porn', 'child pornography', 'cp', 'sexual assault', 'rape',
+            'child abuse', 'child exploitation', 'child molest', 'pedophilia',
+            'human trafficking', 'sex trafficking', 'sexual predator', 'grooming children',
+            'revenge porn', 'non-consensual', 'sexual harassment'
+        ],
+        'Hate Speech & Discrimination': [
+            'white supremacy', 'white supremacist', 'white power', 'nazi', 'neo-nazi',
+            'fascism', 'hate group', 'ethnic cleansing', 'racial violence', 'hate crime',
+            'lynching', 'ku klux klan', 'kkk', 'genocide', 'holocaust denial',
+            'racial supremacy', 'racist ideology', 'sexist ideology'
+        ],
+        'Dangerous Materials & Weapons': [
+            'make bomb', 'build bomb', 'create explosive', 'pipe bomb', 'fertilizer bomb',
+            'pressure cooker bomb', 'molotov cocktail', 'chemical weapon', 'biological weapon',
+            'bioweapon', 'nerve agent', 'sarin gas', 'anthrax', 'ricin', 'cyanide',
+            'radioactive material', 'dirty bomb', 'nuclear weapon', 'uranium enrichment'
+        ]
+    };
+
+    // Check against all blocked keywords
+    for (const [category, keywords] of Object.entries(blockedKeywords)) {
+        for (const keyword of keywords) {
+            if (subjectLower.includes(keyword)) {
+                console.log(`[ETHICS] ❌ BLOCKED - Category: "${category}", Keyword: "${keyword}"`);
+                
+                // Show detailed error message
+                showEthicalViolationError(category, keyword, 'resources');
+                return false;
+            }
+        }
+    }
+    
+    console.log('[ETHICS] ✅ Content validation passed');
+    return true;
+}
+
+function validateEthicalContentForMotivation(input) {
+    console.log('[ETHICS] Validating motivation input:', input);
+    
+    const inputLower = input.toLowerCase();
+    
+    // Same blocked keywords as resources, but with motivation context
+    const blockedKeywords = {
+        'Violence & Harm': [
+            'suicide', 'suicidal', 'kill', 'killing', 'murder', 'murderer', 'assassin', 
+            'assassination', 'bomb', 'bombing', 'explosive', 'weapon', 'weaponize', 
+            'gun', 'firearm', 'rifle', 'pistol', 'knife attack', 'stabbing', 'stab',
+            'terrorist', 'terrorism', 'terror attack', 'mass shooting', 'school shooting',
+            'serial killer', 'homicide', 'genocide', 'war crime', 'torture', 'execution',
+            'death penalty', 'vigilante', 'lynch', 'poison', 'poisoning', 'strangle'
+        ],
+        'Illegal Hacking & Cybercrime': [
+            'black hat', 'blackhat', 'crack software', 'cracking', 'piracy', 'pirate software',
+            'warez', 'keygen', 'crack password', 'password cracker', 'brute force attack',
+            'hack bank', 'hack account', 'hack website', 'hack system', 'hack network',
+            'break into system', 'break into account', 'unauthorized access', 'bypass security',
+            'exploit kit', 'zero-day exploit', 'malware creation', 'virus creation',
+            'ransomware', 'create virus', 'ddos attack', 'dos attack', 'botnet',
+            'phishing kit', 'credential stuffing', 'session hijacking', 'sql injection',
+            'xss attack', 'man in the middle', 'keylogger', 'trojan', 'backdoor',
+            'rootkit', 'spyware', 'adware creation'
+        ],
+        'Illegal Activities & Fraud': [
+            'steal', 'stealing', 'theft', 'rob', 'robbery', 'burglary', 'fraud',
+            'scam', 'scamming', 'ponzi scheme', 'pyramid scheme', 'identity theft',
+            'credit card fraud', 'fake id', 'counterfeit', 'forgery', 'money laundering',
+            'tax evasion', 'insider trading', 'embezzlement', 'bribery', 'corruption',
+            'smuggling', 'trafficking', 'illegal trade'
+        ],
+        'Drugs & Illegal Substances': [
+            'meth', 'methamphetamine', 'meth production', 'meth lab', 'cocaine',
+            'cocaine production', 'heroin', 'heroin production', 'fentanyl', 'fentanyl synthesis',
+            'drug dealing', 'drug manufacturing', 'drug production', 'drug trafficking',
+            'illegal drugs', 'narcotics production', 'lsd production', 'mdma production',
+            'ecstasy production', 'crack cocaine', 'opium', 'cannabis cultivation illegal'
+        ],
+        'Self-Harm & Dangerous Behavior': [
+            'self-harm', 'self harm', 'cut myself', 'cutting myself', 'hurt myself',
+            'hurting myself', 'self-mutilation', 'self injury', 'eating disorder',
+            'anorexia tips', 'bulimia tips', 'purging', 'pro ana', 'pro mia',
+            'suicide method', 'how to die', 'overdose intentionally', 'jump off',
+            'hang myself', 'end my life'
+        ],
+        'Sexual Abuse & Exploitation': [
+            'child porn', 'child pornography', 'cp', 'sexual assault', 'rape',
+            'child abuse', 'child exploitation', 'child molest', 'pedophilia',
+            'human trafficking', 'sex trafficking', 'sexual predator', 'grooming children',
+            'revenge porn', 'non-consensual', 'sexual harassment'
+        ],
+        'Hate Speech & Discrimination': [
+            'white supremacy', 'white supremacist', 'white power', 'nazi', 'neo-nazi',
+            'fascism', 'hate group', 'ethnic cleansing', 'racial violence', 'hate crime',
+            'lynching', 'ku klux klan', 'kkk', 'genocide', 'holocaust denial',
+            'racial supremacy', 'racist ideology', 'sexist ideology'
+        ],
+        'Dangerous Materials & Weapons': [
+            'make bomb', 'build bomb', 'create explosive', 'pipe bomb', 'fertilizer bomb',
+            'pressure cooker bomb', 'molotov cocktail', 'chemical weapon', 'biological weapon',
+            'bioweapon', 'nerve agent', 'sarin gas', 'anthrax', 'ricin', 'cyanide',
+            'radioactive material', 'dirty bomb', 'nuclear weapon', 'uranium enrichment'
+        ]
+    };
+
+    // Check against all blocked keywords
+    for (const [category, keywords] of Object.entries(blockedKeywords)) {
+        for (const keyword of keywords) {
+            if (inputLower.includes(keyword)) {
+                console.log(`[ETHICS] ❌ BLOCKED - Category: "${category}", Keyword: "${keyword}"`);
+                
+                // Show detailed error message with motivation context
+                showEthicalViolationError(category, keyword, 'motivation');
+                return false;
+            }
+        }
+    }
+    
+    console.log('[ETHICS] ✅ Motivation content validation passed');
+    return true;
+}
+
+function showEthicalViolationError(category, keyword, context = 'resources') {
+    // Create error modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 1rem;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 1rem; max-width: 600px; width: 100%; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="font-size: 4rem; margin-bottom: 0.5rem;">⚠️</div>
+                <h2 style="color: #dc2626; margin: 0 0 0.5rem 0; font-size: 1.75rem;">Content Policy Violation</h2>
+                <p style="color: #64748b; margin: 0; font-size: 1rem;">Detected: <strong>${category}</strong></p>
+            </div>
+            
+            <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 1.25rem; margin: 1.5rem 0; border-radius: 0.5rem;">
+                <p style="margin: 0 0 1rem 0; color: #991b1b; font-weight: 600;">
+                    🚫 Our AI ${context === 'motivation' ? 'Motivation Coach' : 'Resource Finder'} is designed exclusively for educational purposes.
+                </p>
+                <p style="margin: 0; color: #991b1b; line-height: 1.6;">
+                    We cannot ${context === 'motivation' ? 'provide motivation or guidance' : 'find or recommend resources'} for topics involving violence, illegal activities, 
+                    self-harm, discrimination, or any content that could cause harm.
+                </p>
+            </div>
+            
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1.25rem; margin: 1.5rem 0; border-radius: 0.5rem;">
+                <p style="margin: 0 0 0.75rem 0; color: #166534; font-weight: 600;">
+                    ✅ Try ${context === 'motivation' ? 'sharing positive study experiences' : 'searching for these educational topics'} instead:
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                    ${context === 'motivation' ? `
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Struggling with calculus"</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Need study motivation"</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Feeling overwhelmed"</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Excited about learning"</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Need confidence boost"</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">"Preparing for exams"</span>
+                    ` : `
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Data Science</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Programming</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Mathematics</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Science</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Languages</span>
+                        <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Design</span>
+                    `}
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove(); document.getElementById('${context === 'motivation' ? 'currentMood' : 'resourceSubject'}').focus();" 
+                        style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); 
+                               color: white; 
+                               border: none; 
+                               padding: 1rem 2.5rem; 
+                               border-radius: 0.75rem; 
+                               font-size: 1.1rem; 
+                               font-weight: 700; 
+                               cursor: pointer;
+                               box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+                               transition: all 0.3s ease;">
+                    ${context === 'motivation' ? 'Share Different Feelings' : 'Search for Different Resources'}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add hover effect to button
+    const button = modal.querySelector('button');
+    button.addEventListener('mouseenter', () => {
+        button.style.transform = 'translateY(-2px)';
+        button.style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.5)';
+    });
+    button.addEventListener('mouseleave', () => {
+        button.style.transform = 'translateY(0)';
+        button.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.4)';
+    });
+    
+    document.body.appendChild(modal);
+    
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            const targetInput = document.getElementById(context === 'motivation' ? 'currentMood' : 'resourceSubject');
+            if (targetInput) targetInput.focus();
+        }
+    });
+}
+
 // Initialize authentication on page load - SINGLE EVENT LISTENER
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing enhanced study planner...');
@@ -842,6 +1110,12 @@ async function findResources() {
         return;
     }
     
+    // ETHICAL CONTENT VALIDATION - Check before searching for resources
+    if (!validateEthicalContent(subject)) {
+        console.log('[ETHICS] ❌ Resource search blocked due to harmful content');
+        return; // Stop here, don't proceed with search
+    }
+    
     const loadingDiv = document.getElementById('resources-loading');
     const resultsDiv = document.getElementById('resources-results');
     const generateBtn = document.querySelector('#resources-tab .generate-btn');
@@ -1018,6 +1292,12 @@ async function getMotivation() {
     if (!mood) {
         showError('motivation-results', 'Please share how you\'re feeling about your studies!');
         return;
+    }
+    
+    // ETHICAL CONTENT VALIDATION - Check motivation input for harmful content
+    if (!validateEthicalContentForMotivation(mood)) {
+        console.log('[ETHICS] ❌ Motivation request blocked due to harmful content');
+        return; // Stop here, don't proceed with motivation request
     }
     
     const loadingDiv = document.getElementById('motivation-loading');
