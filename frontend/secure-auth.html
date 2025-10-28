@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 AI Study Planner - Secure Login</title>
+    <title>AI Study Planner - Secure Login</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         * {
             margin: 0;
@@ -41,6 +42,15 @@
         .auth-header h1 {
             margin-bottom: 10px;
             font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .auth-header h1 svg {
+            width: 28px;
+            height: 28px;
         }
         
         .auth-header p {
@@ -54,7 +64,14 @@
             border-radius: 15px;
             font-size: 12px;
             margin-top: 10px;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .security-badge svg {
+            width: 14px;
+            height: 14px;
         }
         
         .auth-tabs {
@@ -129,6 +146,15 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .submit-btn svg {
+            width: 18px;
+            height: 18px;
         }
         
         .submit-btn:hover {
@@ -190,7 +216,9 @@
         }
         
         .study-planner-link {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             margin-top: 15px;
             padding: 12px 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -199,6 +227,11 @@
             border-radius: 8px;
             font-weight: 600;
             transition: transform 0.2s ease;
+        }
+        
+        .study-planner-link svg {
+            width: 18px;
+            height: 18px;
         }
         
         .study-planner-link:hover {
@@ -214,6 +247,14 @@
             cursor: pointer;
             font-size: 14px;
             margin-right: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .logout-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
         .user-dashboard {
@@ -232,9 +273,12 @@
 <body>
     <div class="auth-container">
         <div class="auth-header">
-            <h1>🔒 Secure Study Planner</h1>
+            <h1><i data-lucide="lock"></i> Secure Study Planner</h1>
             <p>JWT-Protected Multi-Agent System</p>
-            <div class="security-badge">🛡️ Secure Authentication</div>
+            <div class="security-badge">
+                <i data-lucide="shield-check"></i>
+                Secure Authentication
+            </div>
         </div>
         
         <div class="auth-tabs">
@@ -258,7 +302,8 @@
                 </div>
                 
                 <button type="submit" class="submit-btn" id="login-btn">
-                    🔑 Secure Sign In
+                    <i data-lucide="key"></i>
+                    Secure Sign In
                 </button>
             </form>
             
@@ -295,7 +340,8 @@
                 </div>
                 
                 <button type="submit" class="submit-btn" id="register-btn">
-                    📝 Create Secure Account
+                    <i data-lucide="user-plus"></i>
+                    Create Secure Account
                 </button>
             </form>
             
@@ -303,9 +349,13 @@
             <div class="user-dashboard" id="user-dashboard" style="display: none;">
                 <div class="user-info" id="user-info"></div>
                 <div id="token-info" class="token-info" style="display: none;"></div>
-                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                <button class="logout-btn" onclick="logout()">
+                    <i data-lucide="log-out"></i>
+                    Logout
+                </button>
                 <a href="enhanced-index.html" class="study-planner-link">
-                    📚 Access Study Planner
+                    <i data-lucide="book-open"></i>
+                    Access Study Planner
                 </a>
             </div>
         </div>
@@ -315,11 +365,6 @@
         const API_BASE_URL = 'http://127.0.0.1:8000';
         let currentUser = null;
         let authToken = null;
-
-        // Check if user is already logged in
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthStatus();
-        });
 
         function checkAuthStatus() {
             const token = localStorage.getItem('authToken');
@@ -389,14 +434,14 @@
                     localStorage.setItem('authToken', authToken);
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     
-                    showMessage('🎉 Login successful! JWT token received.', 'success');
+                    showMessage('✓ Login successful! JWT token received.', 'success');
                     setTimeout(() => showUserDashboard(), 1500);
                 } else {
-                    showMessage(`❌ ${data.detail || data.message || 'Login failed'}`, 'error');
+                    showMessage(`✗ ${data.detail || data.message || 'Login failed'}`, 'error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage('🌐 Network error. Please check server connection.', 'error');
+                showMessage('⚠ Network error. Please check server connection.', 'error');
             } finally {
                 setLoading('login-btn', false);
             }
@@ -449,16 +494,16 @@
                 const data = await response.json();
                 
                 if (response.ok && data.status === 'success') {
-                    showMessage('✅ Account created successfully! Please log in.', 'success');
+                    showMessage('✓ Account created successfully! Please log in.', 'success');
                     // Switch to login tab and pre-fill email
                     switchTab('login');
                     document.getElementById('login-email').value = email;
                 } else {
-                    showMessage(`❌ ${data.message || data.detail || 'Registration failed'}`, 'error');
+                    showMessage(`✗ ${data.message || data.detail || 'Registration failed'}`, 'error');
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage('🌐 Network error. Please check server connection.', 'error');
+                showMessage('⚠ Network error. Please check server connection.', 'error');
             } finally {
                 setLoading('register-btn', false);
             }
@@ -473,10 +518,10 @@
             const tokenInfo = document.getElementById('token-info');
             
             userInfo.innerHTML = `
-                <h3>🎉 Welcome, ${currentUser.first_name} ${currentUser.last_name}! 👋</h3>
-                <p><strong>📧 Email:</strong> ${currentUser.email}</p>
-                <p><strong>👤 Username:</strong> ${currentUser.username}</p>
-                <p><strong>🔐 Status:</strong> <span style="color: green;">Authenticated</span></p>
+                <h3>Welcome, ${currentUser.first_name} ${currentUser.last_name}!</h3>
+                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <p><strong>Username:</strong> ${currentUser.username}</p>
+                <p><strong>Status:</strong> <span style="color: green;">Authenticated</span></p>
             `;
             
             // Hide token info as requested
@@ -509,13 +554,21 @@
                 button.disabled = true;
             } else {
                 if (buttonId === 'login-btn') {
-                    button.innerHTML = '🔑 Secure Sign In';
+                    button.innerHTML = '<i data-lucide="key"></i>Secure Sign In';
                 } else {
-                    button.innerHTML = '📝 Create Secure Account';
+                    button.innerHTML = '<i data-lucide="user-plus"></i>Create Secure Account';
                 }
                 button.disabled = false;
+                // Re-initialize icons after updating innerHTML
+                lucide.createIcons();
             }
         }
+
+        // Initialize Lucide icons on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            checkAuthStatus();
+        });
     </script>
 </body>
 </html>
