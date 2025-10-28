@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Study Planner - Dashboard</title>
     <!-- Version: 2025-10-23-15:54 - Interactive Roadmap Update -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         * {
             margin: 0;
@@ -113,7 +113,13 @@
 
         .logo i {
             margin-right: 0.5rem;
-            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo svg {
+            width: 1.8rem;
+            height: 1.8rem;
         }
 
         .user-nav {
@@ -135,6 +141,13 @@
 
         .user-info i {
             color: #10b981;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info svg {
+            width: 1.2rem;
+            height: 1.2rem;
         }
 
         .nav-links {
@@ -4346,6 +4359,33 @@
                 left: 100%;
             }
         }
+
+        /* Lucide Icon Styles */
+        .tab i, .generate-btn i, .action-btn i, button i, 
+        .nav-link i, .sidebar-close i, .sidebar-toggle i, label i,
+        .pricing-btn i, .btn-next i, .btn-back i, .btn-change-level i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tab svg, .generate-btn svg, .action-btn svg, button svg,
+        .nav-link svg, .sidebar-close svg, .sidebar-toggle svg,
+        .pricing-btn svg, .btn-next svg, .btn-back svg, .btn-change-level svg {
+            width: 1.1rem;
+            height: 1.1rem;
+        }
+        
+        .input-group label svg {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+        
+        .feature svg {
+            width: 1rem;
+            height: 1rem;
+        }
     </style>
     
     <!-- User Assessment Styles -->
@@ -4356,24 +4396,24 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="logo">
-                <i class="fas fa-brain"></i>
+                <i data-lucide="brain"></i>
                 AI Study Planner
             </a>
             <div class="user-nav">
                 <div class="nav-links">
                     <a href="index.html" class="nav-link">
-                        <i class="fas fa-home"></i> Home
+                        <i data-lucide="home"></i> Home
                     </a>
                     <button class="nav-link nav-new-plan-btn" onclick="startNewPlan()" style="background: none; border: none; cursor: pointer; color: inherit; font-size: inherit; padding: 0.75rem 1rem;">
-                        <i class="fas fa-plus-circle"></i> New Plan
+                        <i data-lucide="plus-circle"></i> New Plan
                     </button>
                 </div>
                 <div class="user-info" id="userDisplay">
-                    <i class="fas fa-user-circle"></i>
+                    <i data-lucide="user-circle"></i>
                     <span>Loading...</span>
                 </div>
                 <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+                    <i data-lucide="log-out"></i> Logout
                 </button>
             </div>
         </div>
@@ -4382,14 +4422,14 @@
     <!-- Study Plans Sidebar -->
     <div class="study-plans-sidebar" id="studyPlansSidebar">
         <div class="sidebar-header">
-            <h3><i class="fas fa-history"></i> My Study Plans</h3>
+            <h3><i data-lucide="history"></i> My Study Plans</h3>
             <button class="sidebar-close" onclick="toggleSidebar()">
-                <i class="fas fa-times"></i>
+                <i data-lucide="x"></i>
             </button>
         </div>
         <div class="sidebar-content" id="sidebarPlansContent">
             <div class="no-plans">
-                <i class="fas fa-folder-open"></i>
+                <i data-lucide="folder-open"></i>
                 <p>No study plans yet</p>
                 <small>Create your first plan to get started!</small>
             </div>
@@ -4398,7 +4438,7 @@
 
     <!-- Sidebar Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
-        <i class="fas fa-history"></i>
+        <i data-lucide="history"></i>
         <span>Plans</span>
     </button>
 
@@ -4413,7 +4453,7 @@
                 <h2>🔒 Please Log In</h2>
                 <p>You need to be logged in to access the AI Study Planner dashboard.</p>
                 <a href="secure-auth.html">
-                    <i class="fas fa-sign-in-alt"></i> Login / Register
+                    <i data-lucide="log-in"></i> Login / Register
                 </a>
             </div>
 
@@ -4423,16 +4463,16 @@
                 <div class="tabs-container">
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('advanced')">
-                            <i class="fas fa-rocket"></i> Advanced Planner
+                            <i data-lucide="rocket"></i> Advanced Planner
                         </button>
                         <button class="tab" onclick="switchTab('resources')">
-                            <i class="fas fa-search"></i> Find Resources
+                            <i data-lucide="search"></i> Find Resources
                         </button>
                         <button class="tab" onclick="switchTab('motivation')">
-                            <i class="fas fa-heart"></i> Get Motivated
+                            <i data-lucide="heart"></i> Get Motivated
                         </button>
                         <button class="tab" onclick="switchTab('progress')">
-                            <i class="fas fa-chart-line"></i> My Progress
+                            <i data-lucide="trending-up"></i> My Progress
                         </button>
                     </div>
 
@@ -4481,7 +4521,7 @@
                                         <!-- Subject in full width row -->
                                         <div class="input-group" style="grid-column: 1 / -1;">
                                             <label for="onboardingSubject">
-                                                <i class="fas fa-book"></i> Subject or Topic
+                                                <i data-lucide="book"></i> Subject or Topic
                                             </label>
                                             <input type="text" id="onboardingSubject" 
                                                    placeholder="e.g., Machine Learning, Calculus, Spanish..." 
@@ -4502,7 +4542,7 @@
                                         <!-- Daily Study Time and Study Duration in second row -->
                                         <div class="input-group">
                                             <label for="onboardingDailyHours">
-                                                <i class="fas fa-clock"></i> Daily Study Time
+                                                <i data-lucide="clock"></i> Daily Study Time
                                             </label>
                                             <select id="onboardingDailyHours">
                                                 <option value="1">1 hour</option>
@@ -4515,7 +4555,7 @@
 
                                         <div class="input-group">
                                             <label for="onboardingTotalDays">
-                                                <i class="fas fa-calendar-alt"></i> Study Duration
+                                                <i data-lucide="calendar"></i> Study Duration
                                             </label>
                                             <select id="onboardingTotalDays" onchange="toggleCustomDurationOnboarding()">
                                                 <option value="3">3 days</option>
@@ -4530,7 +4570,7 @@
                                         <!-- Custom Duration field (full width when visible) -->
                                         <div class="input-group" id="customDurationOnboarding" style="display: none; grid-column: 1 / -1;">
                                             <label for="customDaysOnboarding">
-                                                <i class="fas fa-calendar-plus"></i> Custom Days (1-365)
+                                                <i data-lucide="calendar-plus"></i> Custom Days (1-365)
                                             </label>
                                             <input 
                                                 type="number" 
@@ -4544,7 +4584,7 @@
 
                                     <div class="step-actions">
                                         <button class="btn-next" onclick="goToOnboardingStep(2)" id="step1NextBtn">
-                                            Continue <i class="fas fa-arrow-right"></i>
+                                            Continue <i data-lucide="arrow-right"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -4634,10 +4674,10 @@
 
                                     <div class="step-actions">
                                         <button class="btn-back" onclick="goToOnboardingStep(1)">
-                                            <i class="fas fa-arrow-left"></i> Back
+                                            <i data-lucide="arrow-left"></i> Back
                                         </button>
                                         <button class="btn-next" onclick="analyzeAndShowLevel()" id="step2NextBtn" disabled>
-                                            Analyze My Level <i class="fas fa-magic"></i>
+                                            Analyze My Level <i data-lucide="sparkles"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -4652,7 +4692,7 @@
 
                                     <div class="ai-suggestion-card">
                                         <div class="ai-badge">
-                                            <i class="fas fa-robot"></i> AI Recommended
+                                            <i data-lucide="bot"></i> AI Recommended
                                         </div>
                                         <div class="suggested-level">
                                             <div class="level-icon-large" id="suggestedLevelIcon">🌱</div>
@@ -4660,7 +4700,7 @@
                                             <p id="suggestedLevelDesc">Perfect for those starting fresh with fundamentals</p>
                                         </div>
                                         <button class="btn-change-level" onclick="toggleManualLevel()">
-                                            <i class="fas fa-edit"></i> Change Level
+                                            <i data-lucide="edit"></i> Change Level
                                         </button>
                                     </div>
 
@@ -4695,10 +4735,10 @@
 
                                     <div class="step-actions">
                                         <button class="btn-back" onclick="goToOnboardingStep(2)">
-                                            <i class="fas fa-arrow-left"></i> Back
+                                            <i data-lucide="arrow-left"></i> Back
                                         </button>
                                         <button class="btn-next" onclick="goToOnboardingStep(4)">
-                                            Continue <i class="fas fa-arrow-right"></i>
+                                            Continue <i data-lucide="arrow-right"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -4721,39 +4761,39 @@
                                             </div>
                                             <div class="pricing-features">
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>3-day study plans</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>Basic resources (3 per topic)</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>Progress tracking</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>AI study schedule</span>
                                                 </div>
                                                 <div class="feature disabled">
-                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
+                                                    <i data-lucide="x" style="color: #ef4444;"></i>
                                                     <span>Advanced customization</span>
                                                 </div>
                                                 <div class="feature disabled">
-                                                    <i class="fas fa-times" style="color: #ef4444;"></i>
+                                                    <i data-lucide="x" style="color: #ef4444;"></i>
                                                     <span>Unlimited resources</span>
                                                 </div>
                                             </div>
                                             <button class="pricing-btn free-btn" onclick="continueWithFree()">
-                                                <i class="fas fa-arrow-right"></i> Try Free Demo
+                                                <i data-lucide="arrow-right"></i> Try Free Demo
                                             </button>
                                         </div>
 
                                         <!-- Premium Plan -->
                                         <div class="pricing-card premium-card">
                                             <div class="popular-badge">
-                                                <i class="fas fa-star"></i> MOST POPULAR
+                                                <i data-lucide="star"></i> MOST POPULAR
                                             </div>
                                             <div class="pricing-header">
                                                 <h4>⭐ Premium Plan</h4>
@@ -4762,36 +4802,36 @@
                                             </div>
                                             <div class="pricing-features">
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span><strong>Unlimited</strong> study plans</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span><strong>Advanced</strong> AI tutor mode</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>Unlimited resources & materials</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>Progress analytics dashboard</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>AI motivation & coaching</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>Calendar sync & reminders</span>
                                                 </div>
                                                 <div class="feature">
-                                                    <i class="fas fa-check" style="color: #10b981;"></i>
+                                                    <i data-lucide="check" style="color: #10b981;"></i>
                                                     <span>Priority support</span>
                                                 </div>
                                             </div>
                                             <button class="pricing-btn premium-btn" onclick="showPremiumModal()">
-                                                <i class="fas fa-crown"></i> Customize Plan
+                                                <i data-lucide="crown"></i> Customize Plan
                                             </button>
                                         </div>
                                     </div>
@@ -4810,7 +4850,7 @@
 
                                     <div class="step-actions">
                                         <button class="btn-back" onclick="goToOnboardingStep(3)">
-                                            <i class="fas fa-arrow-left"></i> Back
+                                            <i data-lucide="arrow-left"></i> Back
                                         </button>
                                     </div>
                                 </div>
@@ -4851,7 +4891,7 @@
                         <div class="form-grid">
                             <div class="input-group">
                                 <label for="resourceSubject">
-                                    <i class="fas fa-book-open"></i> Subject
+                                    <i data-lucide="book-open"></i> Subject
                                 </label>
                                 <input type="text" id="resourceSubject" placeholder="Enter any subject to find resources..." list="resourceSubjectList">
                                 <datalist id="resourceSubjectList">
@@ -4861,7 +4901,7 @@
                             </div>
                             <div class="input-group">
                                 <label for="resourceType">
-                                    <i class="fas fa-filter"></i> Resource Type
+                                    <i data-lucide="filter"></i> Resource Type
                                 </label>
                                 <select id="resourceType">
                                     <option value="">All Types</option>
@@ -4875,7 +4915,7 @@
                         </div>
                         
                         <button class="generate-btn" onclick="findResources()">
-                            <i class="fas fa-search"></i> Find Best Resources
+                            <i data-lucide="search"></i> Find Best Resources
                         </button>
 
                         <div class="loading" id="resources-loading">
@@ -4895,13 +4935,13 @@
 
                         <div class="input-group">
                             <label for="currentMood">
-                                <i class="fas fa-comment"></i> How are you feeling about your studies?
+                                <i data-lucide="message-circle"></i> How are you feeling about your studies?
                             </label>
                             <input type="text" id="currentMood" placeholder="e.g., I'm struggling with calculus, feeling overwhelmed, excited about learning..." style="min-height: 100px;">
                         </div>
                         
                         <button class="generate-btn" onclick="getMotivation()">
-                            <i class="fas fa-heart"></i> Get Personalized Motivation
+                            <i data-lucide="heart"></i> Get Personalized Motivation
                         </button>
 
                         <div class="loading" id="motivation-loading">
@@ -4961,10 +5001,10 @@
                             <!-- Quick Actions -->
                             <div class="quick-actions">
                                 <button class="action-btn" onclick="markTodayComplete()">
-                                    <i class="fas fa-check"></i> Complete Today
+                                    <i data-lucide="check"></i> Complete Today
                                 </button>
                                 <button class="action-btn secondary" onclick="resetProgress()">
-                                    <i class="fas fa-refresh"></i> Reset Progress
+                                    <i data-lucide="refresh-cw"></i> Reset Progress
                                 </button>
                             </div>
                         </div>
@@ -6705,11 +6745,12 @@
             if (plans.length === 0) {
                 container.innerHTML = `
                     <div class="no-plans">
-                        <i class="fas fa-folder-open"></i>
+                        <i data-lucide="folder-open"></i>
                         <p>No study plans yet</p>
                         <small>Create your first plan to get started!</small>
                     </div>
                 `;
+                lucide.createIcons(); // Re-initialize icons
                 return;
             }
 
@@ -6733,12 +6774,12 @@
                             <div class="plan-level">${plan.level}</div>
                         </div>
                         <div class="plan-meta">
-                            <span><i class="fas fa-clock"></i> ${plan.dailyHours}h/day</span>
-                            <span><i class="fas fa-calendar"></i> ${plan.totalDays} days</span>
-                            <span><i class="fas fa-${plan.planType === 'premium' ? 'crown' : 'gift'}"></i> ${plan.planType}</span>
+                            <span><i data-lucide="clock"></i> ${plan.dailyHours}h/day</span>
+                            <span><i data-lucide="calendar"></i> ${plan.totalDays} days</span>
+                            <span><i data-lucide="${plan.planType === 'premium' ? 'crown' : 'gift'}"></i> ${plan.planType}</span>
                         </div>
                         <div class="plan-date">
-                            <i class="fas fa-calendar-check"></i> ${dateStr} at ${timeStr}
+                            <i data-lucide="calendar-check"></i> ${dateStr} at ${timeStr}
                         </div>
                         <div class="plan-actions">
                             <button class="plan-action-btn load-btn" onclick="event.stopPropagation(); loadPlan(${plan.id})">
@@ -6849,6 +6890,11 @@
             saveStudyPlan(planData);
             originalShowPremiumModal();
         };
+
+        // Initialize Lucide icons when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
     </script>
 
     <!-- Toast Container (dynamically populated) -->

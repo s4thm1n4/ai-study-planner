@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Study Planner - Intelligent Multi-Agent Learning System</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         * {
             margin: 0;
@@ -51,7 +51,11 @@
 
         .logo i {
             margin-right: 0.5rem;
-            font-size: 1.8rem;
+        }
+        
+        .logo svg {
+            width: 1.8rem;
+            height: 1.8rem;
         }
 
         .auth-buttons {
@@ -156,7 +160,13 @@
         }
 
         .hero-feature i {
-            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .hero-feature svg {
+            width: 1.2rem;
+            height: 1.2rem;
             color: #fbbf24;
         }
 
@@ -174,6 +184,11 @@
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .cta-button svg {
+            width: 1.1rem;
+            height: 1.1rem;
         }
 
         .cta-button:hover {
@@ -244,7 +259,14 @@
         }
 
         .feature-icon i {
-            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-icon svg {
+            width: 1.5rem;
+            height: 1.5rem;
             color: white;
         }
 
@@ -410,6 +432,15 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .generate-btn svg {
+            width: 1.1rem;
+            height: 1.1rem;
         }
 
         .generate-btn:hover {
@@ -535,7 +566,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="#" class="logo">
-                <i class="fas fa-brain"></i>
+                <i data-lucide="brain"></i>
                 AI Study Planner
             </a>
             <div class="auth-buttons">
@@ -555,25 +586,25 @@
             
             <div class="hero-features">
                 <div class="hero-feature">
-                    <i class="fas fa-robot"></i>
+                    <i data-lucide="bot"></i>
                     <span>4 AI Agents</span>
                 </div>
                 <div class="hero-feature">
-                    <i class="fas fa-shield-alt"></i>
+                    <i data-lucide="shield-check"></i>
                     <span>Secure & Private</span>
                 </div>
                 <div class="hero-feature">
-                    <i class="fas fa-chart-line"></i>
+                    <i data-lucide="trending-up"></i>
                     <span>Progress Tracking</span>
                 </div>
                 <div class="hero-feature">
-                    <i class="fas fa-mobile-alt"></i>
+                    <i data-lucide="smartphone"></i>
                     <span>Mobile Friendly</span>
                 </div>
             </div>
 
             <a href="#try-now" class="cta-button">
-                <i class="fas fa-play"></i>
+                <i data-lucide="play"></i>
                 Try Free Demo
             </a>
         </div>
@@ -583,14 +614,14 @@
     <section class="features">
         <div class="features-container">
             <div class="features-header">
-                <h2>🚀 Powered by Advanced AI</h2>
+                <h2> Powered by Advanced AI</h2>
                 <p>Our multi-agent system combines cutting-edge AI technology with educational best practices to deliver personalized learning experiences.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-calendar-alt"></i>
+                        <i data-lucide="calendar"></i>
                     </div>
                     <h3>Smart Scheduling</h3>
                     <p>AI-powered schedule optimization that adapts to your available time, learning pace, and knowledge level for maximum efficiency.</p>
@@ -598,7 +629,7 @@
 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-search"></i>
+                        <i data-lucide="search"></i>
                     </div>
                     <h3>Intelligent Resource Discovery</h3>
                     <p>Advanced information retrieval system finds the best educational resources tailored to your learning style and difficulty level.</p>
@@ -606,7 +637,7 @@
 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-heart"></i>
+                        <i data-lucide="heart"></i>
                     </div>
                     <h3>Motivation Coaching</h3>
                     <p>Sentiment analysis and personalized motivation to keep you engaged and motivated throughout your learning journey.</p>
@@ -614,7 +645,7 @@
 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-lock"></i>
+                        <i data-lucide="lock"></i>
                     </div>
                     <h3>Secure & Private</h3>
                     <p>Enterprise-grade security with JWT authentication ensures your learning data and progress remain completely private.</p>
@@ -622,7 +653,7 @@
 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-chart-bar"></i>
+                        <i data-lucide="bar-chart-3"></i>
                     </div>
                     <h3>Progress Analytics</h3>
                     <p>Detailed insights into your learning progress with recommendations for improvement and goal achievement.</p>
@@ -630,7 +661,7 @@
 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
+                        <i data-lucide="smartphone"></i>
                     </div>
                     <h3>Cross-Platform</h3>
                     <p>Access your study plans anywhere, anytime. Fully responsive design works seamlessly across all devices.</p>
@@ -643,32 +674,32 @@
     <section class="services">
         <div class="services-container">
             <div class="services-header">
-                <h2>🤖 Multi-Agent Architecture</h2>
+                <h2> Multi-Agent Architecture</h2>
                 <p>Four specialized AI agents work together to provide you with the ultimate study planning experience.</p>
             </div>
 
             <div class="agent-cards">
                 <div class="agent-card primary">
                     <div class="agent-number">1</div>
-                    <h3>📅 Schedule Creator Agent</h3>
+                    <h3> Schedule Creator Agent</h3>
                     <p>Creates personalized study schedules based on your goals, available time, and learning preferences using advanced AI algorithms.</p>
                 </div>
 
                 <div class="agent-card">
                     <div class="agent-number">2</div>
-                    <h3>📚 Resource Finder Agent</h3>
+                    <h3> Resource Finder Agent</h3>
                     <p>Uses information retrieval and machine learning to discover the most relevant educational resources from curated databases.</p>
                 </div>
 
                 <div class="agent-card">
                     <div class="agent-number">3</div>
-                    <h3>💪 Motivation Coach Agent</h3>
+                    <h3> Motivation Coach Agent</h3>
                     <p>Analyzes your sentiment and progress to provide personalized motivation, tips, and encouragement when you need it most.</p>
                 </div>
 
                 <div class="agent-card">
                     <div class="agent-number">4</div>
-                    <h3>🔒 Coordinator Agent</h3>
+                    <h3> Coordinator Agent</h3>
                     <p>Manages authentication, data security, and coordinates between all agents to ensure seamless and secure operation.</p>
                 </div>
             </div>
@@ -678,7 +709,7 @@
     <!-- Try Now Section -->
     <section class="try-now" id="try-now">
         <div class="try-now-container">
-            <h2>✨ Try Our Simple Planner</h2>
+            <h2> Try Our Simple Planner</h2>
             <p class="try-now-subtitle">Get a taste of our AI-powered study planning. Enter any subject and receive an instant 3-day study plan!</p>
 
             <div class="simple-planner-form">
@@ -687,7 +718,7 @@
                     <input type="text" id="demo-goal" placeholder="e.g., Machine Learning, Python Programming, Data Science">
                 </div>
                 <button class="generate-btn" onclick="generateDemoStudyPlan()">
-                    <i class="fas fa-magic"></i> Generate Study Plan
+                    <i data-lucide="sparkles"></i> Generate Study Plan
                 </button>
 
                 <div class="loading" id="demo-loading">
@@ -699,7 +730,7 @@
             </div>
 
             <div class="unlock-more">
-                <p><strong>🚀 Want more advanced features?</strong></p>
+                <p><strong> Want more advanced features?</strong></p>
                 <p>Get premium to unlock personalized schedules, detailed resource recommendations, progress tracking, and motivational coaching!</p>
                 <a href="secure-auth.html" class="btn-primary" style="display: inline-block; margin-top: 1rem;">
                     Create Free Account
@@ -808,24 +839,24 @@
             
             let scheduleHtml = schedule.map(item => `
                 <div class="schedule-item">
-                    <h4>📅 ${item}</h4>
+                    <h4> ${item}</h4>
                 </div>
             `).join('');
 
             const resourceHtml = `
                 <div class="resource-card">
-                    <h4>📚 Recommended Resource</h4>
+                    <h4> Recommended Resource</h4>
                     <p><a href="${resource.link}" target="_blank" rel="noopener noreferrer">${resource.topic}</a></p>
                 </div>
             `;
 
             resultsDiv.innerHTML = `
                 <div class="results">
-                    <h3>🎯 Your 3-Day Study Plan</h3>
+                    <h3> Your 3-Day Study Plan</h3>
                     ${scheduleHtml}
                     ${resourceHtml}
                     <div style="margin-top: 2rem; padding: 1rem; background: rgba(99, 102, 241, 0.2); border-radius: 0.5rem; border-left: 4px solid #6366f1;">
-                        <p><strong>✨ This is just the beginning!</strong></p>
+                        <p><strong> This is just the beginning!</strong></p>
                         <p>Register to unlock advanced features like personalized schedules, progress tracking, and AI-powered motivation coaching.</p>
                     </div>
                 </div>
@@ -846,6 +877,9 @@
                 generateDemoStudyPlan();
             }
         });
+
+        // Initialize Lucide icons
+        lucide.createIcons();
     </script>
 </body>
 </html>
