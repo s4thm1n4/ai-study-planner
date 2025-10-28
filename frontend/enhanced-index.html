@@ -4450,7 +4450,7 @@
         <div class="container">
             <!-- Login Required State -->
             <div id="loginRequired" class="login-required" style="display: none;">
-                <h2>🔒 Please Log In</h2>
+                <h2><i data-lucide="lock"></i> Please Log In</h2>
                 <p>You need to be logged in to access the AI Study Planner dashboard.</p>
                 <a href="secure-auth.html">
                     <i data-lucide="log-in"></i> Login / Register
@@ -4479,7 +4479,7 @@
                     <!-- Advanced Planner Tab -->
                     <div id="advanced-tab" class="tab-content active">
                         <div class="tab-header">
-                            <h2>🚀 Create Your Personalized Study Plan</h2>
+                            <h2><i data-lucide="rocket"></i> Create Your Personalized Study Plan</h2>
                             <p>Answer a few quick questions and let our AI create the perfect learning journey for you.</p>
                         </div>
 
@@ -4695,7 +4695,7 @@
                                             <i data-lucide="bot"></i> AI Recommended
                                         </div>
                                         <div class="suggested-level">
-                                            <div class="level-icon-large" id="suggestedLevelIcon">🌱</div>
+                                            <div class="level-icon-large" id="suggestedLevelIcon"><i data-lucide="seedling"></i></div>
                                             <h4 id="suggestedLevelText">BEGINNER</h4>
                                             <p id="suggestedLevelDesc">Perfect for those starting fresh with fundamentals</p>
                                         </div>
@@ -4747,7 +4747,7 @@
                             <!-- Step 4: Premium Comparison -->
                             <div class="onboarding-step" id="onboarding-step-4">
                                 <div class="step-card" style="max-width: 900px; margin: 0 auto;">
-                                    <div class="step-icon">💎</div>
+                                    <div class="step-icon"><i data-lucide="gem"></i></div>
                                     <h3 class="step-title">Unlock Better Grades & Save Study Time</h3>
                                     <p class="step-subtitle">Choose the plan that works best for you</p>
 
@@ -4796,7 +4796,7 @@
                                                 <i data-lucide="star"></i> MOST POPULAR
                                             </div>
                                             <div class="pricing-header">
-                                                <h4>⭐ Premium Plan</h4>
+                                                <h4> Premium Plan</h4>
                                                 <div class="price">$9.99<span>/month</span></div>
                                                 <p class="price-note">Everything + Advanced Features</p>
                                             </div>
@@ -4841,10 +4841,10 @@
                                             Trusted by students from top universities
                                         </p>
                                         <div class="university-logos">
-                                            <span class="uni-badge">🎓 Stanford</span>
-                                            <span class="uni-badge">🎓 Harvard</span>
-                                            <span class="uni-badge">🎓 MIT</span>
-                                            <span class="uni-badge">🎓 Yale</span>
+                                            <span class="uni-badge"><i data-lucide="graduation-cap"></i> Stanford</span>
+                                            <span class="uni-badge"><i data-lucide="graduation-cap"></i> Harvard</span>
+                                            <span class="uni-badge"><i data-lucide="graduation-cap"></i> MIT</span>
+                                            <span class="uni-badge"><i data-lucide="graduation-cap"></i> Yale</span>
                                         </div>
                                     </div>
 
@@ -5248,7 +5248,7 @@
             modal.innerHTML = `
                 <div style="background: white; border-radius: 1rem; max-width: 600px; width: 100%; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
                     <div style="text-align: center; margin-bottom: 1.5rem;">
-                        <div style="font-size: 4rem; margin-bottom: 0.5rem;">⚠️</div>
+                        <div style="font-size: 4rem; margin-bottom: 0.5rem;"><i data-lucide="alert-triangle" style="color: #dc2626;"></i></div>
                         <h2 style="color: #dc2626; margin: 0 0 0.5rem 0; font-size: 1.75rem;">Content Policy Violation</h2>
                         <p style="color: #64748b; margin: 0; font-size: 1rem;">Detected: <strong>${category}</strong></p>
                     </div>
@@ -5268,10 +5268,10 @@
                              Try these educational topics instead:
                         </p>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
-                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">📊 Data Science</span>
-                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">💻 Programming</span>
-                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">📐 Mathematics</span>
-                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">🔬 Science</span>
+                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Data Science</span>
+                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Programming</span>
+                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Mathematics</span>
+                            <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">Science</span>
                             <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">🌐 Languages</span>
                             <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">🎨 Design</span>
                         </div>
@@ -6239,7 +6239,7 @@
             ];
 
             return resources.map((resource, index) => {
-                const stars = '★'.repeat(Math.floor(resource.rating)) + (resource.rating % 1 >= 0.5 ? '☆' : '');
+                const stars = '<i data-lucide="star" style="color: #fbbf24;"></i>'.repeat(Math.floor(resource.rating)) + (resource.rating % 1 >= 0.5 ? '<i data-lucide="star" style="color: #d1d5db;"></i>' : '');
                 const iconMap = { video: 'video', course: 'book-open', article: 'file-text', book: 'book' };
                 
                 return `
@@ -6252,7 +6252,7 @@
                             <div class="resource-card-header">
                                 <span class="resource-type-badge ${resource.type}">${resource.type}</span>
                                 <button class="resource-favorite" onclick="toggleFavorite(${index}, this)">
-                                    ♡
+                                    <i data-lucide="heart"></i>
                                 </button>
                             </div>
                             <h5 class="resource-card-title">${resource.title}</h5>
@@ -6345,18 +6345,23 @@
             
             if (button.classList.contains('active')) {
                 button.classList.remove('active');
-                button.textContent = '♡';
+                button.innerHTML = '<i data-lucide="heart"></i>';
                 const index = favorites.indexOf(resourceIndex);
                 if (index > -1) favorites.splice(index, 1);
             } else {
                 button.classList.add('active');
-                button.textContent = '♥';
+                button.innerHTML = '<i data-lucide="heart" style="fill: currentColor;"></i>';
                 if (!favorites.includes(resourceIndex)) {
                     favorites.push(resourceIndex);
                 }
             }
 
             localStorage.setItem('favoriteResources', JSON.stringify(favorites));
+            
+            // Reinitialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
             
             // Show toast notification
             if (button.classList.contains('active')) {
@@ -6995,7 +7000,7 @@
                     <p>• Mark days complete to unlock achievements</p>
                     <p>• Filter resources by type for focused learning</p>
                     <p>• Use dark mode for comfortable night studying</p>
-                    <p>• Save your favorite resources with the ♥ button</p>
+                    <p>• Save your favorite resources with the heart button</p>
                 </div>
             </div>
         </div>
