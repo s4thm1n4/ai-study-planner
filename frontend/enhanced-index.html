@@ -4513,7 +4513,7 @@
                             <!-- Step 1: Subject & Time -->
                             <div class="onboarding-step active" id="onboarding-step-1">
                                 <div class="step-card">
-                                    <div class="step-icon">🎯</div>
+                                    <div class="step-icon"></div>
                                     <h3 class="step-title">What do you want to learn?</h3>
                                     <p class="step-subtitle">Tell us your subject and available time</p>
 
@@ -4593,7 +4593,7 @@
                             <!-- Step 2: Quick Assessment -->
                             <div class="onboarding-step" id="onboarding-step-2">
                                 <div class="step-card">
-                                    <div class="step-icon">🧠</div>
+                                    <div class="step-icon"></div>
                                     <h3 class="step-title">Quick Knowledge Check</h3>
                                     <p class="step-subtitle">Help us understand your current level (3 questions)</p>
 
@@ -4686,7 +4686,7 @@
                             <!-- Step 3: AI Suggestion -->
                             <div class="onboarding-step" id="onboarding-step-3">
                                 <div class="step-card">
-                                    <div class="step-icon">🤖</div>
+                                    <div class="step-icon"></div>
                                     <h3 class="step-title">AI Analysis Complete!</h3>
                                     <p class="step-subtitle">Based on your responses, here's our recommendation</p>
 
@@ -4710,23 +4710,23 @@
                                             Choose your preferred level:
                                         </p>
                                         <div class="level-selection-grid">
-                                            <div class="level-choice-card" onclick="selectManualLevel('beginner', '🌱', 'Beginner', 'Start from scratch')">
-                                                <div class="level-choice-icon">🌱</div>
+                                            <div class="level-choice-card" onclick="selectManualLevel('beginner', 'seedling', 'Beginner', 'Start from scratch')">
+                                                <div class="level-choice-icon"><i data-lucide="seedling"></i></div>
                                                 <div class="level-choice-title">Beginner</div>
                                                 <div class="level-choice-desc">Start from scratch</div>
                                             </div>
-                                            <div class="level-choice-card" onclick="selectManualLevel('intermediate', '🌿', 'Intermediate', 'Build on basics')">
-                                                <div class="level-choice-icon">🌿</div>
+                                            <div class="level-choice-card" onclick="selectManualLevel('intermediate', 'sprout', 'Intermediate', 'Build on basics')">
+                                                <div class="level-choice-icon"><i data-lucide="sprout"></i></div>
                                                 <div class="level-choice-title">Intermediate</div>
                                                 <div class="level-choice-desc">Build on basics</div>
                                             </div>
-                                            <div class="level-choice-card" onclick="selectManualLevel('advanced', '🌳', 'Advanced', 'Deep expertise')">
-                                                <div class="level-choice-icon">🌳</div>
+                                            <div class="level-choice-card" onclick="selectManualLevel('advanced', 'tree-pine', 'Advanced', 'Deep expertise')">
+                                                <div class="level-choice-icon"><i data-lucide="tree-pine"></i></div>
                                                 <div class="level-choice-title">Advanced</div>
                                                 <div class="level-choice-desc">Deep expertise</div>
                                             </div>
-                                            <div class="level-choice-card" onclick="selectManualLevel('expert', '🏔️', 'Expert', 'Master level')">
-                                                <div class="level-choice-icon">🏔️</div>
+                                            <div class="level-choice-card" onclick="selectManualLevel('expert', 'mountain', 'Expert', 'Master level')">
+                                                <div class="level-choice-icon"><i data-lucide="mountain"></i></div>
                                                 <div class="level-choice-title">Expert</div>
                                                 <div class="level-choice-desc">Master level</div>
                                             </div>
@@ -4884,7 +4884,7 @@
                     <!-- Resources Tab -->
                     <div id="resources-tab" class="tab-content">
                         <div class="tab-header">
-                            <h2>📚 Resource Finder</h2>
+                            <h2><i data-lucide="book-open"></i> Resource Finder</h2>
                             <p>Discover the best learning resources curated by our AI-powered information retrieval system.</p>
                         </div>
 
@@ -4929,7 +4929,7 @@
                     <!-- Motivation Tab -->
                     <div id="motivation-tab" class="tab-content">
                         <div class="tab-header">
-                            <h2>💪 Motivation Coach</h2>
+                            <h2><i data-lucide="heart"></i> Motivation Coach</h2>
                             <p>Get personalized motivation, study tips, and encouragement from our AI coach.</p>
                         </div>
 
@@ -4955,13 +4955,13 @@
                     <!-- Progress Tab -->
                     <div id="progress-tab" class="tab-content">
                         <div class="tab-header">
-                            <h2>🎮 My Progress</h2>
+                            <h2><i data-lucide="trending-up"></i> My Progress</h2>
                             <p>Track your daily study hours and maintain your learning streak!</p>
                         </div>
 
                         <!-- Study Streak Counter -->
                         <div class="streak-counter">
-                            <div class="streak-flame">🔥</div>
+                            <div class="streak-flame"><i data-lucide="flame"></i></div>
                             <div class="streak-info">
                                 <div class="streak-number" id="streakNumber">0</div>
                                 <div class="streak-label">Day Streak</div>
@@ -4972,7 +4972,7 @@
                         <!-- Overall Progress -->
                         <div class="progress-overview">
                             <div class="progress-card">
-                                <h3>📊 Current Study Plan</h3>
+                                <h3><i data-lucide="bar-chart-3"></i> Current Study Plan</h3>
                                 <div id="currentPlanInfo">
                                     <p>Create a study plan to start tracking!</p>
                                 </div>
@@ -4993,7 +4993,7 @@
 
                         <!-- Daily Tracking Grid -->
                         <div class="daily-tracking" id="dailyTrackingSection" style="display: none;">
-                            <h3>📅 Daily Progress</h3>
+                            <h3><i data-lucide="calendar"></i> Daily Progress</h3>
                             <div class="daily-grid" id="dailyGrid">
                                 <!-- Daily boxes will be generated here -->
                             </div>
@@ -5011,25 +5011,25 @@
 
                         <!-- Achievements Section -->
                         <div class="achievements-section" id="achievementsSection">
-                            <h3>🏆 Achievements</h3>
+                            <h3><i data-lucide="trophy"></i> Achievements</h3>
                             <div class="achievements-grid" id="achievementsGrid">
                                 <div class="achievement locked" data-achievement="first-day">
-                                    <div class="achievement-icon">🎯</div>
+                                    <div class="achievement-icon"><i data-lucide="target"></i></div>
                                     <div class="achievement-name">First Day</div>
                                     <div class="achievement-desc">Complete your first study session</div>
                                 </div>
                                 <div class="achievement locked" data-achievement="three-streak">
-                                    <div class="achievement-icon">🔥</div>
+                                    <div class="achievement-icon"><i data-lucide="flame"></i></div>
                                     <div class="achievement-name">Hot Streak</div>
                                     <div class="achievement-desc">Study for 3 days in a row</div>
                                 </div>
                                 <div class="achievement locked" data-achievement="week-warrior">
-                                    <div class="achievement-icon">⚡</div>
+                                    <div class="achievement-icon"><i data-lucide="zap"></i></div>
                                     <div class="achievement-name">Week Warrior</div>
                                     <div class="achievement-desc">Complete a full week</div>
                                 </div>
                                 <div class="achievement locked" data-achievement="perfect-week">
-                                    <div class="achievement-icon">💎</div>
+                                    <div class="achievement-icon"><i data-lucide="gem"></i></div>
                                     <div class="achievement-name">Perfect Week</div>
                                     <div class="achievement-desc">100% completion for 7 days</div>
                                 </div>
@@ -5040,7 +5040,7 @@
                         <div class="celebration-overlay" id="celebrationOverlay">
                             <div class="confetti" id="confetti"></div>
                                                        <div class="celebration-message" id="celebrationMessage">
-                                <div class="celebration-icon">🎉</div>
+                                <div class="celebration-icon"><i data-lucide="party-popper"></i></div>
                                 <div class="celebration-text">Congratulations!</div>
                                 <div class="celebration-subtext">You're making great progress!</div>
                             </div>
@@ -5215,7 +5215,7 @@
             for (const [category, keywords] of Object.entries(blockedKeywords)) {
                 for (const keyword of keywords) {
                     if (subjectLower.includes(keyword)) {
-                        console.log(`[ETHICS] ❌ BLOCKED - Category: "${category}", Keyword: "${keyword}"`);
+                        console.log(`[ETHICS]  BLOCKED - Category: "${category}", Keyword: "${keyword}"`);
                         
                         // Show detailed error message
                         showEthicalViolationError(category, keyword);
@@ -5224,7 +5224,7 @@
                 }
             }
             
-            console.log('[ETHICS] ✅ Content validation passed');
+            console.log('[ETHICS]  Content validation passed');
             return true;
         }
 
@@ -5255,7 +5255,7 @@
                     
                     <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 1.25rem; margin: 1.5rem 0; border-radius: 0.5rem;">
                         <p style="margin: 0 0 1rem 0; color: #991b1b; font-weight: 600;">
-                            🚫 Our AI Study Planner is designed exclusively for educational purposes.
+                             Our AI Study Planner is designed exclusively for educational purposes.
                         </p>
                         <p style="margin: 0; color: #991b1b; line-height: 1.6;">
                             We cannot generate study plans for topics involving violence, illegal activities, 
@@ -5265,7 +5265,7 @@
                     
                     <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1.25rem; margin: 1.5rem 0; border-radius: 0.5rem;">
                         <p style="margin: 0 0 0.75rem 0; color: #166534; font-weight: 600;">
-                            ✅ Try these educational topics instead:
+                             Try these educational topics instead:
                         </p>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
                             <span style="background: white; color: #166534; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.9rem; text-align: center; border: 1px solid #bbf7d0;">📊 Data Science</span>
@@ -5331,7 +5331,7 @@
                     
                     // ETHICAL CONTENT VALIDATION - Check before proceeding to Step 2
                     if (!validateEthicalContent(subject)) {
-                        console.log('[ETHICS] ❌ Subject blocked at Step 1');
+                        console.log('[ETHICS]  Subject blocked at Step 1');
                         return; // Stop here, don't proceed to next step
                     }
                     
@@ -5432,7 +5432,7 @@
             setTimeout(() => {
                 // Determine level based on answers
                 let level = 'beginner';
-                let icon = '🌱';
+                let icon = 'seedling';
                 let levelText = 'BEGINNER';
                 let description = 'Perfect for those starting fresh with fundamentals';
 
@@ -5440,18 +5440,18 @@
                     if (onboardingData.q2 === 'confident' || onboardingData.q2 === 'very-confident') {
                         if (onboardingData.q3 === 'advanced' || onboardingData.q3 === 'expert') {
                             level = 'advanced';
-                            icon = '🌳';
+                            icon = 'tree-pine';
                             levelText = 'ADVANCED';
                             description = 'You\'re ready for complex topics and deep dives';
                         } else {
                             level = 'intermediate';
-                            icon = '🌿';
+                            icon = 'sprout';
                             levelText = 'INTERMEDIATE';
                             description = 'Build on your foundation with structured learning';
                         }
                     } else {
                         level = 'intermediate';
-                        icon = '🌿';
+                        icon = 'sprout';
                         levelText = 'INTERMEDIATE';
                         description = 'Strengthen your knowledge at a comfortable pace';
                     }
@@ -5461,9 +5461,14 @@
                 onboardingData.selectedLevel = level;
 
                 // Update UI
-                document.getElementById('suggestedLevelIcon').textContent = icon;
+                document.getElementById('suggestedLevelIcon').innerHTML = `<i data-lucide="${icon}"></i>`;
                 document.getElementById('suggestedLevelText').textContent = levelText;
                 document.getElementById('suggestedLevelDesc').textContent = description;
+                
+                // Reinitialize Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
 
                 // Hide loading
                 if (loadingDiv) {
@@ -5495,9 +5500,14 @@
             onboardingData.selectedLevel = level;
 
             // Update display
-            document.getElementById('suggestedLevelIcon').textContent = icon;
+            document.getElementById('suggestedLevelIcon').innerHTML = `<i data-lucide="${icon}"></i>`;
             document.getElementById('suggestedLevelText').textContent = levelText.toUpperCase();
             document.getElementById('suggestedLevelDesc').textContent = description;
+            
+            // Reinitialize Lucide icons  
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
 
             // Hide manual section after a moment
             setTimeout(() => {
@@ -5532,13 +5542,13 @@
         window.showPremiumModal = function() {
             // Show premium confirmation
             const confirmed = confirm('Premium Plan - $9.99/month\n\n' +
-                  '✅ Unlimited study plans\n' +
-                  '✅ Advanced AI tutor mode\n' +
-                  '✅ Unlimited resources\n' +
-                  '✅ Progress analytics\n' +
-                  '✅ AI motivation coach\n' +
-                  '✅ Calendar integration\n' +
-                  '✅ Priority support\n\n' +
+                  '• Unlimited study plans\n' +
+                  '• Advanced AI tutor mode\n' +
+                  '• Unlimited resources\n' +
+                  '• Progress analytics\n' +
+                  '• AI motivation coach\n' +
+                  '• Calendar integration\n' +
+                  '• Priority support\n\n' +
                   'For this demo, all premium features are unlocked!\n\n' +
                   'Click OK to continue with premium features enabled.');
             
@@ -5663,78 +5673,78 @@
                 { 
                     name: 'Introduction & Fundamentals', 
                     difficulty: 'easy', 
-                    emoji: '📖',
+                    emoji: 'book-open',
                     activities: ['Reading', 'Video Lectures', 'Note-taking'],
                     resources: [
-                        { title: `${planData.subject} Basics Course`, type: 'Course', duration: '2 hours', icon: '📘' },
-                        { title: 'Beginner Tutorial', type: 'Video', duration: '30 mins', icon: '🎥' },
-                        { title: 'Quick Start Guide', type: 'Article', duration: '15 mins', icon: '📄' }
+                        { title: `${planData.subject} Basics Course`, type: 'Course', duration: '2 hours', icon: 'book-open' },
+                        { title: 'Beginner Tutorial', type: 'Video', duration: '30 mins', icon: 'video' },
+                        { title: 'Quick Start Guide', type: 'Article', duration: '15 mins', icon: 'file-text' }
                     ]
                 },
                 { 
                     name: 'Core Concepts', 
                     difficulty: 'easy', 
-                    emoji: '⚡',
+                    emoji: 'zap',
                     activities: ['Practice Exercises', 'Interactive Demos', 'Quizzes'],
                     resources: [
-                        { title: 'Interactive Practice Platform', type: 'Course', duration: '3 hours', icon: '📘' },
-                        { title: 'Concept Deep Dive', type: 'Video', duration: '45 mins', icon: '🎥' },
-                        { title: 'Core Principles Guide', type: 'Article', duration: '20 mins', icon: '📄' }
+                        { title: 'Interactive Practice Platform', type: 'Course', duration: '3 hours', icon: 'book-open' },
+                        { title: 'Concept Deep Dive', type: 'Video', duration: '45 mins', icon: 'video' },
+                        { title: 'Core Principles Guide', type: 'Article', duration: '20 mins', icon: 'file-text' }
                     ]
                 },
                 { 
                     name: 'Practical Applications', 
                     difficulty: 'medium', 
-                    emoji: '🛠️',
+                    emoji: 'wrench',
                     activities: ['Hands-on Projects', 'Code Labs', 'Case Studies'],
                     resources: [
-                        { title: 'Real-World Projects', type: 'Course', duration: '4 hours', icon: '📘' },
-                        { title: 'Build With Me Tutorial', type: 'Video', duration: '1 hour', icon: '🎥' },
-                        { title: 'Case Study Collection', type: 'Article', duration: '30 mins', icon: '📄' }
+                        { title: 'Real-World Projects', type: 'Course', duration: '4 hours', icon: 'book-open' },
+                        { title: 'Build With Me Tutorial', type: 'Video', duration: '1 hour', icon: 'video' },
+                        { title: 'Case Study Collection', type: 'Article', duration: '30 mins', icon: 'file-text' }
                     ]
                 },
                 { 
                     name: 'Advanced Techniques', 
                     difficulty: 'medium', 
-                    emoji: '🚀',
+                    emoji: 'rocket',
                     activities: ['Problem Solving', 'Research Papers', 'Deep Dive'],
                     resources: [
-                        { title: 'Advanced Masterclass', type: 'Course', duration: '5 hours', icon: '📘' },
-                        { title: 'Expert Techniques', type: 'Video', duration: '1.5 hours', icon: '🎥' },
-                        { title: 'Research Papers Summary', type: 'Article', duration: '40 mins', icon: '📄' }
+                        { title: 'Advanced Masterclass', type: 'Course', duration: '5 hours', icon: 'book-open' },
+                        { title: 'Expert Techniques', type: 'Video', duration: '1.5 hours', icon: 'video' },
+                        { title: 'Research Papers Summary', type: 'Article', duration: '40 mins', icon: 'file-text' }
                     ]
                 },
                 { 
                     name: 'Real-World Projects', 
                     difficulty: 'hard', 
-                    emoji: '🏗️',
+                    emoji: 'building',
                     activities: ['Build Projects', 'Peer Review', 'Portfolio Work'],
                     resources: [
-                        { title: 'Portfolio Projects Guide', type: 'Course', duration: '6 hours', icon: '📘' },
-                        { title: 'Project Walkthrough', type: 'Video', duration: '2 hours', icon: '🎥' },
-                        { title: 'Best Practices', type: 'Article', duration: '25 mins', icon: '📄' }
+                        { title: 'Portfolio Projects Guide', type: 'Course', duration: '6 hours', icon: 'book-open' },
+                        { title: 'Project Walkthrough', type: 'Video', duration: '2 hours', icon: 'video' },
+                        { title: 'Best Practices', type: 'Article', duration: '25 mins', icon: 'file-text' }
                     ]
                 },
                 { 
                     name: 'Optimization & Best Practices', 
                     difficulty: 'hard', 
-                    emoji: '⚙️',
+                    emoji: 'settings',
                     activities: ['Code Review', 'Performance Tuning', 'Testing'],
                     resources: [
-                        { title: 'Optimization Techniques', type: 'Course', duration: '4 hours', icon: '📘' },
-                        { title: 'Performance Tuning Tips', type: 'Video', duration: '1 hour', icon: '🎥' },
-                        { title: 'Testing Strategies', type: 'Article', duration: '30 mins', icon: '📄' }
+                        { title: 'Optimization Techniques', type: 'Course', duration: '4 hours', icon: 'book-open' },
+                        { title: 'Performance Tuning Tips', type: 'Video', duration: '1 hour', icon: 'video' },
+                        { title: 'Testing Strategies', type: 'Article', duration: '30 mins', icon: 'file-text' }
                     ]
                 },
                 { 
                     name: 'Mastery & Assessment', 
                     difficulty: 'medium', 
-                    emoji: '🎓',
+                    emoji: 'graduation-cap',
                     activities: ['Final Project', 'Comprehensive Test', 'Self-Assessment'],
                     resources: [
-                        { title: 'Final Exam Prep', type: 'Course', duration: '3 hours', icon: '📘' },
-                        { title: 'Certification Guide', type: 'Video', duration: '45 mins', icon: '🎥' },
-                        { title: 'Assessment Checklist', type: 'Article', duration: '20 mins', icon: '📄' }
+                        { title: 'Final Exam Prep', type: 'Course', duration: '3 hours', icon: 'book-open' },
+                        { title: 'Certification Guide', type: 'Video', duration: '45 mins', icon: 'video' },
+                        { title: 'Assessment Checklist', type: 'Article', duration: '20 mins', icon: 'file-text' }
                     ]
                 }
             ];
@@ -5743,7 +5753,7 @@
             const currentPlanSubject = localStorage.getItem('currentPlanSubject') || planData.subject;
             const storageKey = `completedDays_${currentPlanSubject}`;
             const completedDays = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            console.log('📊 Loaded completed days:', completedDays);
+            console.log('Loaded completed days:', completedDays);
 
             for (let i = 0; i < daysToShow; i++) {
                 const dayDate = new Date(today);
@@ -5760,9 +5770,9 @@
                 const checkboxChecked = isCompleted ? 'checked' : '';
                 
                 const difficultyClass = `difficulty-${topic.difficulty}`;
-                const difficultyIcon = topic.difficulty === 'easy' ? '🟢' : topic.difficulty === 'medium' ? '🟡' : '🔴';
+                const difficultyIcon = topic.difficulty === 'easy' ? '<i data-lucide="circle" style="color: #10b981;"></i>' : topic.difficulty === 'medium' ? '<i data-lucide="circle" style="color: #f59e0b;"></i>' : '<i data-lucide="circle" style="color: #ef4444;"></i>';
                 
-                const markerIcon = status === 'completed' ? '✓' : topic.emoji;
+                const markerIcon = status === 'completed' ? '✓' : `<i data-lucide="${topic.emoji}"></i>`;
                 const resourcesJson = JSON.stringify(topic.resources);
                 
                 scheduleHtml += `
@@ -5784,15 +5794,15 @@
                                            onchange="toggleDayCompletion(${i + 1}, this.checked)"
                                            title="Mark as complete">
                                     <span class="status-badge ${status}">
-                                        ${status === 'completed' ? '✓ Done' : status === 'in-progress' ? '⏳ In Progress' : '⭕ Pending'}
+                                        ${status === 'completed' ? '<i data-lucide="check"></i> Done' : status === 'in-progress' ? '<i data-lucide="clock"></i> In Progress' : '<i data-lucide="circle"></i> Pending'}
                                     </span>
                                 </div>
                             </div>
 
                             <div class="timeline-topics">
-                                <h5>📚 Today's Focus</h5>
+                                <h5><i data-lucide="target"></i> Today's Focus</h5>
                                 <div class="topic-list">
-                                    ${topic.activities.map(activity => `<span class="topic-tag">• ${activity}</span>`).join('')}
+                                    ${topic.activities.map(activity => `<span class="topic-tag"><i data-lucide="dot"></i> ${activity}</span>`).join('')}
                                 </div>
                             </div>
 
@@ -5874,7 +5884,7 @@
             
             // Attach event listeners to roadmap nodes after rendering
             setTimeout(() => {
-                console.log('🎯 Attaching roadmap event listeners...');
+                console.log(' Attaching roadmap event listeners...');
                 attachRoadmapEventListeners();
             }, 100);
         }
@@ -5882,7 +5892,7 @@
         // Attach click listeners to roadmap nodes
         function attachRoadmapEventListeners() {
             const roadmapNodes = document.querySelectorAll('.roadmap-node');
-            console.log(`✅ Found ${roadmapNodes.length} roadmap nodes to attach listeners`);
+            console.log(` Found ${roadmapNodes.length} roadmap nodes to attach listeners`);
             roadmapNodes.forEach(node => {
                 const marker = node.querySelector('.roadmap-marker');
                 const card = node.querySelector('.roadmap-card');
@@ -5930,9 +5940,9 @@
             if (isCompleted) {
                 roadmapNode.classList.remove('in-progress', 'not-started');
                 roadmapNode.classList.add('completed');
-                marker.textContent = '✓';
+                marker.innerHTML = '<i data-lucide="check"></i>';
                 statusBadge.className = 'status-badge completed';
-                statusBadge.textContent = '✓ Done';
+                statusBadge.innerHTML = '<i data-lucide="check"></i> Done';
                 progressFill.style.width = '100%';
                 progressText.textContent = '100%';
                 if (checkbox) checkbox.checked = true;
@@ -5957,11 +5967,11 @@
             } else {
                 roadmapNode.classList.remove('completed');
                 roadmapNode.classList.add('not-started');
-                // Get the original emoji from the data attribute or set to day number
-                const originalEmoji = roadmapNode.getAttribute('data-emoji') || dayNumber;
-                marker.textContent = originalEmoji;
+                // Get the original icon from the data attribute or set to default
+                const originalIcon = roadmapNode.getAttribute('data-emoji') || 'circle';
+                marker.innerHTML = `<i data-lucide="${originalIcon}"></i>`;
                 statusBadge.className = 'status-badge not-started';
-                statusBadge.textContent = '⭕ Pending';
+                statusBadge.innerHTML = '<i data-lucide="circle"></i> Pending';
                 progressFill.style.width = '0%';
                 progressText.textContent = '0%';
                 if (checkbox) checkbox.checked = false;
@@ -5976,7 +5986,12 @@
 
             // Persist to localStorage
             localStorage.setItem(storageKey, JSON.stringify(completedDays));
-            console.log(`✅ Day ${dayNumber} completion status saved:`, isCompleted);
+            console.log(` Day ${dayNumber} completion status saved:`, isCompleted);
+            
+            // Reinitialize Lucide icons for the updated elements
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
         
         // Animate roadmap path fill
@@ -6020,7 +6035,7 @@
                         const badge = node.querySelector('.status-badge');
                         if (badge) {
                             badge.className = 'status-badge not-started';
-                            badge.textContent = '⭕ Pending';
+                            badge.textContent = ' Pending';
                         }
                     }
                 });
@@ -6031,7 +6046,7 @@
                 const nextBadge = nextDayNode.querySelector('.status-badge');
                 if (nextBadge) {
                     nextBadge.className = 'status-badge in-progress';
-                    nextBadge.textContent = '⏳ In Progress';
+                    nextBadge.innerHTML = '<i data-lucide="clock"></i> In Progress';
                 }
                 
                 // Update progress for next day
@@ -6063,12 +6078,12 @@
             // Generate resource items HTML
             const resourceItemsHtml = resources.map((resource, index) => `
                 <div class="resource-item-flashcard" style="animation-delay: ${0.1 + index * 0.1}s">
-                    <div class="resource-flashcard-icon">${resource.icon}</div>
+                    <div class="resource-flashcard-icon"><i data-lucide="${resource.icon}"></i></div>
                     <div class="resource-flashcard-content">
                         <h4>${resource.title}</h4>
                         <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
                             <span class="resource-type-badge">${resource.type}</span>
-                            <span style="color: #6b7280; font-size: 0.875rem;">⏱️ ${resource.duration}</span>
+                            <span style="color: #6b7280; font-size: 0.875rem;"> ${resource.duration}</span>
                         </div>
                     </div>
                     <button class="resource-action-btn" onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(resource.title)}', '_blank')">
@@ -6084,7 +6099,7 @@
             flashcard.innerHTML = `
                 <div class="flashcard-header">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700;">📚 Day ${dayNumber} Resources</h3>
+                        <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700;"> Day ${dayNumber} Resources</h3>
                         <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem;">${topicName}</p>
                     </div>
                     <button class="flashcard-close" onclick="closeResourcePopup()">
@@ -6095,14 +6110,14 @@
                 </div>
                 <div class="flashcard-body">
                     <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem;">
-                        🎯 Recommended resources to help you master this topic. Click "View Resource" to explore!
+                         Recommended resources to help you master this topic. Click "View Resource" to explore!
                     </p>
                     <div class="flashcard-resources-list">
                         ${resourceItemsHtml}
                     </div>
                     <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
                         <p style="color: #9ca3af; font-size: 0.875rem; margin: 0;">
-                            💡 Tip: Complete these resources in order for the best learning experience
+                             Tip: Complete these resources in order for the best learning experience
                         </p>
                     </div>
                 </div>
@@ -6153,7 +6168,7 @@
                 // Scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
-                console.log('✅ Ready for new plan creation');
+                console.log(' Ready for new plan creation');
             }
         }
 
@@ -6225,13 +6240,13 @@
 
             return resources.map((resource, index) => {
                 const stars = '★'.repeat(Math.floor(resource.rating)) + (resource.rating % 1 >= 0.5 ? '☆' : '');
-                const iconMap = { video: '🎥', course: '📘', article: '📄', book: '📚' };
+                const iconMap = { video: 'video', course: 'book-open', article: 'file-text', book: 'book' };
                 
                 return `
                     <div class="resource-card-modern" data-type="${resource.type}" data-rating="${resource.rating}" data-title="${resource.title.toLowerCase()}" data-index="${index}">
-                        ${resource.premium ? '<div class="premium-lock">🔒 Premium</div>' : ''}
+                        ${resource.premium ? '<div class="premium-lock"><i data-lucide="lock"></i> Premium</div>' : ''}
                         <div class="resource-thumbnail ${resource.type}">
-                            ${iconMap[resource.type]}
+                            <i data-lucide="${iconMap[resource.type]}"></i>
                         </div>
                         <div class="resource-card-body">
                             <div class="resource-card-header">
@@ -6483,9 +6498,9 @@
             if (isCompleted) {
                 timelineItem.classList.remove('in-progress', 'not-started');
                 timelineItem.classList.add('completed');
-                marker.textContent = '✓';
+                marker.innerHTML = '<i data-lucide="check"></i>';
                 statusBadge.className = 'status-badge completed';
-                statusBadge.textContent = '✓ Done';
+                statusBadge.innerHTML = '<i data-lucide="check"></i> Done';
                 progressFill.style.width = '100%';
                 progressText.textContent = '100%';
 
@@ -6496,7 +6511,7 @@
                 }, 10);
 
                 // Show success toast
-                showToast('success', 'Well Done! 🎉', `Day ${dayNumber} completed successfully!`);
+                showToast('success', 'Well Done!', `Day ${dayNumber} completed successfully!`);
 
                 // Trigger confetti for milestones
                 if (dayNumber % 3 === 0) {
@@ -6505,9 +6520,9 @@
             } else {
                 timelineItem.classList.remove('completed');
                 timelineItem.classList.add('not-started');
-                marker.textContent = dayNumber;
+                marker.innerHTML = `<i data-lucide="circle">${dayNumber}</i>`;
                 statusBadge.className = 'status-badge not-started';
-                statusBadge.textContent = '⭕ Pending';
+                statusBadge.innerHTML = '<i data-lucide="circle"></i> Pending';
                 progressFill.style.width = '0%';
                 progressText.textContent = '0%';
                 
@@ -6530,18 +6545,24 @@
         function toggleDarkMode() {
             const body = document.body;
             const icon = document.getElementById('darkModeIcon');
+            const iconElement = icon.querySelector('i');
             
             body.classList.toggle('dark-mode');
             
             // Update icon
             if (body.classList.contains('dark-mode')) {
-                icon.textContent = '☀️';
+                iconElement.setAttribute('data-lucide', 'sun');
                 localStorage.setItem('darkMode', 'enabled');
-                showToast('success', 'Dark Mode Enabled', 'Easy on the eyes! ✨');
+                showToast('success', 'Dark Mode Enabled', 'Easy on the eyes!');
             } else {
-                icon.textContent = '🌙';
+                iconElement.setAttribute('data-lucide', 'moon');
                 localStorage.setItem('darkMode', 'disabled');
-                showToast('info', 'Light Mode Enabled', 'Bright and clear! 💡');
+                showToast('info', 'Light Mode Enabled', 'Bright and clear!');
+            }
+            
+            // Reinitialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         }
 
@@ -6552,7 +6573,16 @@
             
             if (darkMode === 'enabled') {
                 document.body.classList.add('dark-mode');
-                if (icon) icon.textContent = '☀️';
+                if (icon) {
+                    const iconElement = icon.querySelector('i');
+                    if (iconElement) {
+                        iconElement.setAttribute('data-lucide', 'sun');
+                        // Reinitialize Lucide icons
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    }
+                }
             }
         }
 
@@ -6760,17 +6790,17 @@
                 const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-                const levelEmoji = {
-                    'beginner': '🌱',
-                    'intermediate': '🌿',
-                    'advanced': '🌳',
-                    'expert': '🏔️'
+                const levelIcons = {
+                    'beginner': 'seedling',
+                    'intermediate': 'sprout', 
+                    'advanced': 'tree-pine',
+                    'expert': 'mountain'
                 };
 
                 html += `
                     <div class="plan-card" onclick="loadPlan(${plan.id})">
                         <div class="plan-card-header">
-                            <div class="plan-subject">${levelEmoji[plan.level] || '📚'} ${plan.subject}</div>
+                            <div class="plan-subject"><i data-lucide="${levelIcons[plan.level] || 'book-open'}"></i> ${plan.subject}</div>
                             <div class="plan-level">${plan.level}</div>
                         </div>
                         <div class="plan-meta">
@@ -6841,7 +6871,7 @@
             updateStep1Button();
 
             // Show notification
-            alert(`📚 Loaded: ${plan.subject}\n\nLevel: ${plan.level}\n${plan.dailyHours}h/day for ${plan.totalDays} days\n\nClick "Continue" to proceed with this plan!`);
+            alert(` Loaded: ${plan.subject}\n\nLevel: ${plan.level}\n${plan.dailyHours}h/day for ${plan.totalDays} days\n\nClick "Continue" to proceed with this plan!`);
 
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -6902,7 +6932,7 @@
 
     <!-- Dark Mode Toggle -->
     <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
-        <span id="darkModeIcon">🌙</span>
+        <span id="darkModeIcon"><i data-lucide="moon"></i></span>
     </button>
 
     <!-- Help Button -->
@@ -6914,7 +6944,7 @@
     <div class="help-modal" id="helpModal">
         <div class="help-modal-content">
             <div class="help-modal-header">
-                <h3>⌨️ Keyboard Shortcuts</h3>
+                <h3>⌨ Keyboard Shortcuts</h3>
                 <button class="help-modal-close" onclick="toggleHelpModal()">×</button>
             </div>
 
@@ -6959,9 +6989,9 @@
             </div>
 
             <div class="shortcuts-section">
-                <h4>💡 Pro Tips</h4>
+                <h4> Pro Tips</h4>
                 <div style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6;">
-                    <p>• Click the flame icon 🔥 to see your study streak</p>
+                    <p>• Click the flame icon  to see your study streak</p>
                     <p>• Mark days complete to unlock achievements</p>
                     <p>• Filter resources by type for focused learning</p>
                     <p>• Use dark mode for comfortable night studying</p>
