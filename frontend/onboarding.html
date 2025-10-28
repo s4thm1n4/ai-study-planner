@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to AI Study Planner - Let's Get Started</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         * {
             margin: 0;
@@ -198,9 +198,7 @@
         }
 
         .choice-btn.selected::after {
-            content: '\f00c';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
+            content: '';
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
@@ -213,6 +211,13 @@
             align-items: center;
             justify-content: center;
             font-size: 0.75rem;
+        }
+
+        .choice-btn.selected::after {
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 16px;
         }
 
         .choice-emoji {
@@ -571,6 +576,39 @@
             text-decoration: underline;
         }
 
+        /* Lucide Icon Styles */
+        i[data-lucide] {
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .card-icon i[data-lucide] {
+            width: 3.5rem;
+            height: 3.5rem;
+        }
+
+        .choice-emoji i[data-lucide] {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .level-icon i[data-lucide] {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .premium-icon i[data-lucide] {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .ai-icon i[data-lucide] {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .flashcard {
@@ -623,29 +661,29 @@
         <!-- Step 1: Welcome -->
         <div class="flashcard active" id="step1">
             <div class="card-header">
-                <span class="card-icon">👋</span>
+                <span class="card-icon"><i data-lucide="hand-heart"></i></span>
                 <h1 class="card-title">Welcome to AI Study Planner!</h1>
                 <p class="card-subtitle">Let's create a personalized learning journey just for you. This will only take 2 minutes.</p>
             </div>
 
             <div class="choice-grid">
                 <div class="choice-btn" onclick="selectWelcomeGoal('student')">
-                    <span class="choice-emoji">🎓</span>
+                    <span class="choice-emoji"><i data-lucide="graduation-cap"></i></span>
                     <div class="choice-label">I'm a Student</div>
                     <div class="choice-desc">School or University</div>
                 </div>
                 <div class="choice-btn" onclick="selectWelcomeGoal('professional')">
-                    <span class="choice-emoji">💼</span>
+                    <span class="choice-emoji"><i data-lucide="briefcase"></i></span>
                     <div class="choice-label">Professional</div>
                     <div class="choice-desc">Career Development</div>
                 </div>
                 <div class="choice-btn" onclick="selectWelcomeGoal('learner')">
-                    <span class="choice-emoji">📚</span>
+                    <span class="choice-emoji"><i data-lucide="book-open"></i></span>
                     <div class="choice-label">Lifelong Learner</div>
                     <div class="choice-desc">Personal Growth</div>
                 </div>
                 <div class="choice-btn" onclick="selectWelcomeGoal('exam')">
-                    <span class="choice-emoji">✍️</span>
+                    <span class="choice-emoji"><i data-lucide="pencil"></i></span>
                     <div class="choice-label">Exam Prep</div>
                     <div class="choice-desc">Test Preparation</div>
                 </div>
@@ -653,7 +691,7 @@
 
             <div class="card-footer">
                 <button class="btn btn-primary" id="step1Next" onclick="goToStep(2)" disabled>
-                    Continue <i class="fas fa-arrow-right"></i>
+                    Continue <i data-lucide="arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -661,13 +699,13 @@
         <!-- Step 2: What to Learn -->
         <div class="flashcard" id="step2">
             <div class="card-header">
-                <span class="card-icon">🎯</span>
+                <span class="card-icon"><i data-lucide="target"></i></span>
                 <h1 class="card-title">What do you want to learn?</h1>
                 <p class="card-subtitle">Tell us your subject or topic. We'll personalize everything around it.</p>
             </div>
 
             <div class="input-group">
-                <label for="subjectInput"><i class="fas fa-book"></i> Subject or Topic</label>
+                <label for="subjectInput"><i data-lucide="book"></i> Subject or Topic</label>
                 <input type="text" id="subjectInput" placeholder="e.g., Machine Learning, Calculus, Spanish..." list="subjectSuggestions">
                 <datalist id="subjectSuggestions">
                     <option value="Machine Learning">
@@ -682,7 +720,7 @@
             </div>
 
             <div class="input-group">
-                <label for="timeCommitment"><i class="fas fa-clock"></i> Daily Time Commitment</label>
+                <label for="timeCommitment"><i data-lucide="clock"></i> Daily Time Commitment</label>
                 <select id="timeCommitment">
                     <option value="30min">30 minutes</option>
                     <option value="1hr">1 hour</option>
@@ -693,7 +731,7 @@
             </div>
 
             <div class="premium-banner" style="margin-top: 1.5rem;">
-                <span class="premium-icon">💎</span>
+                <span class="premium-icon"><i data-lucide="gem"></i></span>
                 <div class="premium-content">
                     <div class="premium-title">Upgrade for Smart Schedule Optimization</div>
                     <div class="premium-desc">Premium users get AI-powered time management and calendar sync</div>
@@ -703,10 +741,10 @@
 
             <div class="card-footer">
                 <button class="btn btn-secondary" onclick="goToStep(1)">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i data-lucide="arrow-left"></i> Back
                 </button>
                 <button class="btn btn-primary" id="step2Next" onclick="goToStep(3)" disabled>
-                    Continue <i class="fas fa-arrow-right"></i>
+                    Continue <i data-lucide="arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -714,7 +752,7 @@
         <!-- Step 3: Quick Assessment Question 1 -->
         <div class="flashcard" id="step3">
             <div class="card-header">
-                <span class="card-icon">🧠</span>
+                <span class="card-icon"><i data-lucide="brain"></i></span>
                 <h1 class="card-title">Quick Knowledge Check</h1>
                 <p class="card-subtitle">Let's understand your current level. Question 1 of 3</p>
             </div>
@@ -747,10 +785,10 @@
 
             <div class="card-footer">
                 <button class="btn btn-secondary" onclick="goToStep(2)">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i data-lucide="arrow-left"></i> Back
                 </button>
                 <button class="btn btn-primary" id="step3Next" onclick="goToStep(4)" disabled>
-                    Continue <i class="fas fa-arrow-right"></i>
+                    Continue <i data-lucide="arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -758,7 +796,7 @@
         <!-- Step 4: Quick Assessment Question 2 -->
         <div class="flashcard" id="step4">
             <div class="card-header">
-                <span class="card-icon">⚡</span>
+                <span class="card-icon"><i data-lucide="zap"></i></span>
                 <h1 class="card-title">Quick Knowledge Check</h1>
                 <p class="card-subtitle">Question 2 of 3</p>
             </div>
@@ -791,10 +829,10 @@
 
             <div class="card-footer">
                 <button class="btn btn-secondary" onclick="goToStep(3)">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i data-lucide="arrow-left"></i> Back
                 </button>
                 <button class="btn btn-primary" id="step4Next" onclick="goToStep(5)" disabled>
-                    Continue <i class="fas fa-arrow-right"></i>
+                    Continue <i data-lucide="arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -802,7 +840,7 @@
         <!-- Step 5: Quick Assessment Question 3 -->
         <div class="flashcard" id="step5">
             <div class="card-header">
-                <span class="card-icon">🎯</span>
+                <span class="card-icon"><i data-lucide="target"></i></span>
                 <h1 class="card-title">Quick Knowledge Check</h1>
                 <p class="card-subtitle">Final question - Question 3 of 3</p>
             </div>
@@ -835,10 +873,10 @@
 
             <div class="card-footer">
                 <button class="btn btn-secondary" onclick="goToStep(4)">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i data-lucide="arrow-left"></i> Back
                 </button>
                 <button class="btn btn-primary" id="step5Next" onclick="analyzeLevel()" disabled>
-                    Analyze My Level <i class="fas fa-magic"></i>
+                    Analyze My Level <i data-lucide="sparkles"></i>
                 </button>
             </div>
         </div>
@@ -846,14 +884,14 @@
         <!-- Step 6: AI Analysis & Level Suggestion -->
         <div class="flashcard" id="step6">
             <div class="card-header">
-                <span class="card-icon">🤖</span>
+                <span class="card-icon"><i data-lucide="bot"></i></span>
                 <h1 class="card-title">AI Analysis Complete!</h1>
                 <p class="card-subtitle">Based on your responses, here's our recommendation</p>
             </div>
 
             <div class="ai-analysis">
                 <div class="ai-header">
-                    <span class="ai-icon">✨</span>
+                    <span class="ai-icon"><i data-lucide="sparkles"></i></span>
                     <span class="ai-title">Suggested Difficulty Level</span>
                 </div>
                 <div class="ai-result">
@@ -869,22 +907,22 @@
                 </p>
                 <div class="level-grid">
                     <div class="level-card" onclick="selectLevel('beginner')">
-                        <span class="level-icon">🌱</span>
+                        <span class="level-icon"><i data-lucide="sprout"></i></span>
                         <div class="level-title">Beginner</div>
                         <div class="level-desc">Start from scratch</div>
                     </div>
                     <div class="level-card" onclick="selectLevel('intermediate')">
-                        <span class="level-icon">🌿</span>
+                        <span class="level-icon"><i data-lucide="leaf"></i></span>
                         <div class="level-title">Intermediate</div>
                         <div class="level-desc">Build on basics</div>
                     </div>
                     <div class="level-card" onclick="selectLevel('advanced')">
-                        <span class="level-icon">🌳</span>
+                        <span class="level-icon"><i data-lucide="tree-pine"></i></span>
                         <div class="level-title">Advanced</div>
                         <div class="level-desc">Deep expertise</div>
                     </div>
                     <div class="level-card" onclick="selectLevel('expert')">
-                        <span class="level-icon">🏔️</span>
+                        <span class="level-icon"><i data-lucide="mountain"></i></span>
                         <div class="level-title">Expert</div>
                         <div class="level-desc">Master level</div>
                     </div>
@@ -892,7 +930,7 @@
             </div>
 
             <div class="premium-banner">
-                <span class="premium-icon">🚀</span>
+                <span class="premium-icon"><i data-lucide="rocket"></i></span>
                 <div class="premium-content">
                     <div class="premium-title">Unlock Advanced Features</div>
                     <div class="premium-desc">Get AI coaching, progress analytics, and unlimited study plans</div>
@@ -902,10 +940,10 @@
 
             <div class="card-footer">
                 <button class="btn btn-secondary" onclick="goToStep(5)">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i data-lucide="arrow-left"></i> Back
                 </button>
                 <button class="btn btn-primary" onclick="completeOnboarding()">
-                    Create My Study Plan <i class="fas fa-check"></i>
+                    Create My Study Plan <i data-lucide="check"></i>
                 </button>
             </div>
         </div>
@@ -1108,6 +1146,11 @@
                 e.preventDefault();
                 alert('Premium features coming soon! For now, continue with free plan.');
             });
+        });
+
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
         });
     </script>
 </body>
