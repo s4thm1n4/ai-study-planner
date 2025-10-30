@@ -541,7 +541,7 @@
                 <div class="upload-icon">📁</div>
                 <h3>Drop your files here or click to browse</h3>
                 <p>Support for PDF, PowerPoint, and Images</p>
-                <input type="file" id="fileInput" accept=".pdf,.pptx,.ppt,.png,.jpg,.jpeg" style="display: none;" multiple>
+                <input type="file" id="fileInput" accept=".pdf,.pptx,.ppt,.png,.jpg,.jpeg" style="display: none;">
                 <div class="file-types">
                     <span class="file-type-badge">PDF</span>
                     <span class="file-type-badge">PPTX</span>
@@ -625,26 +625,42 @@
 
         // Authentication
         function getAuthToken() {
-            const tokenData = localStorage.getItem('authToken');
-            return tokenData ? JSON.parse(tokenData).access_token : null;
+            try {
+                // Token is stored as raw string in localStorage
+                const token = localStorage.getItem('authToken');
+                console.log('[DEBUG] Token from localStorage:', token ? 'Found' : 'Not found');
+                return token;
+            } catch (error) {
+                console.error('[ERROR] Failed to get auth token:', error);
+                return null;
+            }
         }
 
         function checkAuth() {
             const token = getAuthToken();
             if (!token) {
+                console.log('[DEBUG] No auth token, redirecting to login');
                 alert('Please log in to use this feature');
                 window.location.href = 'secure-auth.html';
                 return false;
             }
+            console.log('[DEBUG] Auth token validated');
             return true;
         }
 
         // Check upload limit
         async function checkUploadLimit() {
-            if (!checkAuth()) return;
-
             try {
                 const token = getAuthToken();
+                
+                // If no token, show default free plan state
+                if (!token) {
+                    console.log('[DEBUG] No auth token, showing default state');
+                    uploadLimit = { allowed: true, count: 0, limit: 3, remaining: 3, is_premium: false };
+                    updateLimitDisplay();
+                    return;
+                }
+                
                 const response = await fetch(`${API_BASE}/file-analysis/check-limit`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -655,11 +671,17 @@
                     const data = await response.json();
                     uploadLimit = data.limit_info;
                     updateLimitDisplay();
+                    console.log('[DEBUG] Upload limit loaded:', uploadLimit);
                 } else {
-                    console.error('Failed to check upload limit');
+                    console.error('Failed to check upload limit, using defaults');
+                    uploadLimit = { allowed: true, count: 0, limit: 3, remaining: 3, is_premium: false };
+                    updateLimitDisplay();
                 }
             } catch (error) {
                 console.error('Error checking limit:', error);
+                // Set default values on error
+                uploadLimit = { allowed: true, count: 0, limit: 3, remaining: 3, is_premium: false };
+                updateLimitDisplay();
             }
         }
 
@@ -714,18 +736,23 @@
         function handleFiles(files) {
             console.log(`[DEBUG] handleFiles called with ${files.length} file(s)`);
             
+            // For free users, only allow single file
             if (!uploadLimit.is_premium && files.length > 1) {
-                alert('Multiple file upload is a premium feature. Please upgrade or upload one file at a time.');
+                alert('Multiple file upload is a premium feature. Please upload one file at a time.');
                 return;
             }
 
-            if (!uploadLimit.is_premium && selectedFiles.length + files.length > uploadLimit.remaining) {
-                alert(`You can only upload ${uploadLimit.remaining} more file(s) today. Upgrade to premium for unlimited uploads!`);
+            // Check daily limit
+            if (!uploadLimit.is_premium && uploadLimit.remaining <= 0) {
+                alert(`Daily upload limit reached (${uploadLimit.limit} files). Upgrade to premium for unlimited uploads!`);
+                premiumUpsell.style.display = 'block';
                 return;
             }
 
+            // Convert FileList to Array
             selectedFiles = Array.from(files);
-            console.log(`[DEBUG] Files selected:`, selectedFiles.map(f => f.name));
+            console.log(`[DEBUG] Files selected:`, selectedFiles.map(f => `${f.name} (${f.type})`));
+            
             displaySelectedFiles();
             analyzeBtn.disabled = false;
             console.log('[DEBUG] Analyze button enabled');
@@ -816,8 +843,15 @@
                     });
 
                     console.log(`[DEBUG] Response status: ${response.status} ${response.statusText}`);
-                    const data = await response.json();
-                    console.log('[DEBUG] Response data:', data);
+                    
+                    let data;
+                    try {
+                        data = await response.json();
+                        console.log('[DEBUG] Response data:', data);
+                    } catch (e) {
+                        console.error('[ERROR] Failed to parse response as JSON:', e);
+                        throw new Error('Server returned invalid response');
+                    }
 
                     if (response.ok && data.status === 'success') {
                         console.log('[DEBUG] Analysis successful!');
@@ -827,9 +861,14 @@
                             uploadLimit = data.limit_info;
                             updateLimitDisplay();
                         }
+                    } else if (response.status === 401) {
+                        console.error('[DEBUG] Authentication failed');
+                        alert('Session expired. Please log in again.');
+                        window.location.href = 'secure-auth.html';
                     } else {
                         console.error('[DEBUG] Analysis failed:', data);
-                        displayError(file.name, data.detail || data.message || 'Analysis failed');
+                        const errorMsg = data.detail || data.message || `Server error: ${response.status}`;
+                        displayError(file.name, errorMsg);
                     }
                 }
 
@@ -918,9 +957,19 @@
             darkModeToggle.textContent = '☀️';
         }
 
-        // Initialize
-        checkUploadLimit();
-        lucide.createIcons();
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[DEBUG] Page loaded, initializing...');
+            checkUploadLimit();
+            lucide.createIcons();
+            
+            // Check if user is logged in
+            const token = getAuthToken();
+            if (!token) {
+                console.log('[DEBUG] No authentication token found');
+                limitText.innerHTML = '⚠️ Please <a href="secure-auth.html" style="color: var(--primary-color); text-decoration: underline;">log in</a> to use file analysis';
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Token Check</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: #00ff00; 
+        }
+        .box { 
+            background: #2a2a2a; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border: 1px solid #00ff00;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Auth Token Diagnostic</h1>
+    
+    <div class="box">
+        <h3>LocalStorage Contents:</h3>
+        <div id="storage"></div>
+    </div>
+    
+    <div class="box">
+        <h3>Token Validation:</h3>
+        <div id="token"></div>
+    </div>
+    
+    <button onclick="location.reload()">Refresh</button>
+    <button onclick="testAPI()">Test API Call</button>
+    <button onclick="localStorage.clear(); location.reload()">Clear Storage</button>
+    <button onclick="location.href='secure-auth.html'">Go Login</button>
+    
+    <div class="box" id="apiResult" style="display:none;">
+        <h3>API Test Result:</h3>
+        <pre id="apiOutput"></pre>
+    </div>
+
+    <script>
+        // Show storage
+        const storageDiv = document.getElementById('storage');
+        storageDiv.innerHTML = `
+            authToken: ${localStorage.getItem('authToken') ? '✅ EXISTS' : '❌ MISSING'}<br>
+            currentUser: ${localStorage.getItem('currentUser') ? '✅ EXISTS' : '❌ MISSING'}<br>
+            <br>
+            Raw authToken: <span style="word-break: break-all;">${localStorage.getItem('authToken') || 'null'}</span>
+        `;
+        
+        // Validate token
+        const tokenDiv = document.getElementById('token');
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            const parts = token.split('.');
+            tokenDiv.innerHTML = `
+                <span class="success">✅ Token exists</span><br>
+                Token length: ${token.length} characters<br>
+                JWT parts: ${parts.length} (should be 3)<br>
+                Valid JWT format: ${parts.length === 3 ? '<span class="success">YES</span>' : '<span class="error">NO</span>'}
+            `;
+        } else {
+            tokenDiv.innerHTML = '<span class="error">❌ No token found - Please log in</span>';
+        }
+        
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            const outputDiv = document.getElementById('apiOutput');
+            resultDiv.style.display = 'block';
+            
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                outputDiv.textContent = '❌ No token - cannot test API';
+                return;
+            }
+            
+            outputDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/file-analysis/check-limit', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    outputDiv.textContent = `✅ API CALL SUCCESSFUL!\n\nStatus: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+                    outputDiv.className = 'success';
+                } else {
+                    outputDiv.textContent = `❌ API CALL FAILED\n\nStatus: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+                    outputDiv.className = 'error';
+                }
+            } catch (error) {
+                outputDiv.textContent = `❌ ERROR: ${error.message}`;
+                outputDiv.className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>

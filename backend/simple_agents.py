@@ -304,10 +304,10 @@ class ScheduleCreatorAgent:
             if api_key:
                 try:
                     genai.configure(api_key=api_key)
-                    # Use the latest Gemini model
-                    self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
+                    # Use the stable Gemini model
+                    self.model = genai.GenerativeModel('gemini-pro')
                     self.genai_initialized = True
-                    print("[GEMINI DEBUG] ✅ Gemini API initialized successfully with gemini-1.5-flash-latest!")
+                    print("[GEMINI DEBUG] ✅ Gemini API initialized successfully with gemini-pro!")
                 except Exception as e:
                     print(f"[GEMINI DEBUG] ❌ Failed to initialize Gemini: {e}")
                     self.genai_initialized = False
@@ -1595,8 +1595,9 @@ class FileAnalysisAgent:
                 api_key = os.getenv("GEMINI_API_KEY")
                 if api_key:
                     genai.configure(api_key=api_key)
-                    self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
-                    print("[FILE ANALYSIS] ✅ Gemini API initialized for file analysis")
+                    # Use gemini-2.5-flash - stable multimodal model available in current API
+                    self.model = genai.GenerativeModel('gemini-2.5-flash')
+                    print("[FILE ANALYSIS] ✅ Gemini API initialized for file analysis with gemini-2.5-flash")
             except Exception as e:
                 print(f"[FILE ANALYSIS] ❌ Failed to initialize Gemini: {e}")
     
@@ -1705,14 +1706,11 @@ class FileAnalysisAgent:
                 extracted_text = self.extract_text_from_pptx(file_content)
                 content_type = "presentation"
             elif file_ext in ['png', 'jpg', 'jpeg']:
-                image_data = self.process_image(file_content)
-                if "error" in image_data:
-                    return {
-                        "status": "error",
-                        "message": image_data["error"]
-                    }
-                extracted_text = None
-                content_type = "image"
+                # gemini-1.0-pro doesn't support images, return helpful message
+                return {
+                    "status": "error",
+                    "message": "Image analysis is temporarily unavailable. Please upload PDF or PPTX files instead."
+                }
             else:
                 return {
                     "status": "error",
@@ -1728,22 +1726,13 @@ class FileAnalysisAgent:
             
             # Prepare prompt based on user query
             if user_query and user_query.strip():
-                if content_type == "image":
-                    prompt = f"User question: {user_query}\n\nPlease analyze this image and answer the question."
-                else:
-                    prompt = f"User question: {user_query}\n\nDocument content:\n{extracted_text}\n\nPlease answer based on the document."
+                prompt = f"User question: {user_query}\n\nDocument content:\n{extracted_text}\n\nPlease answer based on the document."
             else:
                 # Default summarization
-                if content_type == "image":
-                    prompt = "Please describe this image in detail. What does it show? What are the key elements?"
-                else:
-                    prompt = f"Please provide a comprehensive summary of this {content_type}:\n\n{extracted_text}"
+                prompt = f"Please provide a comprehensive summary of this {content_type}:\n\n{extracted_text}"
             
-            # Call Gemini API
-            if content_type == "image":
-                response = self.model.generate_content([prompt, image_data["image"]])
-            else:
-                response = self.model.generate_content(prompt)
+            # Call Gemini API (text only for gemini-1.0-pro)
+            response = self.model.generate_content(prompt)
             
             analysis_result = response.text
             
