@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Analysis - AI Study Planner</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --primary-color: #6366f1;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        body.dark-mode {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        body.dark-mode .navbar {
+            background: rgba(30, 41, 59, 0.95);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo svg {
+            width: 1.8rem;
+            height: 1.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .user-nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .btn-back {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: #5046e5;
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1000px;
+            margin: 6rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Upload Limit Display */
+        .upload-limit {
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            border: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .limit-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .limit-badge {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+
+        .limit-badge.warning {
+            background: var(--warning-color);
+        }
+
+        .limit-badge.error {
+            background: var(--error-color);
+        }
+
+        /* Upload Area */
+        .upload-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 2px dashed var(--border-color);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section.drag-over {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-area {
+            text-align: center;
+            padding: 3rem 2rem;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .upload-area h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .file-types {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .file-type-badge {
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Query Input */
+        .query-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .query-section h3 {
+            margin-bottom: 1rem;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .query-hint {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Selected Files Display */
+        .selected-files {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .selected-files.active {
+            display: block;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+        }
+
+        .btn-remove {
+            padding: 0.5rem 1rem;
+            background: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn-analyze {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Area */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .result-card {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .result-file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .result-status {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .result-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .result-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+
+        .result-query {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .result-content {
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Premium Upsell */
+        .premium-upsell {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .premium-upsell h3 {
+            margin-bottom: 1rem;
+        }
+
+        .btn-premium {
+            padding: 1rem 2rem;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .upload-limit {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i data-lucide="brain"></i>
+                AI Study Planner
+            </a>
+            <div class="user-nav">
+                <a href="enhanced-index.html" class="btn-back">
+                    <i data-lucide="arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>📄 File Analysis</h1>
+            <p>Upload documents or images and let AI analyze them for you</p>
+        </div>
+
+        <!-- Upload Limit Display -->
+        <div class="upload-limit" id="limitDisplay">
+            <div class="limit-info">
+                <span id="limitText">Loading...</span>
+            </div>
+            <span class="limit-badge" id="limitBadge">Free Plan</span>
+        </div>
+
+        <!-- Premium Upsell (for free users near limit) -->
+        <div class="premium-upsell" id="premiumUpsell" style="display: none;">
+            <h3>💎 Upgrade to Premium</h3>
+            <p>Get unlimited file uploads, batch processing, and priority support!</p>
+            <button class="btn-premium" onclick="window.location.href='enhanced-index.html'">
+                Upgrade Now - $4.99/month
+            </button>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <h3>Drop your files here or click to browse</h3>
+                <p>Support for PDF, PowerPoint, and Images</p>
+                <input type="file" id="fileInput" accept=".pdf,.pptx,.ppt,.png,.jpg,.jpeg" style="display: none;" multiple>
+                <div class="file-types">
+                    <span class="file-type-badge">PDF</span>
+                    <span class="file-type-badge">PPTX</span>
+                    <span class="file-type-badge">PNG</span>
+                    <span class="file-type-badge">JPG</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Files -->
+        <div class="selected-files" id="selectedFiles">
+            <h3>Selected Files</h3>
+            <div id="filesList"></div>
+        </div>
+
+        <!-- Query Input -->
+        <div class="query-section">
+            <h3>What would you like to know?</h3>
+            <textarea 
+                id="queryInput" 
+                class="query-input" 
+                placeholder="Ask a question about the document or leave blank for a summary..."></textarea>
+            <p class="query-hint">
+                💡 Tip: Leave blank to get a general summary, or ask specific questions like "What are the key points?" or "Explain this concept"
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn-analyze" id="analyzeBtn" disabled>
+                <i data-lucide="sparkles"></i>
+                Analyze with AI
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <h2 style="margin-bottom: 1.5rem;">📊 Analysis Results</h2>
+            <div id="resultsContainer"></div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loadingState" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyzing your file with AI...</p>
+        </div>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle">
+        🌙
+    </button>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // State
+        let selectedFiles = [];
+        let uploadLimit = { allowed: false, count: 0, limit: 3, remaining: 3, is_premium: false };
+
+        // DOM Elements
+        const uploadSection = document.getElementById('uploadSection');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFilesDiv = document.getElementById('selectedFiles');
+        const filesList = document.getElementById('filesList');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const queryInput = document.getElementById('queryInput');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const loadingState = document.getElementById('loadingState');
+        const limitDisplay = document.getElementById('limitDisplay');
+        const limitText = document.getElementById('limitText');
+        const limitBadge = document.getElementById('limitBadge');
+        const premiumUpsell = document.getElementById('premiumUpsell');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+
+        // API Base URL
+        const API_BASE = 'http://localhost:8000/api';
+
+        // Authentication
+        function getAuthToken() {
+            const tokenData = localStorage.getItem('authToken');
+            return tokenData ? JSON.parse(tokenData).access_token : null;
+        }
+
+        function checkAuth() {
+            const token = getAuthToken();
+            if (!token) {
+                alert('Please log in to use this feature');
+                window.location.href = 'secure-auth.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Check upload limit
+        async function checkUploadLimit() {
+            if (!checkAuth()) return;
+
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE}/file-analysis/check-limit`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    uploadLimit = data.limit_info;
+                    updateLimitDisplay();
+                } else {
+                    console.error('Failed to check upload limit');
+                }
+            } catch (error) {
+                console.error('Error checking limit:', error);
+            }
+        }
+
+        // Update limit display
+        function updateLimitDisplay() {
+            const { count, limit, remaining, is_premium } = uploadLimit;
+            
+            if (is_premium) {
+                limitText.textContent = '♾️ Unlimited uploads available';
+                limitBadge.textContent = 'Premium Plan';
+                limitBadge.className = 'limit-badge';
+                premiumUpsell.style.display = 'none';
+            } else {
+                limitText.textContent = `📊 ${remaining} of ${limit} uploads remaining today`;
+                limitBadge.textContent = 'Free Plan';
+                
+                if (remaining === 0) {
+                    limitBadge.className = 'limit-badge error';
+                    premiumUpsell.style.display = 'block';
+                } else if (remaining === 1) {
+                    limitBadge.className = 'limit-badge warning';
+                    premiumUpsell.style.display = 'block';
+                } else {
+                    limitBadge.className = 'limit-badge';
+                    premiumUpsell.style.display = 'none';
+                }
+            }
+        }
+
+        // File upload handlers
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            console.log(`[DEBUG] handleFiles called with ${files.length} file(s)`);
+            
+            if (!uploadLimit.is_premium && files.length > 1) {
+                alert('Multiple file upload is a premium feature. Please upgrade or upload one file at a time.');
+                return;
+            }
+
+            if (!uploadLimit.is_premium && selectedFiles.length + files.length > uploadLimit.remaining) {
+                alert(`You can only upload ${uploadLimit.remaining} more file(s) today. Upgrade to premium for unlimited uploads!`);
+                return;
+            }
+
+            selectedFiles = Array.from(files);
+            console.log(`[DEBUG] Files selected:`, selectedFiles.map(f => f.name));
+            displaySelectedFiles();
+            analyzeBtn.disabled = false;
+            console.log('[DEBUG] Analyze button enabled');
+        }
+
+        function displaySelectedFiles() {
+            filesList.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                const icon = fileExt === 'pdf' ? '📄' : 
+                            fileExt === 'pptx' || fileExt === 'ppt' ? '📊' : '🖼️';
+                
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-icon">${icon}</span>
+                        <div>
+                            <strong>${file.name}</strong>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                ${(file.size / 1024).toFixed(2)} KB
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-remove" onclick="removeFile(${index})">Remove</button>
+                `;
+                
+                filesList.appendChild(fileItem);
+            });
+
+            selectedFilesDiv.classList.add('active');
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            if (selectedFiles.length === 0) {
+                selectedFilesDiv.classList.remove('active');
+                analyzeBtn.disabled = true;
+            } else {
+                displaySelectedFiles();
+            }
+        }
+
+        // Analyze files
+        analyzeBtn.addEventListener('click', async () => {
+            console.log('[DEBUG] Analyze button clicked');
+            
+            if (!checkAuth()) {
+                console.log('[DEBUG] Authentication check failed');
+                return;
+            }
+            
+            if (selectedFiles.length === 0) {
+                console.log('[DEBUG] No files selected');
+                alert('Please select a file to analyze');
+                return;
+            }
+
+            console.log(`[DEBUG] Analyzing ${selectedFiles.length} file(s)`);
+            loadingState.style.display = 'block';
+            resultsSection.style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            const query = queryInput.value.trim();
+            const token = getAuthToken();
+            console.log(`[DEBUG] Query: "${query || 'No query - will summarize'}"`);
+
+            try {
+                resultsContainer.innerHTML = '';
+
+                for (const file of selectedFiles) {
+                    console.log(`[DEBUG] Processing file: ${file.name} (${file.type}, ${file.size} bytes)`);
+                    
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    if (query) {
+                        formData.append('query', query);
+                    }
+
+                    console.log(`[DEBUG] Sending request to ${API_BASE}/file-analysis/upload`);
+                    const response = await fetch(`${API_BASE}/file-analysis/upload`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    console.log(`[DEBUG] Response status: ${response.status} ${response.statusText}`);
+                    const data = await response.json();
+                    console.log('[DEBUG] Response data:', data);
+
+                    if (response.ok && data.status === 'success') {
+                        console.log('[DEBUG] Analysis successful!');
+                        displayResult(data);
+                        // Update limit
+                        if (data.limit_info) {
+                            uploadLimit = data.limit_info;
+                            updateLimitDisplay();
+                        }
+                    } else {
+                        console.error('[DEBUG] Analysis failed:', data);
+                        displayError(file.name, data.detail || data.message || 'Analysis failed');
+                    }
+                }
+
+                loadingState.style.display = 'none';
+                resultsSection.style.display = 'block';
+                resultsSection.classList.add('active');
+
+                // Clear selections
+                selectedFiles = [];
+                fileInput.value = '';
+                selectedFilesDiv.classList.remove('active');
+                queryInput.value = '';
+
+            } catch (error) {
+                console.error('[ERROR] Analysis error:', error);
+                loadingState.style.display = 'none';
+                alert(`Failed to analyze file: ${error.message}\n\nPlease check the browser console for details.`);
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        function displayResult(data) {
+            const resultCard = document.createElement('div');
+            resultCard.className = 'result-card';
+            
+            const fileIcon = data.file_type === 'pdf' ? '📄' : 
+                           data.file_type === 'pptx' || data.file_type === 'ppt' ? '📊' : '🖼️';
+            
+            resultCard.innerHTML = `
+                <div class="result-header">
+                    <div class="result-file-info">
+                        <span style="font-size: 2rem;">${fileIcon}</span>
+                        <div>
+                            <strong>${data.filename}</strong>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                ${new Date(data.timestamp).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="result-status success">✓ Success</span>
+                </div>
+                ${data.query !== 'Summary requested' ? `
+                    <div class="result-query">
+                        <strong>Your question:</strong> ${data.query}
+                    </div>
+                ` : ''}
+                <div class="result-content">${data.analysis}</div>
+            `;
+            
+            resultsContainer.appendChild(resultCard);
+        }
+
+        function displayError(filename, message) {
+            const resultCard = document.createElement('div');
+            resultCard.className = 'result-card';
+            
+            resultCard.innerHTML = `
+                <div class="result-header">
+                    <div class="result-file-info">
+                        <span style="font-size: 2rem;">❌</span>
+                        <div>
+                            <strong>${filename}</strong>
+                        </div>
+                    </div>
+                    <span class="result-status error">✗ Error</span>
+                </div>
+                <div class="result-content" style="color: var(--error-color);">
+                    ${message}
+                </div>
+            `;
+            
+            resultsContainer.appendChild(resultCard);
+        }
+
+        // Dark mode toggle
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            darkModeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️';
+        }
+
+        // Initialize
+        checkUploadLimit();
+        lucide.createIcons();
+    </script>
+</body>
+</html>

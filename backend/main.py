@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from typing import Optional, Annotated
+from typing import Optional, Annotated, List
 import asyncio
 from jose import jwt
 from jose.exceptions import JWTError
@@ -493,6 +493,193 @@ async def get_ai_transparency_info():
         }
     }
 
+# ===== FILE ANALYSIS ENDPOINTS =====
+@app.get("/api/file-analysis/check-limit")
+async def check_upload_limit(current_user: dict = Depends(get_current_user)):
+    """Check user's remaining file upload limit (PROTECTED)"""
+    try:
+        # For now, assume all users are free tier (add premium check later)
+        is_premium = False  # TODO: Check user's subscription status
+        
+        limit_info = coordinator.file_analysis_agent.check_daily_upload_limit(
+            user_id=current_user["id"],
+            is_premium=is_premium
+        )
+        
+        return {
+            "status": "success",
+            "limit_info": limit_info
+        }
+    except Exception as e:
+        print(f"[ERROR] Check upload limit failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/file-analysis/upload")
+async def upload_and_analyze_file(
+    file: UploadFile = File(...),
+    query: Optional[str] = Form(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload and analyze a single file (PROTECTED)"""
+    try:
+        print(f"[FILE UPLOAD] User: {current_user['id']}, File: {file.filename}, Query: {query}")
+        
+        # Check file type
+        allowed_extensions = ['pdf', 'pptx', 'ppt', 'png', 'jpg', 'jpeg']
+        file_ext = file.filename.lower().split('.')[-1]
+        
+        if file_ext not in allowed_extensions:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
+            )
+        
+        # Check upload limit
+        is_premium = False  # TODO: Check user's subscription status
+        limit_info = coordinator.file_analysis_agent.check_daily_upload_limit(
+            user_id=current_user["id"],
+            is_premium=is_premium
+        )
+        
+        if not limit_info["allowed"]:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Daily upload limit reached ({limit_info['limit']} files). Upgrade to premium for unlimited uploads."
+            )
+        
+        # Read file content
+        file_content = await file.read()
+        
+        # Analyze file
+        result = await coordinator.file_analysis_agent.analyze_file(
+            file_content=file_content,
+            filename=file.filename,
+            user_query=query,
+            user_id=current_user["id"]
+        )
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=500, detail=result["message"])
+        
+        # Get updated limit info
+        updated_limit = coordinator.file_analysis_agent.check_daily_upload_limit(
+            user_id=current_user["id"],
+            is_premium=is_premium
+        )
+        
+        return {
+            **result,
+            "limit_info": updated_limit
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] File upload failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/file-analysis/upload-multiple")
+async def upload_and_analyze_multiple_files(
+    files: List[UploadFile] = File(...),
+    query: Optional[str] = Form(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload and analyze multiple files at once - PREMIUM FEATURE (PROTECTED)"""
+    try:
+        # Check if user is premium
+        is_premium = False  # TODO: Check user's subscription status
+        
+        if not is_premium:
+            raise HTTPException(
+                status_code=403,
+                detail="Multiple file upload is a premium feature. Please upgrade your plan."
+            )
+        
+        print(f"[MULTIPLE FILE UPLOAD] User: {current_user['id']}, Files: {len(files)}")
+        
+        results = []
+        allowed_extensions = ['pdf', 'pptx', 'ppt', 'png', 'jpg', 'jpeg']
+        
+        for file in files:
+            file_ext = file.filename.lower().split('.')[-1]
+            
+            if file_ext not in allowed_extensions:
+                results.append({
+                    "filename": file.filename,
+                    "status": "error",
+                    "message": f"Unsupported file type: {file_ext}"
+                })
+                continue
+            
+            # Read and analyze file
+            file_content = await file.read()
+            result = await coordinator.file_analysis_agent.analyze_file(
+                file_content=file_content,
+                filename=file.filename,
+                user_query=query,
+                user_id=current_user["id"]
+            )
+            
+            results.append(result)
+        
+        return {
+            "status": "success",
+            "total_files": len(files),
+            "results": results,
+            "is_premium": is_premium
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Multiple file upload failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/file-analysis/history")
+async def get_file_analysis_history(
+    limit: int = 10,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get user's file analysis history (PROTECTED)"""
+    try:
+        import sqlite3
+        conn = sqlite3.connect(coordinator.file_analysis_agent.db.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, filename, file_type, upload_date, query, result
+            FROM file_uploads
+            WHERE user_id = ?
+            ORDER BY upload_date DESC
+            LIMIT ?
+        ''', (current_user["id"], limit))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        history = []
+        for row in rows:
+            history.append({
+                "id": row[0],
+                "filename": row[1],
+                "file_type": row[2],
+                "upload_date": row[3],
+                "query": row[4],
+                "result": row[5]
+            })
+        
+        return {
+            "status": "success",
+            "history": history,
+            "count": len(history)
+        }
+        
+    except Exception as e:
+        print(f"[ERROR] Get history failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/")
 async def root():
     return {
@@ -502,6 +689,7 @@ async def root():
             "Personalized Schedule Creation",
             "Advanced Resource Finding with IR",
             "Motivation Coaching with Sentiment Analysis",
+            "File Analysis with AI (PDF, PPTX, Images)",
             "User Management and Security",
             "Progress Tracking"
         ]
