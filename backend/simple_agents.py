@@ -11,6 +11,8 @@ from typing import List, Dict, Any, Optional
 import asyncio
 from dataclasses import dataclass
 import hashlib
+import io
+import base64
 # Try to import intelligent topics generator
 try:
     from intelligent_topics import IntelligentTopicGenerator
@@ -47,6 +49,25 @@ try:
     GENAI_AVAILABLE = True
 except ImportError:
     GENAI_AVAILABLE = False
+
+# Import file processing libraries
+try:
+    import PyPDF2
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
+    
+try:
+    from pptx import Presentation
+    PPTX_AVAILABLE = True
+except ImportError:
+    PPTX_AVAILABLE = False
+    
+try:
+    from PIL import Image
+    IMAGE_AVAILABLE = True
+except ImportError:
+    IMAGE_AVAILABLE = False
 
 @dataclass
 class StudyPlan:
@@ -147,6 +168,20 @@ class DatabaseManager:
                 current_topic TEXT,
                 progress_percentage REAL,
                 last_activity TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
+        # File uploads tracking table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS file_uploads (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                filename TEXT,
+                file_type TEXT,
+                upload_date TEXT,
+                query TEXT,
+                result TEXT,
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         ''')
@@ -269,10 +304,10 @@ class ScheduleCreatorAgent:
             if api_key:
                 try:
                     genai.configure(api_key=api_key)
-                    # Use the latest Gemini model
-                    self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
+                    # Use the stable Gemini model
+                    self.model = genai.GenerativeModel('gemini-pro')
                     self.genai_initialized = True
-                    print("[GEMINI DEBUG] ✅ Gemini API initialized successfully with gemini-1.5-flash-latest!")
+                    print("[GEMINI DEBUG] ✅ Gemini API initialized successfully with gemini-pro!")
                 except Exception as e:
                     print(f"[GEMINI DEBUG] ❌ Failed to initialize Gemini: {e}")
                     self.genai_initialized = False
@@ -1547,6 +1582,194 @@ class MotivationCoachAgent:
         else:
             return 'late_night'
 
+class FileAnalysisAgent:
+    """Handles file upload, processing, and AI-powered analysis"""
+    
+    def __init__(self):
+        self.db = DatabaseManager()
+        self.model = None
+        
+        # Initialize Gemini for multimodal analysis
+        if GENAI_AVAILABLE:
+            try:
+                api_key = os.getenv("GEMINI_API_KEY")
+                if api_key:
+                    genai.configure(api_key=api_key)
+                    # Use gemini-2.5-flash - stable multimodal model available in current API
+                    self.model = genai.GenerativeModel('gemini-2.5-flash')
+                    print("[FILE ANALYSIS] ✅ Gemini API initialized for file analysis with gemini-2.5-flash")
+            except Exception as e:
+                print(f"[FILE ANALYSIS] ❌ Failed to initialize Gemini: {e}")
+    
+    def check_daily_upload_limit(self, user_id: str, is_premium: bool = False) -> Dict:
+        """Check if user has exceeded daily upload limit"""
+        today = datetime.now().date().isoformat()
+        
+        conn = sqlite3.connect(self.db.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT COUNT(*) FROM file_uploads 
+            WHERE user_id = ? AND DATE(upload_date) = ?
+        ''', (user_id, today))
+        
+        upload_count = cursor.fetchone()[0]
+        conn.close()
+        
+        max_uploads = 999 if is_premium else 3  # Premium: unlimited, Free: 3 per day
+        remaining = max(0, max_uploads - upload_count)
+        
+        return {
+            "allowed": upload_count < max_uploads,
+            "count": upload_count,
+            "limit": max_uploads,
+            "remaining": remaining,
+            "is_premium": is_premium
+        }
+    
+    def extract_text_from_pdf(self, file_content: bytes) -> str:
+        """Extract text from PDF file"""
+        if not PDF_AVAILABLE:
+            return "PDF processing not available"
+        
+        try:
+            pdf_file = io.BytesIO(file_content)
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+            
+            return text.strip()
+        except Exception as e:
+            print(f"[PDF ERROR] {e}")
+            return f"Error extracting PDF text: {str(e)}"
+    
+    def extract_text_from_pptx(self, file_content: bytes) -> str:
+        """Extract text from PowerPoint file"""
+        if not PPTX_AVAILABLE:
+            return "PowerPoint processing not available"
+        
+        try:
+            pptx_file = io.BytesIO(file_content)
+            presentation = Presentation(pptx_file)
+            
+            text = ""
+            for slide_num, slide in enumerate(presentation.slides, 1):
+                text += f"\n--- Slide {slide_num} ---\n"
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        text += shape.text + "\n"
+            
+            return text.strip()
+        except Exception as e:
+            print(f"[PPTX ERROR] {e}")
+            return f"Error extracting PowerPoint text: {str(e)}"
+    
+    def process_image(self, file_content: bytes) -> Dict:
+        """Process image file and return image data for Gemini"""
+        if not IMAGE_AVAILABLE:
+            return {"error": "Image processing not available"}
+        
+        try:
+            image = Image.open(io.BytesIO(file_content))
+            # Convert to RGB if necessary
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            # Save to bytes for Gemini API
+            img_byte_arr = io.BytesIO()
+            image.save(img_byte_arr, format='JPEG')
+            img_byte_arr.seek(0)
+            
+            return {
+                "image": image,
+                "bytes": img_byte_arr.getvalue(),
+                "format": "JPEG",
+                "size": image.size
+            }
+        except Exception as e:
+            print(f"[IMAGE ERROR] {e}")
+            return {"error": f"Error processing image: {str(e)}"}
+    
+    async def analyze_file(self, file_content: bytes, filename: str, 
+                          user_query: Optional[str], user_id: str) -> Dict:
+        """Analyze uploaded file with optional user query"""
+        try:
+            file_ext = filename.lower().split('.')[-1]
+            
+            # Extract content based on file type
+            if file_ext == 'pdf':
+                extracted_text = self.extract_text_from_pdf(file_content)
+                content_type = "document"
+            elif file_ext in ['pptx', 'ppt']:
+                extracted_text = self.extract_text_from_pptx(file_content)
+                content_type = "presentation"
+            elif file_ext in ['png', 'jpg', 'jpeg']:
+                # gemini-1.0-pro doesn't support images, return helpful message
+                return {
+                    "status": "error",
+                    "message": "Image analysis is temporarily unavailable. Please upload PDF or PPTX files instead."
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": f"Unsupported file type: {file_ext}"
+                }
+            
+            # Generate analysis using Gemini API
+            if not self.model:
+                return {
+                    "status": "error",
+                    "message": "AI analysis not available. Please configure Gemini API key."
+                }
+            
+            # Prepare prompt based on user query
+            if user_query and user_query.strip():
+                prompt = f"User question: {user_query}\n\nDocument content:\n{extracted_text}\n\nPlease answer based on the document."
+            else:
+                # Default summarization
+                prompt = f"Please provide a comprehensive summary of this {content_type}:\n\n{extracted_text}"
+            
+            # Call Gemini API (text only for gemini-1.0-pro)
+            response = self.model.generate_content(prompt)
+            
+            analysis_result = response.text
+            
+            # Save to database
+            upload_id = hashlib.md5(f"{user_id}{datetime.now().isoformat()}".encode()).hexdigest()
+            conn = sqlite3.connect(self.db.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO file_uploads (id, user_id, filename, file_type, upload_date, query, result)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (upload_id, user_id, filename, file_ext, datetime.now().isoformat(), 
+                  user_query or "Summary", analysis_result))
+            
+            conn.commit()
+            conn.close()
+            
+            return {
+                "status": "success",
+                "filename": filename,
+                "file_type": file_ext,
+                "content_type": content_type,
+                "query": user_query or "Summary requested",
+                "analysis": analysis_result,
+                "upload_id": upload_id,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            print(f"[FILE ANALYSIS ERROR] {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "status": "error",
+                "message": f"Failed to analyze file: {str(e)}"
+            }
+
 class CoordinatorAgent:
     """Coordinates between all agents and manages the overall system"""
     
@@ -1555,6 +1778,7 @@ class CoordinatorAgent:
         self.schedule_agent = ScheduleCreatorAgent()
         self.resource_agent = ResourceFinderAgent()
         self.motivation_agent = MotivationCoachAgent()
+        self.file_analysis_agent = FileAnalysisAgent()
         # Initialize enhanced motivation agent for mood-based responses
         try:
             from enhanced_motivation import AdvancedSentimentAnalyzer

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Analysis - Simple Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5046e5;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 File Analysis - Simple Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Step 1: Check Backend Connection</h2>
+        <button onclick="testBackend()">Test Backend API</button>
+        <div id="backendResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 2: Check Authentication</h2>
+        <button onclick="checkAuth()">Check Auth Token</button>
+        <button onclick="goToLogin()">Go to Login Page</button>
+        <div id="authResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 3: Check Upload Limit</h2>
+        <button onclick="checkLimit()">Check Upload Limit</button>
+        <div id="limitResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 4: Test File Upload</h2>
+        <input type="file" id="testFile" accept=".pdf,.pptx,.png,.jpg">
+        <br>
+        <label>Optional Query:</label>
+        <textarea id="testQuery" placeholder="Leave blank for summary..."></textarea>
+        <br>
+        <button onclick="testUpload()">Upload and Analyze</button>
+        <div id="uploadResult" class="result"></div>
+    </div>
+
+    <hr>
+    <p><a href="file-analysis.html">← Back to File Analysis</a></p>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+
+        function log(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = 'result ' + (isError ? 'error' : 'success');
+        }
+
+        async function testBackend() {
+            log('backendResult', 'Testing backend connection...');
+            try {
+                const response = await fetch('http://localhost:8000/');
+                const data = await response.json();
+                log('backendResult', `✅ Backend is running!\n\n${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                log('backendResult', `❌ Backend connection failed:\n${error.message}\n\nMake sure the backend is running on http://localhost:8000`, true);
+            }
+        }
+
+        function getAuthToken() {
+            const tokenData = localStorage.getItem('authToken');
+            return tokenData ? tokenData : null;
+        }
+
+        function checkAuth() {
+            const token = getAuthToken();
+            if (token) {
+                log('authResult', `✅ Authentication token found!\n\nToken: ${token.substring(0, 50)}...`);
+            } else {
+                log('authResult', '❌ No authentication token found.\n\nPlease log in first.', true);
+            }
+        }
+
+        function goToLogin() {
+            window.location.href = 'secure-auth.html';
+        }
+
+        async function checkLimit() {
+            log('limitResult', 'Checking upload limit...');
+            const token = getAuthToken();
+            
+            if (!token) {
+                log('limitResult', '❌ Please log in first!', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/file-analysis/check-limit`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('limitResult', `✅ Upload Limit Info:\n\n${JSON.stringify(data, null, 2)}`);
+                } else {
+                    const error = await response.json();
+                    log('limitResult', `❌ Failed to check limit:\n${JSON.stringify(error, null, 2)}`, true);
+                }
+            } catch (error) {
+                log('limitResult', `❌ Error:\n${error.message}`, true);
+            }
+        }
+
+        async function testUpload() {
+            const fileInput = document.getElementById('testFile');
+            const queryInput = document.getElementById('testQuery');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                log('uploadResult', '❌ Please select a file first!', true);
+                return;
+            }
+
+            const token = getAuthToken();
+            if (!token) {
+                log('uploadResult', '❌ Please log in first!', true);
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const query = queryInput.value.trim();
+
+            log('uploadResult', `📤 Uploading ${file.name}...\n\nThis may take 10-20 seconds...`);
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                if (query) {
+                    formData.append('query', query);
+                }
+
+                console.log('Sending request to:', `${API_BASE}/file-analysis/upload`);
+                console.log('File:', file.name, file.type, file.size, 'bytes');
+                console.log('Query:', query || '(none - will summarize)');
+
+                const response = await fetch(`${API_BASE}/file-analysis/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (response.ok && data.status === 'success') {
+                    log('uploadResult', `✅ SUCCESS!\n\nFile: ${data.filename}\nType: ${data.file_type}\n\n📝 AI Analysis:\n${data.analysis}`);
+                } else {
+                    log('uploadResult', `❌ Upload failed:\n\n${JSON.stringify(data, null, 2)}`, true);
+                }
+            } catch (error) {
+                log('uploadResult', `❌ Error during upload:\n${error.message}\n\nCheck browser console for details.`, true);
+                console.error('Upload error:', error);
+            }
+        }
+
+        // Auto-run backend test on load
+        window.onload = () => {
+            testBackend();
+        };
+    </script>
+</body>
+</html>
